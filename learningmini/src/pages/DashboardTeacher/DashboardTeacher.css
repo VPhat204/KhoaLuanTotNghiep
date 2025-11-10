@@ -1,0 +1,50 @@
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.dashboard-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.welcome-card-container {
+  flex: 2;
+  background: linear-gradient(90deg, #38bdf8, #22c55e);
+  color: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+}
+
+.welcome-card-container h2 {
+  margin-bottom: 12px;
+  color: #fff;
+}
+
+.welcome-card-container p {
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+
+.welcome-card-container ul {
+  list-style-type: disc;
+  padding-left: 20px;
+}
+
+.calendar-card {
+  flex: 1;
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+}
+
+.calendar-placeholder {
+  font-size: 50px;
+  margin-top: 20px;
+  color: #bbb;
+}

@@ -1,0 +1,104 @@
+.app-header {
+  background: #001529;
+  padding: 0 30px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-nav {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  width: 100%;
+  max-width: 1200px;
+  color: #fff;
+  justify-content: flex-start;
+}
+
+.app-logo a {
+  text-decoration: none;
+  color: #fff;
+  font-size: 22px;
+  font-weight: bold;
+  transition: color 0.3s;
+}
+
+.app-logo a:hover {
+  color: #1890ff;
+}
+
+.app-search-form {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.search-container {
+  position: relative;
+  width: 340px;
+}
+
+.app-search-input {
+  width: 100%;
+  border-radius: 20px;
+  padding: 6px 40px 6px 15px;
+  border: none;
+  outline: none;
+  background-color: #fff;
+  font-size: 15px;
+  transition: box-shadow 0.2s;
+}
+
+.app-search-input:focus {
+  box-shadow: 0 0 6px #1890ff;
+}
+
+.search-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #001529;
+  font-size: 18px;
+  transition: color 0.2s;
+}
+
+.search-btn:hover {
+  color: #1890ff;
+}
+
+.app-user {
+  margin-left: 560px;
+  color: #fff;
+}
+
+.app-user-name {
+  cursor: pointer;
+  color: #fff;
+  transition: color 0.2s;
+}
+
+.app-user-name:hover {
+  color: #1890ff;
+}
+
+.app-auth-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.app-auth-links a {
+  text-decoration: none;
+  color: #fff;
+  transition: color 0.2s;
+}
+
+.app-auth-links a:hover {
+  color: #1890ff;
+}

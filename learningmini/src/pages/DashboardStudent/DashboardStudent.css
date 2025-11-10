@@ -1,0 +1,103 @@
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.dashboard-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.welcome-card {
+  flex: 2;
+  background: linear-gradient(90deg, #38bdf8, #22c55e);
+  color: #fff;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.calendar-card {
+  flex: 1;
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+}
+
+.calendar-placeholder {
+  font-size: 50px;
+  margin-top: 20px;
+  color: #bbb;
+}
+
+.dashboard-middle {
+  display: flex;
+  gap: 20px;
+}
+
+.chart-card {
+  flex: 1;
+  border-radius: 16px;
+}
+
+.chart-circle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+}
+
+.chart-legend {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin: 0 6px;
+}
+.reading { background: #34d399; }
+.video { background: #60a5fa; }
+.writing { background: #fbbf24; }
+
+.dashboard-bottom {
+  display: flex;
+  gap: 20px;
+}
+
+.courses-card {
+  flex: 2;
+  border-radius: 16px;
+}
+
+.task-card {
+  flex: 1;
+  border-radius: 16px;
+}
+
+.course-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.course-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.task-item {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
