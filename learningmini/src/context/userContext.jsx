@@ -20,6 +20,9 @@ export function UserProvider({ children }) {
   const logout = () => {
     setUser(null);
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("name");
   };
 
   const updateName = (newName) => {
@@ -31,8 +34,14 @@ export function UserProvider({ children }) {
     });
   };
 
+  const updateUser = (updatedUser) => {
+    setUser(updatedUser);
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+  };
+
+
   return (
-    <UserContext.Provider value={{ user, login, logout, updateName, loading }}>
+    <UserContext.Provider value={{ user, login, logout, updateName, updateUser, loading }}>
       {children}
     </UserContext.Provider>
   );

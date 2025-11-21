@@ -1,174 +1,191 @@
 import { useEffect, useState, useCallback } from "react";
-import { Progress, Button, message, Modal, Select, Pagination } from "antd";
 import axios from "axios";
-import { UserOutlined, BookOutlined, ClockCircleOutlined } from "@ant-design/icons";
+import { Button, message, Progress, Modal } from "antd";
 import CourseDetail from "./CourseDetail";
-import "./MyCourse.css";
+import "./Course.css";
 
-export default function StudentDashboard() {
+export default function Courses({ refreshTrigger }) {
   const [courses, setCourses] = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState(null);
-  const [openDetail, setOpenDetail] = useState(false);
-  const [sortOrder, setSortOrder] = useState("az");
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 8;
+  const [loading, setLoading] = useState(false);
+  const [unenrolling, setUnenrolling] = useState({});
+  const [progressData, setProgressData] = useState({});
+  const [selectedCourse, setSelectedCourse] = useState(null); 
+  const [openDetail, setOpenDetail] = useState(false); 
 
-  const token = localStorage.getItem("token");
-  const studentId = token ? JSON.parse(atob(token.split(".")[1])).id : null;
+  const getInitial = (title) => {
+    return title ? title.charAt(0).toUpperCase() : 'C';
+  };
 
-  const fetchCourses = useCallback(async () => {
-    if (!token) return;
+  const fetchMyCourses = useCallback(async () => {
+    setLoading(true);
     try {
-      const res = await axios.get("http://localhost:5000/courses", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const coursesWithStatus = await Promise.all(
-        res.data.map(async (c) => {
-          try {
-            const progressRes = await axios.get(
-              `http://localhost:5000/courses/${c.id}/progress`,
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-            const enrollRes = await axios.get(
-              `http://localhost:5000/courses/${c.id}/isEnrolled`,
-              {
-                headers: { Authorization: `Bearer ${token}` },
-                params: { studentId },
-              }
-            );
-            return {
-              ...c,
-              progress: progressRes.data.progress || 0,
-              isEnrolled: enrollRes.data.isEnrolled || false,
-            };
-          } catch {
-            return { ...c, progress: 0, isEnrolled: false };
-          }
-        })
+      const token = localStorage.getItem("token");
+      const user = JSON.parse(localStorage.getItem("user"));
+      
+      const res = await axios.get(
+        `http://localhost:5000/users/${user.id}/courses`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
-      setCourses(coursesWithStatus);
+      
+      setCourses(res.data);
+      
+      const progressPromises = res.data.map(async (course) => {
+        try {
+          const progressRes = await axios.get(
+            `http://localhost:5000/courses/${course.id}/progress`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+              params: { studentId: user.id }
+            }
+          );
+          return {
+            courseId: course.id,
+            progress: progressRes.data.progress || 0
+          };
+        } catch (error) {
+          return {
+            courseId: course.id,
+            progress: 0
+          };
+        }
+      });
+
+      const progressResults = await Promise.all(progressPromises);
+      const progressMap = {};
+      progressResults.forEach(result => {
+        progressMap[result.courseId] = result.progress;
+      });
+      setProgressData(progressMap);
+      
     } catch (err) {
       console.error(err);
-      message.error("Lấy danh sách khóa học thất bại");
+    } finally {
+      setLoading(false);
     }
-  }, [token, studentId]);
+  }, []);
 
-  const handleEnroll = async (courseId) => {
-    if (!token) return;
+  const handleUnenroll = async (courseId, courseTitle) => {
     try {
-      await axios.post(
-        `http://localhost:5000/courses/${courseId}/enroll`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      message.success("Đăng ký khóa học thành công!");
-      fetchCourses();
-    } catch {
-      message.error("Đăng ký thất bại");
-    }
-  };
-
-  const handleUnenroll = async (courseId) => {
-    if (!token) return;
-    try {
+      setUnenrolling(prev => ({ ...prev, [courseId]: true }));
+      
+      const token = localStorage.getItem("token");
+      
       await axios.delete(
         `http://localhost:5000/courses/${courseId}/unenroll`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { 
+          headers: { Authorization: `Bearer ${token}` } 
+        }
       );
-      message.info("Đã hủy đăng ký khóa học.");
-      fetchCourses();
-    } catch {
-      message.error("Hủy đăng ký thất bại");
+      
+      message.success(`Đã hủy đăng ký khóa học: ${courseTitle}`);
+      fetchMyCourses();
+      
+    } catch (error) {
+      console.error("Lỗi khi hủy đăng ký:", error);
+      message.error("Có lỗi xảy ra khi hủy đăng ký");
+    } finally {
+      setUnenrolling(prev => ({ ...prev, [courseId]: false }));
     }
   };
 
-  const sortedCourses = [...courses].sort((a, b) =>
-    sortOrder === "az"
-      ? a.title.localeCompare(b.title)
-      : b.title.localeCompare(a.title)
-  );
+  const handleViewDetail = (course) => {
+    setSelectedCourse(course);
+    setOpenDetail(true);
+  };
+
+  const handleCloseDetail = () => {
+    setOpenDetail(false);
+    setSelectedCourse(null);
+  };
 
   useEffect(() => {
-    fetchCourses();
-  }, [fetchCourses]);
+    fetchMyCourses();
+  }, [refreshTrigger, fetchMyCourses]);
 
   return (
-    <div className="mycourses-page">
-      {!token ? (
-        <div>Vui lòng đăng nhập để xem dashboard</div>
+    <div className="courses-container">
+      <h1>Khóa học của tôi</h1>
+      {loading ? (
+        <p>Đang tải khóa học...</p>
+      ) : courses.length === 0 ? (
+        <div className="no-courses">
+          <p>Bạn chưa đăng ký khóa học nào</p>
+        </div>
       ) : (
-        <>
-          <div className="mycourses-header">
-            <h2>📚 Khóa học của bạn</h2>
-            <Select
-              value={sortOrder}
-              onChange={(value) => setSortOrder(value)}
-              options={[
-                { value: "az", label: "Sắp xếp A → Z" },
-                { value: "za", label: "Sắp xếp Z → A" },
-              ]}
-            />
-          </div>
-
-          <div className="mycourses-grid">
-            {sortedCourses.map((course) => (
-              <div className="course-card" key={course.id}>
-                <h3>{course.title}</h3>
-                <div className="course-info">
-                  <div><UserOutlined /> {course.teacher_name}</div>
+        <div className="courses-grid">
+          {courses.map((course) => {
+            const progress = progressData[course.id] || 0;
+            
+            return (
+              <div key={course.id} className="course-card">
+                <div className="course-header">
+                  <div className="course-avatar">
+                    {getInitial(course.title)}
+                  </div>
+                  <div className="course-title-section">
+                    <h3>{course.title}</h3>
+                    <span className="course-teacher">Giảng viên: {course.teacher_name}</span>
+                  </div>
                 </div>
-                <div className="course-info">
-                  <div><BookOutlined /> {course.lessons || 0} bài học
-                  <ClockCircleOutlined style={{ marginLeft: 10 }} /> {course.hours || 0} giờ</div>
+                
+                <p className="course-description">{course.description}</p>
+                
+                <div className="progress-section">
+                  <div className="progress-info">
+                    <span className="progress-label">Tiến độ: </span>
+                    <span className="progress-value">{progress}%</span>
+                  </div>
+                  <Progress 
+                    percent={progress} 
+                    size="small"
+                    strokeColor={{
+                      '0%': '#4096ff',
+                      '100%': '#70b6ff',
+                    }}
+                    showInfo={false}
+                    style={{ width: '100%' }}
+                  />
                 </div>
-                <Progress percent={course.progress || 0} />
+                
+                <div className="course-meta">
+                  <span className="enrolled-date">Đăng ký: {new Date(course.enrolled_at).toLocaleDateString()}</span>
+                </div>
+                
                 <div className="course-footer">
-                  <div>
-                    {course.isEnrolled ? (
-                      <Button danger onClick={() => handleUnenroll(course.id)}>
-                        Hủy đăng ký
-                      </Button>
-                    ) : (
-                      <Button type="primary" onClick={() => handleEnroll(course.id)}>
-                        Đăng ký
-                      </Button>
-                    )}
-                  </div>
-                  <div style={{marginLeft: "10px"}}>
-                    <Button
-                      onClick={() => {
-                        setSelectedCourse(course);
-                        setOpenDetail(true);
-                      }}
-                    >
-                      Xem chi tiết
-                    </Button>
-                  </div>
+                  <Button 
+                    danger 
+                    onClick={() => handleUnenroll(course.id, course.title)}
+                    loading={unenrolling[course.id]}
+                    className="unenroll-btn"
+                  >
+                    Hủy đăng ký
+                  </Button>
+                  <Button 
+                    type="primary" 
+                    onClick={() => handleViewDetail(course)}
+                    className="view-detail-btn"
+                  >
+                    Xem chi tiết
+                  </Button>
                 </div>
               </div>
-            ))}
-          </div>
-
-          <Pagination
-            current={currentPage}
-            pageSize={pageSize}
-            className="pagination-wrapper"
-            total={courses.length}
-            onChange={(page) => setCurrentPage(page)}
-          />
-
-          <Modal
-            open={openDetail}
-            onCancel={() => setOpenDetail(false)}
-            footer={null}
-            width={1000}
-            style={{ top: 20 }}
-            destroyOnClose
-          >
-            {selectedCourse && <CourseDetail course={selectedCourse} />}
-          </Modal>
-        </>
+            );
+          })}
+        </div>
       )}
+
+      <Modal
+        open={openDetail}
+        onCancel={handleCloseDetail}
+        footer={null}
+        width={1000}
+        style={{ top: 20 }}
+        destroyOnClose
+      >
+        {selectedCourse && <CourseDetail course={selectedCourse} />}
+      </Modal>
     </div>
   );
 }

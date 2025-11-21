@@ -6,14 +6,18 @@ import {
   TeamOutlined,
   VideoCameraOutlined,
   PlusOutlined,
+  ReadOutlined,
+  ScheduleOutlined,
 } from "@ant-design/icons";
-import api from "../../api";
+import api from "../../../api";
 import "./DashboardTeacher.css"; 
-import MyCourses from "./MyCourse";
-import StudentsList from "./StudentList";
-import CreateCourse from "./CreateCourse";
-import MyQuizzes from "./MyQuizz";
-import UploadVideo from "./UploadVideo";
+import MyCourses from "../Courses/MyCourse";
+import StudentsList from "../Students/StudentList";
+import CreateCourse from "../Courses/CreateCourse";
+import MyAssignments from "../Assignments/MyAssignments";
+import ScheduleTeacher from "../Schedules/ScheduleTeacher"
+import MyQuizzes from "../MyQuizz";
+import UploadVideo from "../UploadVideo";
 
 const { Sider, Content } = Layout;
 
@@ -191,6 +195,10 @@ function DashboardTeacher() {
         return <StudentsList students={students} courseId={selectedCourse} />;
       case "createcourse":
         return <CreateCourse courseForm={courseForm} onCreateCourse={handleCreateCourse} />;
+      case "myassignments":
+        return <MyAssignments teacherId={teacherId} />;
+      case "schedules":
+        return <ScheduleTeacher />;
       case "myquizzes":
         return <MyQuizzes quizzes={quizzes} quizForm={quizForm} onCreateQuiz={handleCreateQuiz} />;
       case "uploadvideo":
@@ -221,12 +229,18 @@ function DashboardTeacher() {
           <Menu.Item key="createcourse" icon={<PlusOutlined />}>
             Tạo khóa học
           </Menu.Item>
+          <Menu.Item key="myassignments" icon={<ReadOutlined />}>
+            Bài tập của tôi
+          </Menu.Item>
+          <Menu.Item key="schedules" icon={<ScheduleOutlined />}>
+            Lịch dạy của tôi
+          </Menu.Item>
           <Menu.Item key="myquizzes" icon={<BookOutlined />}>
             Quiz của tôi
           </Menu.Item>
           <Menu.Item key="uploadvideo" icon={<VideoCameraOutlined />}>
             Upload Video
-          </Menu.Item>
+          </Menu.Item>   
         </Menu>
       </Sider>
       <Layout style={{ padding: "20px", background: "#f0f4f8" }}>

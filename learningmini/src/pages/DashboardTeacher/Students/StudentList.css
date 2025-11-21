@@ -1,0 +1,66 @@
+.my-courses-container {
+  padding: 20px 32px;
+  background-color: #fff;
+  border-radius: 10px;
+}
+
+.my-courses-container h1 {
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.course-select {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.course-select label {
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.course-select select {
+  padding: 6px 12px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+.course-title {
+  font-size: 22px;
+  margin-bottom: 15px;
+  color: #1a73e8;
+}
+
+.students-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.students-table th,
+.students-table td {
+  padding: 12px 15px;
+  text-align: left;
+}
+
+.students-table th {
+  background-color: #1a73e8;
+  color: #fff;
+  font-weight: 600;
+}
+
+.students-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.students-table tr:hover {
+  background-color: #e8f0fe;
+  transition: background-color 0.3s ease;
+}

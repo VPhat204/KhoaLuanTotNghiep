@@ -13,13 +13,21 @@ function LoginPage() {
     const res = await axios.post("http://localhost:5000/login", values, {
       headers: { "Content-Type": "application/json" },
     });
-
+    console.log(res.data);
     if (res.data.token && res.data.roles) {
       localStorage.setItem("token", res.data.token);
       login({
         id: res.data.id,
         name: res.data.name,
+        email: res.data.email,
         roles: res.data.roles,
+        proof_info: res.data.proof_info,
+        proof_file: res.data.proof_file,
+        avatar: res.data.avatar,
+        phone: res.data.phone,
+        address: res.data.address,
+        birthdate: res.data.birthdate,
+        gender: res.data.gender,
         token: res.data.token,
       });
 
@@ -32,25 +40,20 @@ function LoginPage() {
       message.error("Server không trả dữ liệu hợp lệ.");
     }
   } catch (err) {
-    // Nếu server trả lỗi
     if (err.response) {
       const status = err.response.status;
       const data = err.response.data;
 
-      // Sai email/mật khẩu
       if (status === 401) {
         message.error("Sai email hoặc mật khẩu!");
       }
-      // Forbidden, ví dụ giảng viên chờ duyệt
       else if (status === 403) {
         message.warning(data?.message || "Bạn không có quyền truy cập!");
       }
-      // Các lỗi khác từ server
       else {
         message.error(data?.message || "Lỗi server!");
       }
     } else {
-      // Không kết nối được server
       message.error("Không thể kết nối server.");
     }
   }

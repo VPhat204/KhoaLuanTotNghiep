@@ -1,6 +1,9 @@
 .app-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
   background: #001529;
-  padding: 0 30px;
+  padding: 0 20px;
   height: 64px;
   display: flex;
   align-items: center;
@@ -10,11 +13,10 @@
 .app-nav {
   display: flex;
   align-items: center;
-  gap: 25px;
+  justify-content: space-between;
   width: 100%;
   max-width: 1200px;
   color: #fff;
-  justify-content: flex-start;
 }
 
 .app-logo a {
@@ -30,14 +32,15 @@
 }
 
 .app-search-form {
+  flex: 1;
   display: flex;
-  align-items: center;
-  margin-left: 10px;
+  justify-content: center;
 }
 
 .search-container {
   position: relative;
-  width: 340px;
+  width: 100%;
+  max-width: 340px;
 }
 
 .app-search-input {
@@ -73,8 +76,21 @@
 }
 
 .app-user {
-  margin-left: 560px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.app-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.icon-btn {
+  cursor: pointer;
   color: #fff;
+  font-size: 20px;
 }
 
 .app-user-name {
@@ -90,7 +106,7 @@
 .app-auth-links {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .app-auth-links a {
@@ -101,4 +117,73 @@
 
 .app-auth-links a:hover {
   color: #1890ff;
+}
+
+.app-user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.app-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #fff;
+}
+
+.header-user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.header-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+body[data-theme="dark"] .app-user-avatar {
+  border: 1px solid #333;
+}
+
+body[data-theme="dark"] {
+  background-color: #1e1e1e;
+  color: #f5f5f5;
+}
+
+body[data-theme="dark"] .app-header {
+  background: #141414 !important;
+}
+
+body[data-theme="dark"] .app-search-input {
+  background: #2a2a2a;
+  color: #fff;
+}
+
+body[data-theme="dark"] .icon-btn {
+  color: #f5f5f5;
+}
+
+@media (max-width: 1024px) {
+  .app-search-form {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-user {
+    gap: 10px;
+  }
+  .app-actions {
+    gap: 10px;
+  }
+  .app-logo a {
+    font-size: 20px;
+  }
 }

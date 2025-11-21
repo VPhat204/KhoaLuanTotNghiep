@@ -21,6 +21,7 @@ import {
 import UserManagement from "./UserManagement";
 import CourseManagement from "./CourseManagement"
 import VideoManagement from "./VideoManagement"
+import ScheduleManagement from "./ScheduleManagement"
 
 const { Sider, Content } = Layout;
 
@@ -167,6 +168,9 @@ function AdminDashboard() {
       case "courses":
         return <CourseManagement/>;
 
+      case "schedules":
+        return <ScheduleManagement/>;
+
       case "videos":
         return <VideoManagement/>;
 
@@ -192,6 +196,9 @@ function AdminDashboard() {
           </Menu.Item>
           <Menu.Item key="courses" icon={<BookOutlined />}>
             Quản lý khóa học
+          </Menu.Item>
+          <Menu.Item key="schedules" icon={<BookOutlined />}>
+            Quản lý lịch học
           </Menu.Item>
           <Menu.Item key="videos" icon={<VideoCameraOutlined />}>
             Quản lý video
