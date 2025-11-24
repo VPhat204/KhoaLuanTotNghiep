@@ -1,0 +1,130 @@
+.enrolled-container {
+  position: relative;
+  padding: 30px 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+.enrolled-controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.enrolled-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 25px;
+}
+
+.enrolled-card {
+  position: relative;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  padding: 15px 15px 20px 15px;
+  background-color: #fff;
+  transition: box-shadow 0.2s;
+}
+
+.enrolled-card:hover {
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.course-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #1890ff;
+  color: #fff;
+  font-weight: bold;
+  font-size: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.course-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.status-badge {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  display: inline-block;
+}
+
+.status-confirmed {
+  color: #28a745;
+  border: 1px solid #28a745;
+  background-color: #f6ffed;
+}
+
+.status-pending {
+  color: #dc3545;
+  border: 1px solid #dc3545;
+  background-color: #fff5f5;
+}
+
+.enrolled-card h2 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  padding-left: 0;
+}
+
+.enrolled-card p {
+  margin: 4px 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #495057;
+  padding-left: 0;
+}
+
+.enrolled-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.confirm-all-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 25px;
+}
+
+.confirm-all-btn {
+  border-radius: 5px;
+  background-color: #1890ff;
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.confirm-all-btn:hover {
+  background-color: #40a9ff;
+}
+
+.pagination-wrapper {
+  margin-top: auto;
+  display: flex;
+  justify-content: center;
+  padding: 15px 0;
+}

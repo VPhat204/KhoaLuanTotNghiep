@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { ScheduleOutlined, PrinterOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import './ScheduleStudent.css';
 
 const StudentSchedule = () => {
+  const { t } = useTranslation();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [scheduleData, setScheduleData] = useState({
@@ -152,7 +154,7 @@ const StudentSchedule = () => {
     return (
       <div className="date-picker-overlay" onClick={cancelDate}>
         <div className="date-picker" onClick={(e) => e.stopPropagation()}>
-          <h3>Chọn ngày</h3>
+          <h3>{t('studentschedule.datePicker.title')}</h3>
           <input 
             type="date" 
             value={selectedDate.toISOString().split('T')[0]}
@@ -160,8 +162,8 @@ const StudentSchedule = () => {
             className="date-input"
           />
           <div className="date-picker-actions">
-            <button onClick={cancelDate} className="cancel-btn">Hủy</button>
-            <button onClick={applyDate} className="apply-btn">Áp dụng</button>
+            <button onClick={cancelDate} className="cancel-btn">{t('common.cancel')}</button>
+            <button onClick={applyDate} className="apply-btn">{t('common.apply')}</button>
           </div>
         </div>
       </div>
@@ -170,16 +172,16 @@ const StudentSchedule = () => {
 
   const weekDates = getWeekDates(currentDate);
   const weekDays = weekDates.map(date => ({
-    day: ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'][date.getDay() - 1] || 'Chủ nhật',
+    day: t(`studentschedule.days.${date.getDay() === 0 ? 6 : date.getDay() - 1}`),
     date: `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`
   }));
 
   const legendItems = [
-    { type: 'theory', label: 'Lý thuyết', color: '#9E9E9E' },
-    { type: 'practice', label: 'Thực hành', color: '#4CAF50' },
-    { type: 'online', label: 'Trực tuyến', color: '#2196F3' },
-    { type: 'exam', label: 'Lịch thi', color: '#FFEB3B' },
-    { type: 'pause', label: 'Tạm ngưng', color: '#FF9800' }
+    { type: 'theory', label: t('studentschedule.legend.theory'), color: '#9E9E9E' },
+    { type: 'practice', label: t('studentschedule.legend.practice'), color: '#4CAF50' },
+    { type: 'online', label: t('studentschedule.legend.online'), color: '#2196F3' },
+    { type: 'exam', label: t('studentschedule.legend.exam'), color: '#FFEB3B' },
+    { type: 'pause', label: t('studentschedule.legend.pause'), color: '#FF9800' }
   ];
 
   const renderCell = (daySlots, period, dayIndex) => {
@@ -200,8 +202,8 @@ const StudentSchedule = () => {
                 key={slotIndex}
                 className="empty-slot"
               >
-                <div className="empty-text">Trống</div>
-                <span className="slot-number">Slot {slotIndex + 1}</span>
+                <div className="empty-text">{t('studentschedule.emptySlot')}</div>
+                <span className="slot-number">{t('studentschedule.slot')} {slotIndex + 1}</span>
               </div>
             );
           }
@@ -216,16 +218,16 @@ const StudentSchedule = () => {
               </div>
               
               <div className="event-details">
-                <div><strong>GV:</strong> {slot.teacher || 'Chưa có GV'}</div>
-                <div><strong>Lớp:</strong> {slot.url || 'Chưa có lớp'}</div>
-                <div><strong>Tiết:</strong> {slot.lesson || 'Chưa có tiết'}</div>
-                <div><strong>Loại:</strong> 
-                  {slot.type === 'theory' && ' Lý thuyết'}
-                  {slot.type === 'practice' && ' Thực hành'}
-                  {slot.type === 'online' && ' Trực tuyến'}
-                  {slot.type === 'exam' && ' Lịch thi'}
-                  {slot.type === 'pause' && ' Tạm ngưng'}
-                  {!slot.type && ' Chưa xác định'}
+                <div><strong>{t('studentschedule.teacher')}:</strong> {slot.teacher || t('studentschedule.noTeacher')}</div>
+                <div><strong>{t('studentschedule.class')}:</strong> {slot.url || t('studentschedule.noClass')}</div>
+                <div><strong>{t('studentschedule.lesson')}:</strong> {slot.lesson || t('studentschedule.noLesson')}</div>
+                <div><strong>{t('studentschedule.type')}:</strong> 
+                  {slot.type === 'theory' && ` ${t('studentschedule.types.theory')}`}
+                  {slot.type === 'practice' && ` ${t('studentschedule.types.practice')}`}
+                  {slot.type === 'online' && ` ${t('studentschedule.types.online')}`}
+                  {slot.type === 'exam' && ` ${t('studentschedule.types.exam')}`}
+                  {slot.type === 'pause' && ` ${t('studentschedule.types.pause')}`}
+                  {!slot.type && ` ${t('studentschedule.types.unknown')}`}
                 </div>
               </div>
             </div>
@@ -239,25 +241,25 @@ const StudentSchedule = () => {
     <div className="student-schedule-container">
       {loading && (
         <div className="loading-overlay">
-          <div className="loading-spinner">Đang tải lịch học...</div>
+          <div className="loading-spinner">{t('studentschedule.loading')}</div>
         </div>
       )}
       
       <div className="schedule-section">
         <div className="schedule-header student-header">
           <div className="header-top">
-            <h1>Lịch học của tôi</h1>
+            <h1>{t('studentschedule.student.title')}</h1>
             <div className="header-actions">
               <button className="print-btn" onClick={() => window.print()}>
                 <span><PrinterOutlined /></span>
-                In lịch
+                {t('studentschedule.print')}
               </button>
             </div>
           </div>
           
           <div className="header-info">
             <p className="enrolled-info">
-              Đang hiển thị lịch học cho <strong>{enrolledCourses.length}</strong> khóa học đã đăng ký
+              {t('studentschedule.student.enrolledInfo', { count: enrolledCourses.length })}
             </p>
           </div>
           
@@ -271,9 +273,9 @@ const StudentSchedule = () => {
               </div>
               
               <div className="navigation-buttons">
-                <button className="nav-btn" onClick={goToPreviousWeek}>Trở về</button>
-                <button className="nav-btn current" onClick={goToCurrentWeek}>Hôm nay</button>
-                <button className="nav-btn" onClick={goToNextWeek}>Tiếp</button>
+                <button className="nav-btn" onClick={goToPreviousWeek}>{t('studentschedule.previous')}</button>
+                <button className="nav-btn current" onClick={goToCurrentWeek}>{t('studentschedule.today')}</button>
+                <button className="nav-btn" onClick={goToNextWeek}>{t('studentschedule.next')}</button>
               </div>
             </div>
           </div>
@@ -285,7 +287,7 @@ const StudentSchedule = () => {
           <table className="schedule-table">
             <thead>
               <tr>
-                <th className="header-cell time-header">Ca học</th>
+                <th className="header-cell time-header">{t('studentschedule.period')}</th>
                 {weekDays.map((day, index) => (
                   <th key={index} className="header-cell">
                     <div className="day">{day.day}</div>
@@ -295,25 +297,32 @@ const StudentSchedule = () => {
               </tr>
             </thead>
             <tbody>
-              {['Sáng', 'Chiều', 'Tối'].map(period => (
-                <tr key={period}>
-                  <td className="time-period">{period}</td>
-                  {scheduleData[period].map((daySlots, dayIndex) => (
-                    <td 
-                      key={dayIndex} 
-                      className="time-slot multi-slot"
-                    >
-                      {renderCell(daySlots, period, dayIndex)}
-                    </td>
-                  ))}
-                </tr>
-              ))}
+              {['Sáng', 'Chiều', 'Tối'].map(period => {
+                const keyMap = {
+                  'Sáng': 'morning',
+                  'Chiều': 'afternoon',
+                  'Tối': 'evening'
+                };
+                return (
+                  <tr key={period}>
+                    <td className="time-period">{t(`teacherschedule.periods.${keyMap[period]}`)}</td>
+                    {scheduleData[period].map((daySlots, dayIndex) => (
+                      <td 
+                        key={dayIndex} 
+                        className="time-slot multi-slot"
+                      >
+                        {renderCell(daySlots, period, dayIndex)}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
 
         <div className="schedule-legend">
-          <h3>Chú thích</h3>
+          <h3>{t('studentschedule.legend.title')}</h3>
           <div className="legend-items">
             {legendItems.map((item, index) => (
               <div key={index} className="legend-item">

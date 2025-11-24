@@ -15,8 +15,10 @@ import axios from "axios";
 import "./MyCourse.css";
 import { Link } from "react-router-dom";
 import { PlusOutlined, PlayCircleOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
-export default function TeacherDashboard() {
+export default function MyCourse() {
+  const { t } = useTranslation();
   const [courses, setCourses] = useState([]);
   const [form] = Form.useForm();
   const [videoForm] = Form.useForm();
@@ -36,10 +38,15 @@ export default function TeacherDashboard() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setCourses(res.data);
+
+      for (const c of res.data) {
+        const videosRes = await axios.get(`http://localhost:5000/videos/${c.id}`);
+        setVideosByCourse((prev) => ({ ...prev, [c.id]: videosRes.data }));
+      }
     } catch {
-      message.error("Lấy danh sách khóa học thất bại");
+      message.error(t("teacherCourses.fetchCoursesFailed"));
     }
-  }, [token]);
+  }, [token, t]);
 
   const handleAddCourse = async (values) => {
     try {
@@ -48,12 +55,12 @@ export default function TeacherDashboard() {
         { ...values },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      message.success("Thêm khóa học thành công!");
+      message.success(t("teacherCourses.addCourseSuccess"));
       form.resetFields();
       setIsCourseModalOpen(false);
       fetchCourses();
     } catch {
-      message.error("Thêm khóa học thất bại");
+      message.error(t("teacherCourses.addCourseFailed"));
     }
   };
 
@@ -62,7 +69,7 @@ export default function TeacherDashboard() {
       const res = await axios.get(`http://localhost:5000/videos/${courseId}`);
       setVideosByCourse((prev) => ({ ...prev, [courseId]: res.data }));
     } catch {
-      message.error("Lỗi khi lấy video");
+      message.error(t("teacherCourses.fetchVideosFailed"));
     }
   };
 
@@ -74,20 +81,20 @@ export default function TeacherDashboard() {
           { ...values },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        message.success("Cập nhật video thành công!");
+        message.success(t("teacherCourses.updateVideoSuccess"));
       } else {
         await axios.post(
           "http://localhost:5000/videos/add",
           { course_id: selectedCourse.id, ...values },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        message.success("Thêm video thành công!");
+        message.success(t("teacherCourses.addVideoSuccess"));
       }
       videoForm.resetFields();
       setEditingVideo(null);
       fetchVideos(selectedCourse.id);
     } catch {
-      message.error("Lỗi khi lưu video");
+      message.error(t("teacherCourses.saveVideoFailed"));
     }
   };
 
@@ -96,10 +103,10 @@ export default function TeacherDashboard() {
       await axios.delete(`http://localhost:5000/videos/${videoId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      message.success("Xóa video thành công!");
+      message.success(t("teacherCourses.deleteVideoSuccess"));
       fetchVideos(selectedCourse.id);
     } catch {
-      message.error("Xóa video thất bại");
+      message.error(t("teacherCourses.deleteVideoFailed"));
     }
   };
 
@@ -114,16 +121,16 @@ export default function TeacherDashboard() {
 
   return (
     <div className="course-container">
-      <h2>👨‍🏫 Giảng viên - Quản lý khóa học</h2>
+      <h2>👨‍🏫 {t("teacherCourses.title")}</h2>
 
       <div style={{ textAlign: "right", marginBottom: 20 }}>
         <Button type="primary" onClick={() => setIsCourseModalOpen(true)}>
-          + Thêm khóa học
+          {t("teacherCourses.addCourseBtn")}
         </Button>
       </div>
 
       <Modal
-        title="Thêm khóa học mới"
+        title={t("teacherCourses.addCourseModalTitle")}
         open={isCourseModalOpen}
         onCancel={() => setIsCourseModalOpen(false)}
         footer={null}
@@ -131,23 +138,42 @@ export default function TeacherDashboard() {
         <Form form={form} layout="vertical" onFinish={handleAddCourse}>
           <Form.Item
             name="title"
-            label="Tên khóa học"
-            rules={[{ required: true, message: "Vui lòng nhập tên khóa học" }]}
+            label={t("teacherCourses.courseName")}
+            rules={[{ required: true, message: t("teacherCourses.courseNameRequired") }]}
           >
-            <Input placeholder="Nhập tên khóa học..." />
+            <Input placeholder={t("teacherCourses.courseNamePlaceholder")} />
           </Form.Item>
-          <Form.Item name="description" label="Mô tả">
-            <Input.TextArea placeholder="Mô tả ngắn gọn về khóa học..." />
+
+          <Form.Item
+            name="description"
+            label={t("teacherCourses.courseDescription")}
+          >
+            <Input.TextArea placeholder={t("teacherCourses.courseDescriptionPlaceholder")} />
           </Form.Item>
+
+          <Form.Item
+            name="lessons"
+            label={t("teacherCourses.courseLessons")}
+          >
+            <Input type="number" min={0} placeholder={t("teacherCourses.courseLessonsPlaceholder")} />
+          </Form.Item>
+
+          <Form.Item
+            name="hours"
+            label={t("teacherCourses.courseHours")}
+          >
+            <Input type="number" min={0} placeholder={t("teacherCourses.courseHoursPlaceholder")} />
+          </Form.Item>
+
           <Form.Item>
             <Button type="primary" htmlType="submit" block>
-              Xác nhận thêm
+              {t("teacherCourses.confirmAdd")}
             </Button>
           </Form.Item>
         </Form>
       </Modal>
 
-      <h3>Danh sách khóa học của bạn</h3>
+      <h3>{t("teacherCourses.myCourses")}</h3>
       <List
         grid={{ gutter: 16, column: 1 }}
         dataSource={paginatedCourses}
@@ -160,7 +186,7 @@ export default function TeacherDashboard() {
               title={
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <Avatar className="course-icon orange">
-                    {course.title ? course.title[0].toUpperCase() : "K"}
+                    {course.title ? course.title[0].toUpperCase() : "C"}
                   </Avatar>
                   <span className="course-info">{course.title}</span>
                 </div>
@@ -181,11 +207,11 @@ export default function TeacherDashboard() {
                     }}
                   >
                     {videosByCourse[course.id]?.length > 0
-                      ? "Video đã thêm"
-                      : "Thêm video"}
+                      ? t("teacherCourses.videoAdded")
+                      : t("teacherCourses.addVideo")}
                   </Button>
                   <Link className="detail-btn" to={`/course/${course.id}`}>
-                    Xem chi tiết
+                    {t("teacherCourses.viewDetails")}
                   </Link>
                 </div>
               }
@@ -212,7 +238,7 @@ export default function TeacherDashboard() {
       />
 
       <Modal
-        title={`Quản lý video - ${selectedCourse?.title || ""}`}
+        title={`${t("teacherCourses.manageVideos")} - ${selectedCourse?.title || ""}`}
         open={isVideoModalOpen}
         onCancel={() => {
           setIsVideoModalOpen(false);
@@ -229,28 +255,31 @@ export default function TeacherDashboard() {
         >
           <Form.Item
             name="title"
-            label="Tên video"
-            rules={[{ required: true, message: "Nhập tên video" }]}
+            label={t("teacherCourses.videoTitle")}
+            rules={[{ required: true, message: t("teacherCourses.videoTitleRequired") }]}
           >
             <Input />
           </Form.Item>
           <Form.Item
             name="url"
-            label="Đường dẫn video"
-            rules={[{ required: true, message: "Nhập URL video" }]}
+            label={t("teacherCourses.videoUrl")}
+            rules={[{ required: true, message: t("teacherCourses.videoUrlRequired") }]}
           >
-            <Input placeholder="Ví dụ: https://youtu.be/..." />
+            <Input placeholder={t("teacherCourses.videoUrlPlaceholder")} />
           </Form.Item>
-          <Form.Item name="duration" label="Thời lượng (vd: 15 min)">
+          <Form.Item
+            name="duration"
+            label={t("teacherCourses.videoDuration")}
+          >
             <Input />
           </Form.Item>
           <Button type="primary" htmlType="submit" block>
-            {editingVideo ? "Cập nhật video" : "Lưu video"}
+            {editingVideo ? t("teacherCourses.updateVideo") : t("teacherCourses.saveVideo")}
           </Button>
         </Form>
 
         <List
-          header="Danh sách video hiện có"
+          header={t("teacherCourses.videoList")}
           dataSource={videosByCourse[selectedCourse?.id] || []}
           renderItem={(v) => (
             <List.Item
@@ -269,9 +298,7 @@ export default function TeacherDashboard() {
                 />,
               ]}
             >
-              <PlayCircleOutlined
-                style={{ color: "#1677ff", marginRight: 8 }}
-              />
+              <PlayCircleOutlined style={{ color: "#1677ff", marginRight: 8 }} />
               {v.title} ({v.duration})
             </List.Item>
           )}

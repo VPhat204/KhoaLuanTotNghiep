@@ -1,0 +1,17 @@
+.custom-menu .ant-menu-item {
+  font-size: 18px;          
+  font-weight: 600;          
+  color: #333;              
+  padding: 15px 24px; 
+  transition: all 0.3s;      
+}
+
+.custom-menu .ant-menu-item:hover {
+  color: #1890ff;           
+  background: #e6f7ff;       
+}
+
+.custom-menu .ant-menu-item-selected {
+  color: #fff !important;    
+  background: #1890ff !important;  
+}

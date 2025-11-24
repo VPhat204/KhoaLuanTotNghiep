@@ -1,0 +1,47 @@
+.assign-card {
+  border-radius: 12px;
+  padding: 15px;
+}
+
+.assignment-item {
+  margin-bottom: 12px;
+  border-radius: 10px;
+}
+
+.answer-item-info{
+  display: flex;
+  justify-content: space-between;
+}
+
+.course-select {
+  width: 250px;
+  margin-bottom: 20px;
+}
+
+.answers-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+.answer-item {
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.score-input {
+  width: 100px;
+}
+
+.ml10 {
+  margin-left: 10px;
+}
+
+.question-list ul {
+  padding-left: 20px;
+}
+
+.question-list li {
+  margin-bottom: 5px;
+}

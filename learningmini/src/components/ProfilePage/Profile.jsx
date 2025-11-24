@@ -1,6 +1,7 @@
 import { Modal, Form, Input, Button, Upload, message, DatePicker, Select, Row, Col } from "antd";
 import { UploadOutlined, FileAddOutlined, EditOutlined } from "@ant-design/icons";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import axios from "axios";
 import moment from "moment";
 import "./Profile.css";
@@ -9,6 +10,7 @@ const { Option } = Select;
 const { TextArea } = Input;
 
 function ProfileModal({ visible, onClose, user, updateUser }) {
+  const { t } = useTranslation();
   const [form] = Form.useForm();
   const [avatarFileList, setAvatarFileList] = useState([]);
   const [proofFileList, setProofFileList] = useState([]);
@@ -18,7 +20,6 @@ function ProfileModal({ visible, onClose, user, updateUser }) {
 
   useEffect(() => {
     if (visible && user) {
-      // Set các giá trị form
       form.setFieldsValue({
         name: user.name || "",
         email: user.email || "",
@@ -30,7 +31,6 @@ function ProfileModal({ visible, onClose, user, updateUser }) {
         proof_info: user.proof_info || "",
       });
 
-      // Xử lý avatar đầy đủ URL
       const avatarUrl = user.avatar ? (user.avatar.startsWith("http") ? user.avatar : `${BASE_URL}${user.avatar}`) : null;
       setAvatarFileList(
         avatarUrl ? [{
@@ -41,7 +41,6 @@ function ProfileModal({ visible, onClose, user, updateUser }) {
         }] : []
       );
 
-      // Xử lý proof_file
       if (user.proof_file) {
         const files = Array.isArray(user.proof_file) ? user.proof_file : [user.proof_file];
         setProofFileList(files.map((file, idx) => ({
@@ -88,7 +87,6 @@ function ProfileModal({ visible, onClose, user, updateUser }) {
         }
       );
 
-      // Cập nhật avatar với URL đầy đủ
       const newAvatarUrl = res.data.avatar ? `${BASE_URL}${res.data.avatar}` : avatarFileList[0]?.url || null;
       setAvatarFileList(newAvatarUrl ? [{
         uid: "-1",
@@ -106,18 +104,17 @@ function ProfileModal({ visible, onClose, user, updateUser }) {
 
       updateUser(updatedUser);
 
-      // Cập nhật localStorage để login/logout vẫn giữ avatar
       const storedUser = JSON.parse(localStorage.getItem("user")) || {};
       localStorage.setItem("user", JSON.stringify({
         ...storedUser,
         ...updatedUser
       }));
 
-      message.success("Cập nhật profile thành công!");
+      message.success(t("profileUpdateSuccess"));
       setEditing(false);
     } catch (err) {
       console.error(err);
-      message.error("Cập nhật thất bại!");
+      message.error(t("profileUpdateFail"));
     }
   };
 
@@ -131,7 +128,7 @@ function ProfileModal({ visible, onClose, user, updateUser }) {
       setAvatarFileList([{ uid: file.uid, name: file.name, status: "done", url, originFileObj: file }]);
       return false;
     },
-    fileList: [],  
+    fileList: [],
     maxCount: 1,
   };
 
@@ -148,17 +145,17 @@ function ProfileModal({ visible, onClose, user, updateUser }) {
 
   return (
     <Modal
-      title="Thông tin hồ sơ"
+      title={t("profileInfo")}
       open={visible}
       onOk={handleSave}
       onCancel={onClose}
-      okText="Lưu"
+      okText={t("save")}
       width={800}
       centered
       footer={[
-        !editing && <Button key="edit" icon={<EditOutlined />} onClick={() => setEditing(true)}>Chỉnh sửa</Button>,
-        editing && <Button key="save" type="primary" onClick={handleSave}>Lưu</Button>,
-        <Button key="cancel" onClick={onClose}>Đóng</Button>
+        !editing && <Button key="edit" icon={<EditOutlined />} onClick={() => setEditing(true)}>{t("edit")}</Button>,
+        editing && <Button key="save" type="primary" onClick={handleSave}>{t("save")}</Button>,
+        <Button key="cancel" onClick={onClose}>{t("close")}</Button>
       ]}
     >
       <div className="profile-layout">
@@ -170,7 +167,7 @@ function ProfileModal({ visible, onClose, user, updateUser }) {
             {editing && (
               <div className="avatar-upload-actions" style={{ marginTop: 8 }}>
                 <Upload {...avatarUploadProps}>
-                  <Button type="primary" icon={<UploadOutlined />} size="small">Tải ảnh mới</Button>
+                  <Button type="primary" icon={<UploadOutlined />} size="small">{t("uploadNewAvatar")}</Button>
                 </Upload>
               </div>
             )}
@@ -178,22 +175,22 @@ function ProfileModal({ visible, onClose, user, updateUser }) {
 
           <div className="personal-info-section">
             <Form form={form} layout="vertical">
-              <Form.Item name="name" label="Tên">
+              <Form.Item name="name" label={t("name")}>
                 <Input disabled />
               </Form.Item>
 
               <Row gutter={16}>
                 <Col span={12}>
-                  <Form.Item name="birthdate" label="Ngày sinh">
-                    <DatePicker format="DD/MM/YYYY" style={{ width: '100%' }} placeholder="Chọn ngày sinh" disabled={!editing} />
+                  <Form.Item name="birthdate" label={t("birthdate")}>
+                    <DatePicker format="DD/MM/YYYY" style={{ width: '100%' }} placeholder={t("chooseBirthdate")} disabled={!editing} />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item name="gender" label="Giới tính">
-                    <Select placeholder="Chọn giới tính" disabled={!editing}>
-                      <Option value="male">Nam</Option>
-                      <Option value="female">Nữ</Option>
-                      <Option value="other">Khác</Option>
+                  <Form.Item name="gender" label={t("gender")}>
+                    <Select placeholder={t("chooseGender")} disabled={!editing}>
+                      <Option value="male">{t("male")}</Option>
+                      <Option value="female">{t("female")}</Option>
+                      <Option value="other">{t("other")}</Option>
                     </Select>
                   </Form.Item>
                 </Col>
@@ -201,23 +198,23 @@ function ProfileModal({ visible, onClose, user, updateUser }) {
 
               <Row gutter={16}>
                 <Col span={12}>
-                  <Form.Item name="phone" label="Số điện thoại">
-                    <Input placeholder="Nhập số điện thoại" disabled={!editing} />
+                  <Form.Item name="phone" label={t("phone")}>
+                    <Input placeholder={t("enterPhone")} disabled={!editing} />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item name="roles" label="Vai trò">
+                  <Form.Item name="roles" label={t("role")}>
                     <Input disabled />
                   </Form.Item>
                 </Col>
               </Row>
 
-              <Form.Item name="email" label="Email">
+              <Form.Item name="email" label={t("email")}>
                 <Input disabled />
               </Form.Item>
 
-              <Form.Item name="address" label="Địa chỉ">
-                <TextArea rows={2} placeholder="Nhập địa chỉ" disabled={!editing} />
+              <Form.Item name="address" label={t("address")}>
+                <TextArea rows={2} placeholder={t("enterAddress")} disabled={!editing} />
               </Form.Item>
             </Form>
           </div>
@@ -226,28 +223,26 @@ function ProfileModal({ visible, onClose, user, updateUser }) {
         {user.roles === "teacher" && (
           <div className="proof-section">
             <div className="proof-info-section">
-              <h3 className="section-title">Thông tin minh chứng</h3>
+              <h3 className="section-title">{t("proofInfo")}</h3>
               <Form form={form} layout="vertical">
                 <Form.Item name="proof_info">
-                  <TextArea rows={3} placeholder="Nhập thông tin chứng minh" disabled={!editing} />
+                  <TextArea rows={3} placeholder={t("enterProofInfo")} disabled={!editing} />
                 </Form.Item>
               </Form>
             </div>
 
             <div className="proof-file-section">
-              <h3 className="section-title">File minh chứng</h3>
+              <h3 className="section-title">{t("proofFiles")}</h3>
               {editing && (
                 <Upload {...proofUploadProps}>
-                  <Button icon={<FileAddOutlined />} size="large">
-                    Tải lên file chứng minh
-                  </Button>
+                  <Button icon={<FileAddOutlined />} size="large">{t("uploadProofFiles")}</Button>
                 </Upload>
               )}
-              <div className="file-types">(PDF, ảnh, DOC - tối đa 5MB)</div>
+              <div className="file-types">{t("fileTypes")}</div>
 
               {proofFileList.length > 0 && (
                 <div className="uploaded-files">
-                  <h4>File đã tải lên:</h4>
+                  <h4>{t("uploadedFiles")}:</h4>
                   <ul>
                     {proofFileList.map(file => (
                       <li key={file.uid} style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
@@ -264,7 +259,7 @@ function ProfileModal({ visible, onClose, user, updateUser }) {
                             onClick={() => handleRemoveProofFile(file)}
                             style={{ padding: 0 }}
                           >
-                            Xóa
+                            {t("delete")}
                           </Button>
                         )}
                       </li>

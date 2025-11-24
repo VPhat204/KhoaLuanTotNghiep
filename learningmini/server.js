@@ -5,6 +5,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
+const nodemailer = require("nodemailer");
+
 
 const app = express();
 app.use(cors());
@@ -25,26 +27,62 @@ const uploadFields = upload.fields([
   { name: "avatar", maxCount: 1 },
   { name: "proof_file", maxCount: 10 },
 ])
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: "phettpeo160@gmail.com",
+    pass: "eaxh vwxs obiz exhw",
+  },
+});
+
 let db;
-(async () => {
+async function connectDB() {
   db = await mysql.createConnection({
     host: "localhost",
     user: "root",
     password: "123456",
     database: "elearning_platform",
   });
-  console.log("✅ MySQL connected");
-})();
+  console.log("MySQL connected");
+}
+
 
 async function createNotification(userId, title, link = "") {
   try {
     await db.execute(
       "INSERT INTO notifications (user_id, title, link) VALUES (?, ?, ?)",
-      [userId, title, link]
+      [userId ?? null, title ?? null, link ?? ""]
     );
   } catch (err) {
     console.error("Lỗi khi tạo thông báo:", err);
   }
+}
+
+async function sendOTP(email, otp) {
+  await transporter.sendMail({
+    from: '"Hệ thống E-Study" <your_email@gmail.com>', 
+    to: email,
+    subject: "Mã OTP khôi phục mật khẩu",
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+        <h2 style="color: #1890ff;">E-Learning System</h2>
+        <p>Bạn yêu cầu khôi phục mật khẩu. Mã OTP của bạn là:</p>
+        <h1 style="text-align: center; color: #ff4d4f;">${otp}</h1>
+        <p>OTP này sẽ hết hạn sau 5 phút.</p>
+        <p>Nếu bạn không yêu cầu, hãy bỏ qua email này.</p>
+      </div>
+    `,
+  });
+}
+
+async function saveOTP(email, otp) {
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000); 
+  await db.execute(
+    "INSERT INTO password_reset (email, otp, expires_at) VALUES (?, ?, ?)",
+    [email, otp, expiresAt]
+  );
 }
 
 function authMiddleware(req, res, next) {
@@ -105,6 +143,7 @@ app.post("/login", async (req, res) => {
     res.json({ 
       id: user.id, 
       avatar: user.avatar,
+      language: user.language,
       phone: user.phone,
       address: user.address,
       birthdate: user.birthdate,
@@ -121,12 +160,72 @@ app.post("/login", async (req, res) => {
   }
 });
 
+app.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
+  try {
+    const [user] = await db.execute("SELECT id FROM users WHERE email=?", [email]);
+    if (!user.length) return res.status(404).json({ message: "Email không tồn tại" });
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6 số
+    await saveOTP(email, otp);
+    await sendOTP(email, otp);
+
+    res.json({ message: "Đã gửi mã OTP vào email của bạn" });
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi server" });
+  }
+});
+
+app.post("/verify-otp", async (req, res) => {
+  const { email, otp } = req.body;
+  try {
+    const [rows] = await db.execute(
+      "SELECT * FROM password_reset WHERE email=? AND otp=? ORDER BY id DESC LIMIT 1",
+      [email, otp]
+    );
+    if (!rows.length) return res.status(400).json({ message: "OTP không đúng" });
+
+    const record = rows[0];
+    if (new Date(record.expires_at) < new Date())
+      return res.status(400).json({ message: "OTP đã hết hạn" });
+
+    res.json({ message: "OTP hợp lệ" });
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi server" });
+  }
+});
+
+app.post("/reset-password", async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const hashed = await bcrypt.hash(password, 10);
+    await db.execute(
+      "UPDATE users SET password=?, last_password_reset=NOW() WHERE email=?",
+      [hashed, email]
+    );
+    res.json({ message: "Đổi mật khẩu thành công" });
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi server" });
+  }
+});
+
 app.get("/users", authMiddleware, async (req, res) => {
   if (req.user.roles !== "admin") return res.status(403).json({ message: "Forbidden" });
   const [rows] = await db.execute(
     "SELECT id, name, email, roles, is_approved, is_locked, proof_info, proof_file, created_at FROM users"
   );
   res.json(rows);
+});
+
+app.put("/users/:id/language", authMiddleware, async (req, res) => {
+  const { language } = req.body;
+  const userId = req.params.id;
+  try {
+    await db.execute("UPDATE users SET language = ? WHERE id = ?", [language, userId]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ message: "Update language failed" });
+  }
 });
 
 app.put("/users/:id/approve-teacher", authMiddleware, async (req, res) => {
@@ -254,7 +353,7 @@ app.get("/users/:id/courses", authMiddleware, async (req, res) => {
        FROM course_enrollments ce
        JOIN courses c ON ce.course_id = c.id
        JOIN users u ON c.teacher_id = u.id
-       WHERE ce.student_id = ?`,
+       WHERE ce.student_id = ? AND ce.status = 'confirmed'`,
       [studentId]
     );
 
@@ -339,6 +438,103 @@ app.delete("/courses/:id/unenroll", authMiddleware, async (req, res) => {
   );
 
   res.json({ message: "Unenrolled successfully" });
+});
+
+app.get("/enrolled-courses/:studentId", authMiddleware, async (req, res) => {
+  const studentId = req.params.studentId;
+
+  try {
+    const [rows] = await db.execute(
+      `SELECT 
+        c.id AS course_id,
+        c.title,
+        c.description,
+        c.lessons,
+        c.hours,
+        u.name AS teacher_name,
+        u.email AS teacher_email,
+        ce.status
+      FROM course_enrollments ce
+      INNER JOIN courses c ON ce.course_id = c.id
+      INNER JOIN users u ON c.teacher_id = u.id
+      WHERE ce.student_id = ?
+      `,
+      [studentId]
+    );
+
+    res.json(rows);
+  } catch (err) {
+    console.error("Lỗi khi lấy danh sách khóa học:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.post("/courses/confirm-all", async (req, res) => {
+  const { userId, email } = req.body;
+  if (!userId || !email) {
+    return res.status(400).json({ message: "Thiếu userId hoặc email" });
+  }
+
+  try {
+    const [courses] = await db.execute(
+      "SELECT c.title, c.description, c.lessons, c.hours, u.name AS teacher_name, u.email AS teacher_email " +
+      "FROM course_enrollments ce " +
+      "JOIN courses c ON ce.course_id = c.id " +
+      "JOIN users u ON c.teacher_id = u.id " +
+      "WHERE ce.student_id = ? AND ce.status = 'pending'",
+      [userId]
+    );
+
+    if (courses.length === 0) {
+      return res.status(404).json({ message: "Không có khóa học nào để xác nhận" });
+    }
+
+    let courseTable = `
+      <table border="1" cellpadding="5" cellspacing="0">
+        <tr>
+          <th>Khóa học</th>
+          <th>Mô tả</th>
+          <th>Giảng viên</th>
+          <th>Email GV</th>
+          <th>Số buổi</th>
+          <th>Số giờ</th>
+        </tr>
+    `;
+    courses.forEach(c => {
+      courseTable += `
+        <tr>
+          <td>${c.title}</td>
+          <td>${c.description}</td>
+          <td>${c.teacher_name}</td>
+          <td>${c.teacher_email}</td>
+          <td>${c.lessons}</td>
+          <td>${c.hours}</td>
+        </tr>
+      `;
+    });
+    courseTable += "</table>";
+
+    const mailOptions = {
+      from: '"E_Study" <phettpeo160@gmail.com>',
+      to: email,
+      subject: "Xác nhận đăng ký tất cả khóa học",
+      html: `<h2>Chúc mừng!</h2>
+             <p>Bạn đã xác nhận tất cả các khóa học đăng ký thành công:</p>
+             ${courseTable}`
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    await db.execute(
+      "UPDATE course_enrollments SET status = 'confirmed', student_email = ? WHERE student_id = ? AND status = 'pending'",
+      [email, userId]
+    );
+
+    res.status(200).json({ message: "Đã xác nhận tất cả khóa học và gửi email" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Lỗi xác nhận khóa học", error: err });
+  }
 });
 
 app.get("/courses/:id/progress", authMiddleware, async (req, res) => {
@@ -461,7 +657,11 @@ app.post("/assignments/submit", authMiddleware, async (req, res) => {
     );
     const [assignment] = await db.execute("SELECT course_id FROM assignments WHERE id=?", [assignment_id]);
     const [course] = await db.execute("SELECT teacher_id FROM courses WHERE id=?", [assignment[0].course_id]);
-    await createNotification(course[0].teacher_id, `Sinh viên đã nộp bài tập #${assignment_id}`);
+    if (course[0].teacher_id != null) {
+      await createNotification(course[0].teacher_id, `Sinh viên đã nộp bài tập #${assignment_id}`);
+    } else {
+      console.error("teacher_id bị undefined, không thể tạo thông báo");
+    }
     res.json({ message: "Đã nộp bài" });
   } catch (err) {
     console.error(err);
@@ -1057,4 +1257,8 @@ app.put("/notifications/:id/read", authMiddleware, async (req, res) => {
   }
 });
 
-app.listen(5000, () => console.log("Server đang chạy tại http://localhost:5000"));
+connectDB()
+  .then(() => {
+    app.listen(5000, () => console.log("Server running on port 5000"));
+  })
+  .catch((err) => console.error("Lỗi kết nối DB:", err));

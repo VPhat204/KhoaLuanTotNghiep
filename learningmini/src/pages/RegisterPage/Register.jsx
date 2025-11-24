@@ -3,12 +3,16 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Form, Input, Button, message, Select, Upload } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
+import "./Register.css";
 
 const { Option } = Select;
 
 function RegisterPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [fileList, setFileList] = useState([]);
+  const [messageApi, contextHolder] = message.useMessage();
 
   const onFinish = async (values) => {
     try {
@@ -26,64 +30,65 @@ function RegisterPage() {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      message.success(
+      messageApi.success(
         values.role === "teacher"
-          ? "Đăng ký giảng viên thành công. Chờ admin duyệt."
-          : "Đăng ký học viên thành công!"
+          ? t("registerTeacherSuccess")
+          : t("registerStudentSuccess")
       );
+
       navigate("/login");
     } catch (err) {
-      message.error(err.response?.data?.message || "Đăng ký thất bại!");
+      messageApi.error(err.response?.data?.message || t("registerFail"));
     }
   };
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", background: "#f5f5f5" }}>
-      <div style={{ background: "#fff", padding: 30, borderRadius: 12, boxShadow: "0 4px 12px rgba(0,0,0,0.1)", width: 400 }}>
-        <h2 style={{ textAlign: "center", marginBottom: 24 }}>Đăng ký</h2>
+    <div className="register-wrapper">
+      {contextHolder}
+      <div className="register-container">
+        <h2 className="register-title">{t("register")}</h2>
         <Form onFinish={onFinish} layout="vertical">
-          <Form.Item name="name" rules={[{ required: true, message: "Nhập tên" }]}>
-            <Input placeholder="Họ và tên" />
+          <Form.Item name="name" rules={[{ required: true, message: t("enterName") }]}>
+            <Input placeholder={t("fullName")} />
           </Form.Item>
-          <Form.Item name="email" rules={[{ required: true, message: "Nhập email" }]}>
-            <Input placeholder="Email" />
+          <Form.Item name="email" rules={[{ required: true, message: t("enterEmail") }]}>
+            <Input placeholder={t("email")} />
           </Form.Item>
-          <Form.Item name="password" rules={[{ required: true, message: "Nhập mật khẩu" }]}>
-            <Input.Password placeholder="Mật khẩu" />
+          <Form.Item name="password" rules={[{ required: true, message: t("enterPassword") }]}>
+            <Input.Password placeholder={t("password")} />
           </Form.Item>
           <Form.Item
             name="confirmPassword"
             dependencies={["password"]}
             rules={[
-              { required: true, message: "Xác nhận mật khẩu" },
+              { required: true, message: t("confirmPassword") },
               ({ getFieldValue }) => ({
                 validator(_, value) {
                   if (!value || getFieldValue("password") === value) return Promise.resolve();
-                  return Promise.reject(new Error("Mật khẩu không khớp!"));
+                  return Promise.reject(new Error(t("passwordMismatch")));
                 },
               }),
             ]}
           >
-            <Input.Password placeholder="Xác nhận mật khẩu" />
+            <Input.Password placeholder={t("confirmPassword")} />
           </Form.Item>
-          <Form.Item name="role" rules={[{ required: true, message: "Chọn vai trò" }]}>
-            <Select placeholder="Chọn vai trò">
-              <Option value="student">Học viên</Option>
-              <Option value="teacher">Giảng viên</Option>
+          <Form.Item name="role" rules={[{ required: true, message: t("selectRole") }]}>
+            <Select placeholder={t("selectRole")}>
+              <Option value="student">{t("student")}</Option>
+              <Option value="teacher">{t("teacher")}</Option>
             </Select>
           </Form.Item>
 
-          {/* Chỉ hiện khi chọn teacher */}
           <Form.Item noStyle shouldUpdate={(prev, cur) => prev.role !== cur.role}>
             {({ getFieldValue }) =>
               getFieldValue("role") === "teacher" && (
                 <>
-                  <Form.Item name="proof_info" rules={[{ required: true, message: "Nhập thông tin bằng cấp" }]}>
-                    <Input.TextArea placeholder="Bằng cấp, chứng chỉ..." />
+                  <Form.Item name="proof_info" rules={[{ required: true, message: t("enterProofInfo") }]}>
+                    <Input.TextArea placeholder={t("proofInfo")} />
                   </Form.Item>
-                  <Form.Item name="proof_file" rules={[{ required: true, message: "Chọn file bằng chứng" }]}>
+                  <Form.Item name="proof_file" rules={[{ required: true, message: t("selectProofFile") }]}>
                     <Upload beforeUpload={() => false} fileList={fileList} onChange={({ fileList }) => setFileList(fileList)}>
-                      <Button icon={<UploadOutlined />}>Chọn file</Button>
+                      <Button icon={<UploadOutlined />}>{t("chooseFile")}</Button>
                     </Upload>
                   </Form.Item>
                 </>
@@ -91,11 +96,11 @@ function RegisterPage() {
             }
           </Form.Item>
 
-          <Button type="primary" htmlType="submit" block>
-            Đăng ký
+          <Button className="register-button" type="primary" htmlType="submit">
+            {t("register")}
           </Button>
-          <div style={{ textAlign: "center", marginTop: 12 }}>
-            <a href="/login">Đã có tài khoản? Đăng nhập</a>
+          <div className="register-footer">
+            <a href="/login">{t("alreadyHaveAccount")}</a>
           </div>
         </Form>
       </div>

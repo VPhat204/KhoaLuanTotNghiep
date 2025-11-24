@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useTranslation } from "react-i18next";
 import "./StudentList.css";
 
 function StudentList() {
+  const { t } = useTranslation();
   const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [students, setStudents] = useState([]);
@@ -19,9 +21,7 @@ function StudentList() {
         if (res.data.length > 0) {
           setSelectedCourse(res.data[0]);
         }
-      } catch (err) {
-        console.error(err);
-      }
+      } catch (err) {}
     };
     fetchCourses();
   }, []);
@@ -37,9 +37,8 @@ function StudentList() {
           params: { courseId: selectedCourse.id },
         });
         setStudents(res.data.students);
-      } catch (err) {
-        console.error(err);
-      } finally {
+      } catch (err) {} 
+      finally {
         setLoading(false);
       }
     };
@@ -48,9 +47,10 @@ function StudentList() {
 
   return (
     <div className="my-courses-container">
-      <h1>Khóa học của tôi</h1>
+      <h1>{t("studentlist.myCourses")}</h1>
+
       <div className="course-select">
-        <label>Chọn khóa học:</label>
+        <label>{t("studentlist.chooseCourse")}:</label>
         <select
           value={selectedCourse?.id || ""}
           onChange={(e) =>
@@ -64,22 +64,25 @@ function StudentList() {
           ))}
         </select>
       </div>
+
       {selectedCourse && <h2 className="course-title">{selectedCourse.title}</h2>}
+
       <div>
         {loading ? (
-          <p>Đang tải danh sách học viên...</p>
+          <p>{t("studentlist.loading")}</p>
         ) : (
           <table className="students-table">
             <thead>
               <tr>
-                <th>STT</th>
-                <th>Tên học viên</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Giới tính</th>
-                <th>Ngày đăng ký</th>
+                <th>{t("studentlist.stt")}</th>
+                <th>{t("studentlist.name")}</th>
+                <th>{t("studentlist.email")}</th>
+                <th>{t("studentlist.phone")}</th>
+                <th>{t("studentlist.gender")}</th>
+                <th>{t("studentlist.enrolledAt")}</th>
               </tr>
             </thead>
+
             <tbody>
               {students.map((s, idx) => (
                 <tr key={s.student_id}>
@@ -92,6 +95,7 @@ function StudentList() {
                 </tr>
               ))}
             </tbody>
+
           </table>
         )}
       </div>

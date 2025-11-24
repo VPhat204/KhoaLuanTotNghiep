@@ -4,7 +4,6 @@ import {
   Input, 
   message, 
   Collapse, 
-  Table, 
   Tag,
   Progress,
   Empty,
@@ -17,6 +16,7 @@ import {
   ClockCircleOutlined,
   StarOutlined
 } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 import api from "../../../api";
 import "./Assignments.css";
 
@@ -24,12 +24,14 @@ const { Panel } = Collapse;
 const { TextArea } = Input;
 
 export default function StudentAssignments() {
+  const { t } = useTranslation();
   const [assignments, setAssignments] = useState([]);
   const [answers, setAnswers] = useState({});
   const [grades, setGrades] = useState({});
   const [totalScores, setTotalScores] = useState({});
   const [questions, setQuestions] = useState({});
   const [loading, setLoading] = useState(true);
+  const [messageApi, contextHolder] = message.useMessage();
 
   const token = localStorage.getItem("token");
   const studentId = token ? JSON.parse(atob(token.split(".")[1])).id : null;
@@ -95,15 +97,15 @@ export default function StudentAssignments() {
         await Promise.all(detailPromises);
         
       } catch (error) {
-        console.error("Lỗi khi tải dữ liệu:", error);
-        message.error("Không thể tải danh sách bài tập");
+        console.error(error);
+        messageApi.error(t('assignments.messages.loadError'));
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [studentId]);
+  }, [studentId, messageApi, t]);
 
   const handleChange = (assignmentId, questionId, value) => {
     setAnswers(prev => ({
@@ -119,7 +121,7 @@ export default function StudentAssignments() {
     const assignmentAnswers = answers[assignmentId];
     
     if (!assignmentAnswers || Object.values(assignmentAnswers).every(val => !val)) {
-      return message.warning("Vui lòng trả lời ít nhất một câu hỏi trước khi nộp bài.");
+      return messageApi.warning(t('assignments.messages.answerRequired'));
     }
 
     try {
@@ -127,10 +129,10 @@ export default function StudentAssignments() {
         answers: assignmentAnswers
       });
       
-      message.success("🎉 Nộp bài thành công!");
+      messageApi.success(t('assignments.messages.submitSuccess'));
       await loadGrades(assignmentId);
     } catch (err) {
-      message.error("❌ Nộp bài thất bại!");
+      messageApi.error(t('assignments.messages.submitError'));
       console.error(err);
     }
   };
@@ -158,39 +160,41 @@ export default function StudentAssignments() {
     const hasGrades = Object.keys(assignmentGrades).length > 0;
     const isGraded = Object.values(assignmentGrades).some(score => score != null);
     
-    if (isGraded) return { status: 'graded', text: 'Đã chấm điểm' };
-    if (hasGrades) return { status: 'submitted', text: 'Đã nộp bài' };
-    return { status: 'pending', text: 'Chưa nộp' };
+    if (isGraded) return { status: 'graded', text: t('assignments.status.graded') };
+    if (hasGrades) return { status: 'submitted', text: t('assignments.status.submitted') };
+    return { status: 'pending', text: t('assignments.status.pending') };
   };
 
   if (loading) {
     return (
       <div className="assignments-loading">
+        {contextHolder}
         <Spin size="large" />
-        <p>Đang tải bài tập...</p>
+        <p>{t('assignments.loading')}</p>
       </div>
     );
   }
 
   return (
     <div className="student-assignments">
+      {contextHolder}
       <div className="assignments-header">
         <div className="header-content">
           <h1>
-            <RocketOutlined /> Bài Tập Của Tôi
+            <RocketOutlined /> {t('assignments.title')}
           </h1>
-          <p>Quản lý và hoàn thành tất cả bài tập được giao</p>
+          <p>{t('assignments.subtitle')}</p>
         </div>
         <div className="header-stats">
           <div className="stat-card">
             <div className="stat-number">{assignments.length}</div>
-            <div className="stat-label">Tổng bài tập</div>
+            <div className="stat-label">{t('assignments.stats.total')}</div>
           </div>
           <div className="stat-card">
             <div className="stat-number">
               {assignments.filter(a => getAssignmentStatus(a.id).status === 'graded').length}
             </div>
-            <div className="stat-label">Đã chấm điểm</div>
+            <div className="stat-label">{t('assignments.stats.graded')}</div>
           </div>
         </div>
       </div>
@@ -199,9 +203,9 @@ export default function StudentAssignments() {
         <div className="assignments-empty">
           <Empty
             image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description="Chưa có bài tập nào"
+            description={t('assignments.empty.noAssignments')}
           >
-            <Button type="primary">Khám phá khóa học</Button>
+            <Button type="primary">{t('assignments.actions.exploreCourses')}</Button>
           </Empty>
         </div>
       ) : (
@@ -235,6 +239,8 @@ function AssignmentCard({
   onSubmit,
   status 
 }) {
+  const { t } = useTranslation();
+  
   const completionRate = questions.length > 0 
     ? (Object.values(answers).filter(a => a.trim()).length / questions.length) * 100 
     : 0;
@@ -261,12 +267,12 @@ function AssignmentCard({
         
         <div className="assignment-meta">
           <div className="meta-item">
-            <span className="meta-label">Điểm tối đa:</span>
+            <span className="meta-label">{t('assignments.maxScore')}:</span>
             <span className="meta-value">{assignment.total_points}</span>
           </div>
           {totalScore != null && (
             <div className="meta-item highlight">
-              <span className="meta-label">Điểm của bạn:</span>
+              <span className="meta-label">{t('assignments.yourScore')}:</span>
               <span className="meta-value">{totalScore}</span>
             </div>
           )}
@@ -275,7 +281,7 @@ function AssignmentCard({
 
       <div className="assignment-progress">
         <div className="progress-info">
-          <span>Tiến độ hoàn thành</span>
+          <span>{t('assignments.progress.completion')}</span>
           <span>{completionRate.toFixed(0)}%</span>
         </div>
         <Progress 
@@ -296,13 +302,12 @@ function AssignmentCard({
         <Panel 
           header={
             <div className="collapse-header">
-              <span>📝 {questions.length} câu hỏi</span>
               <span className="questions-count">
-                {Object.values(answers).filter(a => a.trim()).length}/{questions.length} đã trả lời
+                {Object.values(answers).filter(a => a.trim()).length}/{questions.length} {t('assignments.progress.answered')}
               </span>
             </div>
           } 
-          key="questions"
+          key={assignment.id}
         >
           <QuestionList 
             assignmentId={assignment.id}
@@ -322,7 +327,7 @@ function AssignmentCard({
           icon={<RocketOutlined />}
           disabled={completionRate === 0}
         >
-          Nộp Bài Tập
+          {t('assignments.actions.submit')}
         </Button>
       </div>
     </div>
@@ -330,69 +335,14 @@ function AssignmentCard({
 }
 
 function QuestionList({ assignmentId, questions, answers, grades, onChange }) {
+  const { t } = useTranslation();
+
   if (!questions.length) {
     return (
       <div className="questions-empty">
         <Empty
-          description="Chưa có câu hỏi nào"
+          description={t('assignments.empty.noQuestions')}
           image={Empty.PRESENTED_IMAGE_SIMPLE}
-        />
-      </div>
-    );
-  }
-
-  const isGraded = Object.values(grades).some(score => score != null);
-
-  if (isGraded) {
-    return (
-      <div className="graded-answers">
-        <h4>📊 Kết quả bài làm</h4>
-        <Table
-          className="answers-table"
-          columns={[
-            { 
-              title: "Câu hỏi", 
-              dataIndex: "question_text",
-              render: (text, record) => (
-                <div>
-                  <div className="question-text-table">{text}</div>
-                  <div className="question-points-table">{record.points} điểm</div>
-                </div>
-              )
-            },
-            { 
-              title: "Câu trả lời của bạn", 
-              dataIndex: "answer_text",
-              render: (text) => (
-                <div className="answer-text">
-                  {text || <span className="no-answer">Chưa trả lời</span>}
-                </div>
-              )
-            },
-            { 
-              title: "Điểm", 
-              dataIndex: "score", 
-              render: (score, record) => (
-                <div className="score-display">
-                  {score != null ? (
-                    <Tag color={score >= record.points * 0.8 ? 'green' : score >= record.points * 0.5 ? 'orange' : 'red'}>
-                      {score}/{record.points}
-                    </Tag>
-                  ) : (
-                    <Tag color="default">Chưa chấm</Tag>
-                  )}
-                </div>
-              )
-            },
-          ]}
-          dataSource={questions.map(q => ({
-            key: q.id,
-            question_text: q.question_text,
-            answer_text: answers[q.id] || "",
-            score: grades[q.id],
-            points: q.points
-          }))}
-          pagination={false}
         />
       </div>
     );
@@ -400,32 +350,42 @@ function QuestionList({ assignmentId, questions, answers, grades, onChange }) {
 
   return (
     <div className="questions-list">
-      {questions.map((question, index) => (
-        <div key={question.id} className="question-item">
-          <div className="question-header">
-            <span className="question-number">Câu {index + 1}</span>
-            <Tag color="blue" className="points-tag">
-              {question.points} điểm
-            </Tag>
-          </div>
-          
-          <div className="question-content">
-            <p className="question-text">{question.text}</p>
-            
-            <div className="answer-section">
-              <TextArea
-                className="answer-textarea"
-                value={answers[question.id] || ""}
-                onChange={(e) => onChange(assignmentId, question.id, e.target.value)}
-                placeholder="Nhập câu trả lời của bạn..."
-                rows={4}
-                showCount
-                maxLength={1000}
-              />
+      {questions.map((question, index) => {
+        const userAnswer = answers[question.id] || "";
+        const score = grades[question.id];
+
+        return (
+          <div key={question.id} className="question-item">
+            <div className="question-header">
+              <span className="question-number">{question.question_text}</span>
+              <Tag color="blue" className="points-tag">
+                {question.points} {t('assignments.points')}
+              </Tag>
+            </div>
+
+            <div className="question-content">
+              <p className="question-text">{question.text}</p>
+
+              <div className="answer-section">
+                <TextArea
+                  className="answer-textarea"
+                  value={userAnswer}
+                  onChange={
+                    score == null
+                      ? (e) => onChange(assignmentId, question.id, e.target.value)
+                      : undefined
+                  }
+                  placeholder={score == null ? t('assignments.placeholder.enterAnswer') : ""}
+                  rows={4}
+                  showCount
+                  maxLength={1000}
+                  disabled={score != null}
+                />
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

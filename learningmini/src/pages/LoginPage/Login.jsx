@@ -3,104 +3,97 @@ import axios from "axios";
 import { Form, Input, Button, message } from "antd";
 import { useContext } from "react";
 import { UserContext } from "../../context/userContext";
+import { useTranslation } from "react-i18next";
+import "./Login.css";
 
 function LoginPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { login } = useContext(UserContext);
+  const [messageApi, contextHolder] = message.useMessage();
 
   const onFinish = async (values) => {
-  try {
-    const res = await axios.post("http://localhost:5000/login", values, {
-      headers: { "Content-Type": "application/json" },
-    });
-    console.log(res.data);
-    if (res.data.token && res.data.roles) {
-      localStorage.setItem("token", res.data.token);
-      login({
-        id: res.data.id,
-        name: res.data.name,
-        email: res.data.email,
-        roles: res.data.roles,
-        proof_info: res.data.proof_info,
-        proof_file: res.data.proof_file,
-        avatar: res.data.avatar,
-        phone: res.data.phone,
-        address: res.data.address,
-        birthdate: res.data.birthdate,
-        gender: res.data.gender,
-        token: res.data.token,
+    try {
+      const res = await axios.post("http://localhost:5000/login", values, {
+        headers: { "Content-Type": "application/json" },
       });
 
-      message.success("Đăng nhập thành công!");
+      if (res.data.token && res.data.roles) {
+        localStorage.setItem("token", res.data.token);
+        login({
+          id: res.data.id,
+          name: res.data.name,
+          language: res.data.language,
+          email: res.data.email,
+          roles: res.data.roles,
+          proof_info: res.data.proof_info,
+          proof_file: res.data.proof_file,
+          avatar: res.data.avatar,
+          phone: res.data.phone,
+          address: res.data.address,
+          birthdate: res.data.birthdate,
+          gender: res.data.gender,
+          token: res.data.token,
+        });
 
-      if (res.data.roles === "admin") navigate("/admin-dashboard");
-      else if (res.data.roles === "teacher") navigate("/teacher-dashboard");
-      else navigate("/student-dashboard");
-    } else {
-      message.error("Server không trả dữ liệu hợp lệ.");
+        messageApi.success({
+          content: t("loginSuccess"),
+          duration: 2,
+          onClose: () => {
+            if (res.data.roles === "admin") navigate("/admin-dashboard");
+            else if (res.data.roles === "teacher") navigate("/teacher-dashboard");
+            else navigate("/student-dashboard");
+          },
+        });
+      } else {
+        messageApi.error(t("invalidServerResponse"));
+      }
+    } catch (err) {
+      if (err.response) {
+        const status = err.response.status;
+        const data = err.response.data;
+
+        if (status === 401) {
+          messageApi.error(t("wrongEmailOrPassword"));
+        } else if (status === 403) {
+          messageApi.warning(data?.message || t("noAccess"));
+        } else {
+          messageApi.error(data?.message || t("serverError"));
+        }
+      } else {
+        messageApi.error(t("cannotConnectServer"));
+      }
     }
-  } catch (err) {
-    if (err.response) {
-      const status = err.response.status;
-      const data = err.response.data;
-
-      if (status === 401) {
-        message.error("Sai email hoặc mật khẩu!");
-      }
-      else if (status === 403) {
-        message.warning(data?.message || "Bạn không có quyền truy cập!");
-      }
-      else {
-        message.error(data?.message || "Lỗi server!");
-      }
-    } else {
-      message.error("Không thể kết nối server.");
-    }
-  }
-};
-
+  };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        background: "#f5f5f5",
-      }}
-    >
-      <div
-        style={{
-          background: "#fff",
-          padding: 30,
-          borderRadius: 12,
-          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-          width: 350,
-        }}
-      >
-        <h2 style={{ textAlign: "center", marginBottom: 24 }}>Đăng nhập</h2>
+    <div className="login-wrapper">
+      {contextHolder}
+      <div className="login-container">
+        <h2 className="login-title">{t("login")}</h2>
         <Form onFinish={onFinish} layout="vertical">
           <Form.Item
             name="email"
-            rules={[{ required: true, message: "Nhập email" }]}
+            rules={[{ required: true, message: t("enterEmail") }]}
           >
-            <Input placeholder="Email" autoComplete="email" />
+            <Input placeholder={t("email")} autoComplete="email" />
           </Form.Item>
           <Form.Item
             name="password"
-            rules={[{ required: true, message: "Nhập mật khẩu" }]}
+            rules={[{ required: true, message: t("enterPassword") }]}
           >
             <Input.Password
-              placeholder="Mật khẩu"
+              placeholder={t("password")}
               autoComplete="current-password"
             />
           </Form.Item>
           <Button type="primary" htmlType="submit" block>
-            Đăng nhập
+            {t("login")}
           </Button>
-          <div style={{ textAlign: "center", marginTop: 12 }}>
-            <a href="/register">Chưa có tài khoản? Đăng ký</a>
+          <div className="login-links">
+            <a href="/register">{t("noAccount")}</a>
+            <br />
+            <a href="/forgot-password">{t("forgotPassword")}</a>
           </div>
         </Form>
       </div>

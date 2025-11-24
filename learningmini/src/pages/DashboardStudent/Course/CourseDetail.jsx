@@ -17,12 +17,14 @@ import {
   SendOutlined,
   UserOutlined,
 } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 import axios from "axios";
 
 const { Title, Paragraph } = Typography;
 const { TextArea } = Input;
 
 export default function CourseDetail({ course }) {
+  const { t } = useTranslation();
   const [videos, setVideos] = useState([]);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
@@ -35,9 +37,9 @@ export default function CourseDetail({ course }) {
       const res = await axios.get(`http://localhost:5000/videos/${course.id}`);
       setVideos(res.data);
     } catch {
-      message.error("Không thể tải danh sách video");
+      message.error(t('courseDetail.messages.videosLoadError'));
     }
-  }, [course?.id]);
+  }, [course?.id, t]);
 
   const fetchComments = useCallback(async () => {
     if (!course?.id) return;
@@ -48,9 +50,9 @@ export default function CourseDetail({ course }) {
       );
       setComments(res.data);
     } catch {
-      message.error("Không thể tải bình luận");
+      message.error(t('courseDetail.messages.commentsLoadError'));
     }
-  }, [course?.id, token]);
+  }, [course?.id, token, t]);
 
   const fetchStudentCount = useCallback(async () => {
     if (!course?.id) return;
@@ -58,24 +60,23 @@ export default function CourseDetail({ course }) {
         const res = await axios.get(`http://localhost:5000/courses/${course.id}/students-count`);
         setStudentCount(res.data.total_students);
     } catch {
-        message.error("Không thể tải số lượng học viên");
+        message.error(t('courseDetail.messages.studentCountError'));
     }
-    }, [course?.id]);
-
+  }, [course?.id, t]);
 
   const handleAddComment = async () => {
-    if (!newComment.trim()) return message.warning("Vui lòng nhập nội dung bình luận");
+    if (!newComment.trim()) return message.warning(t('courseDetail.messages.commentRequired'));
     try {
       await axios.post(
         "http://localhost:5000/comments/add",
         { course_id: course.id, content: newComment },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      message.success("Đã gửi bình luận!");
+      message.success(t('courseDetail.messages.commentSuccess'));
       setNewComment("");
       fetchComments();
     } catch {
-      message.error("Gửi bình luận thất bại");
+      message.error(t('courseDetail.messages.commentError'));
     }
   };
 
@@ -116,7 +117,7 @@ export default function CourseDetail({ course }) {
       <div style={{ marginTop: 24 }}>
         <Title level={3}>{course.title}</Title>
         <Paragraph type="secondary">
-          Giảng viên: <b>{course.teacher_name}</b> | {videos.length} video | {studentCount} học viên
+          {t('courseDetail.teacher')}: <b>{course.teacher_name}</b> | {videos.length} {t('courseDetail.videos')} | {studentCount} {t('courseDetail.students')}
         </Paragraph>
 
         <Tabs
@@ -124,20 +125,20 @@ export default function CourseDetail({ course }) {
           items={[
             {
               key: "1",
-              label: "Tổng quan",
+              label: t('courseDetail.tabs.overview'),
               children: (
                 <>
-                  <Title level={5}>Mô tả khóa học</Title>
-                  <Paragraph>{course.description || "Chưa có mô tả chi tiết"}</Paragraph>
+                  <Title level={5}>{t('courseDetail.courseDescription')}</Title>
+                  <Paragraph>{course.description || t('courseDetail.noDescription')}</Paragraph>
                 </>
               ),
             },
             {
               key: "2",
-              label: "Nội dung khóa học",
+              label: t('courseDetail.tabs.content'),
               children: (
                 <>
-                  <Divider orientation="left">Danh sách bài học</Divider>
+                  <Divider orientation="left">{t('courseDetail.lessonList')}</Divider>
                   {videos.length > 0 ? (
                     <List
                       dataSource={videos}
@@ -150,34 +151,34 @@ export default function CourseDetail({ course }) {
                             color="blue"
                             style={{ marginLeft: "auto" }}
                           >
-                            {video.duration || "N/A"}
+                            {video.duration || t('courseDetail.notAvailable')}
                           </Tag>
                         </List.Item>
                       )}
                     />
                   ) : (
-                    <Paragraph>Chưa có video nào trong khóa học này.</Paragraph>
+                    <Paragraph>{t('courseDetail.noVideos')}</Paragraph>
                   )}
                 </>
               ),
             },
             {
               key: "3",
-              label: "Bình luận",
+              label: t('courseDetail.tabs.comments'),
               children: (
                 <div>
-                  <Title level={5}>Bình luận của học viên</Title>
+                  <Title level={5}>{t('courseDetail.studentComments')}</Title>
 
                   <List
                     dataSource={comments}
-                    locale={{ emptyText: "Chưa có bình luận nào." }}
+                    locale={{ emptyText: t('courseDetail.noComments') }}
                     renderItem={(cmt) => (
                       <List.Item>
                         <List.Item.Meta
                           avatar={<Avatar icon={<UserOutlined />} />}
                           title={
                             <div>
-                              <b>{cmt.user_name || "Người dùng"}</b>{" "}
+                              <b>{cmt.user_name || t('courseDetail.user')}</b>{" "}
                               <span style={{ color: "#999", fontSize: 12 }}>
                                 {new Date(cmt.created_at).toLocaleString()}
                               </span>
@@ -192,7 +193,7 @@ export default function CourseDetail({ course }) {
                   <Divider />
                   <TextArea
                     rows={3}
-                    placeholder="Viết bình luận..."
+                    placeholder={t('courseDetail.placeholder.writeComment')}
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
                   />
@@ -202,7 +203,7 @@ export default function CourseDetail({ course }) {
                       icon={<SendOutlined />}
                       onClick={handleAddComment}
                     >
-                      Gửi
+                      {t('courseDetail.send')}
                     </Button>
                   </div>
                 </div>

@@ -4,6 +4,7 @@
   min-height: 100vh;
   background-color: #fff;
   padding: 12px 24px;
+  width: 100%;
 }
 
 .mycourses-grid.list-view {
@@ -12,6 +13,8 @@
   gap: 12px;
   margin-bottom: 20px;
   flex: 1;
+  width: 100%;
+  align-items: stretch;
 }
 
 .course-card {

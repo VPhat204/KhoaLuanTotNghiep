@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import { ScheduleOutlined, PrinterOutlined } from '@ant-design/icons';
 import './ScheduleTeacher.css';
 
 const TeacherSchedule = () => {
+  const { t } = useTranslation();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [scheduleData, setScheduleData] = useState({
@@ -20,7 +22,6 @@ const TeacherSchedule = () => {
     const diff = startDate.getDate() - day + (day === 0 ? -6 : 1);
     startDate.setDate(diff);
     startDate.setHours(0, 0, 0, 0);
-
     const weekDates = [];
     for (let i = 0; i < 7; i++) {
       const currentDate = new Date(startDate);
@@ -34,15 +35,11 @@ const TeacherSchedule = () => {
   const fetchTeacherCourses = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get(
-        "http://localhost:5000/courses/mine",
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      
+      const res = await axios.get("http://localhost:5000/courses/mine", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setTeacherCourses(res.data);
-    } catch (err) {
-      console.error('Error fetching teacher courses:', err);
-    }
+    } catch (err) {}
   }, []);
 
   const fetchTeacherSchedule = useCallback(async () => {
@@ -50,7 +47,7 @@ const TeacherSchedule = () => {
       const teacherCourseIds = teacherCourses.map(course => course.id);
       const user = JSON.parse(localStorage.getItem("user"));
       const teacherId = user?.id;
-      
+
       const filteredSchedule = {
         Sáng: Array(7).fill().map(() => []),
         Chiều: Array(7).fill().map(() => []),
@@ -60,7 +57,6 @@ const TeacherSchedule = () => {
       Object.keys(scheduleData).forEach(period => {
         for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
           const daySlots = scheduleData[period][dayIndex];
-          
           if (Array.isArray(daySlots)) {
             daySlots.forEach((slot, slotIndex) => {
               if (slot && slot.type !== 'empty' && slot.course_id) {
@@ -82,21 +78,18 @@ const TeacherSchedule = () => {
       return filteredSchedule;
     };
 
-    const token = localStorage.getItem("token");  
+    const token = localStorage.getItem("token");
     const dateString = currentDate.toISOString().split('T')[0];
-    
+
     try {
       setLoading(true);
       const res = await axios.get(
         `http://localhost:5000/api/schedule/week?date=${dateString}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      
       const filteredSchedule = filterScheduleByTeacherCourses(res.data);
       setScheduleData(filteredSchedule);
-      
     } catch (err) {
-      console.log('Error fetching schedule:', err);
       setScheduleData({
         Sáng: Array(7).fill().map(() => [{ type: 'empty' }, { type: 'empty' }]),
         Chiều: Array(7).fill().map(() => [{ type: 'empty' }, { type: 'empty' }]),
@@ -111,9 +104,9 @@ const TeacherSchedule = () => {
     fetchTeacherCourses();
   }, [fetchTeacherCourses]);
 
-  useEffect(() => { 
+  useEffect(() => {
     if (teacherCourses.length > 0) {
-      fetchTeacherSchedule(); 
+      fetchTeacherSchedule();
     }
   }, [fetchTeacherSchedule, teacherCourses]);
 
@@ -139,7 +132,7 @@ const TeacherSchedule = () => {
 
   const DatePicker = () => {
     const [selectedDate, setSelectedDate] = useState(currentDate);
-    
+
     const applyDate = () => {
       setCurrentDate(selectedDate);
       setShowDatePicker(false);
@@ -152,16 +145,20 @@ const TeacherSchedule = () => {
     return (
       <div className="teacher-date-picker-overlay" onClick={cancelDate}>
         <div className="teacher-date-picker" onClick={(e) => e.stopPropagation()}>
-          <h3>Chọn ngày</h3>
-          <input 
-            type="date" 
+          <h3>{t("teacherschedule.selectDate")}</h3>
+          <input
+            type="date"
             value={selectedDate.toISOString().split('T')[0]}
             onChange={(e) => setSelectedDate(new Date(e.target.value))}
             className="teacher-date-input"
           />
           <div className="teacher-date-picker-actions">
-            <button onClick={cancelDate} className="teacher-cancel-btn">Hủy</button>
-            <button onClick={applyDate} className="teacher-apply-btn">Áp dụng</button>
+            <button onClick={cancelDate} className="teacher-cancel-btn">
+              {t("teachercommon.cancel")}
+            </button>
+            <button onClick={applyDate} className="teacher-apply-btn">
+              {t("teachercommon.apply")}
+            </button>
           </div>
         </div>
       </div>
@@ -170,19 +167,21 @@ const TeacherSchedule = () => {
 
   const weekDates = getWeekDates(currentDate);
   const weekDays = weekDates.map(date => ({
-    day: ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'][date.getDay() - 1] || 'Chủ nhật',
-    date: `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`
+    day: t(`teacherschedule.days.${date.getDay()}`),
+    date: `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}/${date.getFullYear()}`
   }));
 
   const legendItems = [
-    { type: 'theory', label: 'Lý thuyết', color: '#9E9E9E' },
-    { type: 'practice', label: 'Thực hành', color: '#4CAF50' },
-    { type: 'online', label: 'Trực tuyến', color: '#2196F3' },
-    { type: 'exam', label: 'Lịch thi', color: '#FFEB3B' },
-    { type: 'pause', label: 'Tạm ngưng', color: '#FF9800' }
+    { type: 'theory', label: t("teacherschedule.lessonTypes.theory"), color: '#9E9E9E' },
+    { type: 'practice', label: t("teacherschedule.lessonTypes.practice"), color: '#4CAF50' },
+    { type: 'online', label: t("teacherschedule.lessonTypes.online"), color: '#2196F3' },
+    { type: 'exam', label: t("teacherschedule.lessonTypes.exam"), color: '#FFEB3B' },
+    { type: 'pause', label: t("teacherschedule.lessonTypes.pause"), color: '#FF9800' }
   ];
 
-  const renderCell = (daySlots, period, dayIndex) => {
+  const renderCell = (daySlots) => {
     if (!Array.isArray(daySlots)) {
       daySlots = [{ type: 'empty' }, { type: 'empty' }];
     }
@@ -196,38 +195,46 @@ const TeacherSchedule = () => {
 
           if (slot.type === 'empty') {
             return (
-              <div
-                key={slotIndex}
-                className="teacher-empty-slot"
-              >
-                <div className="teacher-empty-text">Trống</div>
-                <span className="teacher-slot-number">Slot {slotIndex + 1}</span>
+              <div key={slotIndex} className="teacher-empty-slot">
+                <div className="teacher-empty-text">{t("teacherschedule.empty")}</div>
+                <span className="teacher-slot-number">
+                  {t("teacherschedule.slot")} {slotIndex + 1}
+                </span>
               </div>
             );
           }
 
           return (
-            <div
-              key={`schedule-${slot.schedule_id}-${slotIndex}`}
-              className={`teacher-event-item ${slot.type}`}
-            >
+            <div key={slotIndex} className={`teacher-event-item ${slot.type}`}>
               <div className="teacher-event-top-bar">
                 <div className="teacher-event-title">{slot.title}</div>
               </div>
-              
+
               <div className="teacher-event-details">
-                <div><strong>GV:</strong> {slot.teacher || 'Chưa có GV'}</div>
-                <div><strong>Lớp:</strong> {slot.url || 'Chưa có lớp'}</div>
-                <div><strong>Tiết:</strong> {slot.lesson || 'Chưa có tiết'}</div>
-                <div><strong>Loại:</strong> 
-                  {slot.type === 'theory' && ' Lý thuyết'}
-                  {slot.type === 'practice' && ' Thực hành'}
-                  {slot.type === 'online' && ' Trực tuyến'}
-                  {slot.type === 'exam' && ' Lịch thi'}
-                  {slot.type === 'pause' && ' Tạm ngưng'}
-                  {!slot.type && ' Chưa xác định'}
+                <div>
+                  <strong>{t("teacherschedule.teacher")}:</strong>{" "}
+                  {slot.teacher || t("teacherschedule.noTeacher")}
                 </div>
-                <div><strong>Học viên:</strong> {slot.enrolled_count || 0}</div>
+
+                <div>
+                  <strong>{t("teacherschedule.class")}:</strong>{" "}
+                  {slot.url || t("teacherschedule.noClass")}
+                </div>
+
+                <div>
+                  <strong>{t("teacherschedule.lesson")}:</strong>{" "}
+                  {slot.lesson || t("teacherschedule.noLesson")}
+                </div>
+
+                <div>
+                  <strong>{t("teacherschedule.type")}:</strong>{" "}
+                  {t(`teacherschedule.lessonTypes.${slot.type}`)}
+                </div>
+
+                <div>
+                  <strong>{t("teacherschedule.students")}:</strong>{" "}
+                  {slot.enrolled_count || 0}
+                </div>
               </div>
             </div>
           );
@@ -240,41 +247,65 @@ const TeacherSchedule = () => {
     <div className="teacher-schedule-container">
       {loading && (
         <div className="teacher-loading-overlay">
-          <div className="teacher-loading-spinner">Đang tải lịch dạy...</div>
+          <div className="teacher-loading-spinner">
+            {t("teacherschedule.loading")}
+          </div>
         </div>
       )}
-      
+
       <div className="teacher-schedule-section">
         <div className="teacher-schedule-header teacher-header">
           <div className="teacher-header-top">
-            <h1>Lịch dạy của tôi</h1>
+            <h1>{t("teacherschedule.mySchedule")}</h1>
+
             <div className="teacher-header-actions">
               <button className="teacher-print-btn" onClick={() => window.print()}>
                 <span><PrinterOutlined /></span>
-                In lịch
+                {t("teacherschedule.print")}
               </button>
             </div>
           </div>
-          
+
           <div className="teacher-header-info">
             <p className="teacher-courses-info">
-              Đang hiển thị lịch dạy cho <strong>{teacherCourses.length}</strong> khóa học của bạn
+              {t("teacherschedule.displayingCourses", {
+                count: teacherCourses.length
+              })}
             </p>
           </div>
-          
+
           <div className="teacher-header-controls">
             <div className="teacher-date-controls">
-              <div className="teacher-date-display" onClick={() => setShowDatePicker(true)}>
-                <span className="teacher-calendar-icon"><ScheduleOutlined /></span>
+              <div
+                className="teacher-date-display"
+                onClick={() => setShowDatePicker(true)}
+              >
+                <span className="teacher-calendar-icon">
+                  <ScheduleOutlined />
+                </span>
+
                 <span className="teacher-date-text">
-                  {currentDate.getDate().toString().padStart(2, '0')}/{(currentDate.getMonth() + 1).toString().padStart(2, '0')}/{currentDate.getFullYear()}
+                  {currentDate.getDate().toString().padStart(2, '0')}/
+                  {(currentDate.getMonth() + 1).toString().padStart(2, '0')}/
+                  {currentDate.getFullYear()}
                 </span>
               </div>
-              
+
               <div className="teacher-navigation-buttons">
-                <button className="teacher-nav-btn" onClick={goToPreviousWeek}>Trở về</button>
-                <button className="teacher-nav-btn teacher-nav-btn-current" onClick={goToCurrentWeek}>Hôm nay</button>
-                <button className="teacher-nav-btn" onClick={goToNextWeek}>Tiếp</button>
+                <button className="teacher-nav-btn" onClick={goToPreviousWeek}>
+                  {t("teacherschedule.previous")}
+                </button>
+
+                <button
+                  className="teacher-nav-btn teacher-nav-btn-current"
+                  onClick={goToCurrentWeek}
+                >
+                  {t("teacherschedule.today")}
+                </button>
+
+                <button className="teacher-nav-btn" onClick={goToNextWeek}>
+                  {t("teacherschedule.next")}
+                </button>
               </div>
             </div>
           </div>
@@ -286,7 +317,10 @@ const TeacherSchedule = () => {
           <table className="teacher-schedule-table">
             <thead>
               <tr>
-                <th className="teacher-header-cell teacher-time-header">Ca học</th>
+                <th className="teacher-header-cell teacher-time-header">
+                  {t("teacherschedule.period")}
+                </th>
+
                 {weekDays.map((day, index) => (
                   <th key={index} className="teacher-header-cell">
                     <div className="teacher-day">{day.day}</div>
@@ -295,30 +329,42 @@ const TeacherSchedule = () => {
                 ))}
               </tr>
             </thead>
+
             <tbody>
-              {['Sáng', 'Chiều', 'Tối'].map(period => (
-                <tr key={period}>
-                  <td className="teacher-time-period">{period}</td>
-                  {scheduleData[period].map((daySlots, dayIndex) => (
-                    <td 
-                      key={dayIndex} 
-                      className="teacher-time-slot teacher-multi-slot"
-                    >
-                      {renderCell(daySlots, period, dayIndex)}
+              {['Sáng', 'Chiều', 'Tối'].map(period => {
+                const keyMap = {
+                  'Sáng': 'morning',
+                  'Chiều': 'afternoon',
+                  'Tối': 'evening'
+                };
+                return (
+                  <tr key={period}>
+                    <td className="teacher-time-period">
+                      {t(`teacherschedule.periods.${keyMap[period]}`)}
                     </td>
-                  ))}
-                </tr>
-              ))}
+
+                    {scheduleData[period].map((daySlots, dayIndex) => (
+                      <td key={dayIndex} className="teacher-time-slot teacher-multi-slot">
+                        {renderCell(daySlots)}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
 
         <div className="teacher-schedule-legend">
-          <h3>Chú thích</h3>
+          <h3>{t("teacherschedule.legend")}</h3>
+
           <div className="teacher-legend-items">
             {legendItems.map((item, index) => (
               <div key={index} className="teacher-legend-item">
-                <div className="teacher-legend-color" style={{ backgroundColor: item.color }}></div>
+                <div
+                  className="teacher-legend-color"
+                  style={{ backgroundColor: item.color }}
+                ></div>
                 <span className="teacher-legend-label">{item.label}</span>
               </div>
             ))}

@@ -161,6 +161,14 @@ body[data-theme="dark"] .app-header {
   background: #141414 !important;
 }
 
+body[data-theme="dark"] .app-footer {
+  background-color: #141414;
+  color: #eaeaea;
+  text-align: center;
+  padding: 20px;
+  border-top: 1px solid #333;
+}
+
 body[data-theme="dark"] .app-search-input {
   background: #2a2a2a;
   color: #fff;
