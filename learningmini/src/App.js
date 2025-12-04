@@ -5,7 +5,7 @@ import HomePage from "./pages/HomePage/Dashboard/HomePage";
 import Courses from "./pages/DashboardStudent/Course/Courses"
 import LoginPage from "./pages/LoginPage/Login";
 import RegisterPage from "./pages/RegisterPage/Register";
-import DashboardAdmin from "./pages/DashboardAdmin/Dashboard/DashboardAmin";
+import DashboardAdmin from "./pages/DashboardAdmin/Dashboard/DashboardAdmin";
 import DashboardTeacher from "./pages/DashboardTeacher/Dashboard/DashBoardTeacher";
 import DashboardStudent from "./pages/DashboardStudent/Dashboard/DashBoardStudent";
 import ForgotPasswordPage from "./pages/ForgotPage/ForgotPage";
