@@ -41,11 +41,11 @@ const transporter = nodemailer.createTransport({
 let db;
 async function connectDB() {
   db = await mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    port: process.env.DB_PORT,
-    database: process.env.DB_NAME,
+    host: process.env.MYSQL_HOST,
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASSWORD,
+    port: process.env.MYSQL_PORT,
+    database: process.env.MYSQL_DATABASE,
   });
   console.log("MySQL connected");
 }
@@ -2575,8 +2575,19 @@ app.delete("/chat/message/:message_id", authMiddleware, async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, async () => {
-  console.log("Server is running on port " + PORT);
-  await connectDB(); 
-});
+const PORT = process.env.PORT || 10000;
+
+async function startServer() {
+  try {
+    await connectDB(); // Kết nối DB trước
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error("Không thể kết nối DB:", err);
+    process.exit(1); // dừng server nếu DB fail
+  }
+}
+
+startServer();
+
