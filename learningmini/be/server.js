@@ -40,15 +40,22 @@ const transporter = nodemailer.createTransport({
 
 let db;
 async function connectDB() {
-  db = await mysql.createConnection({
-    host: process.env.MYSQL_HOST,
-    user: process.env.MYSQL_USER,
-    password: process.env.MYSQL_PASSWORD,
-    port: process.env.MYSQL_PORT,
-    database: process.env.MYSQL_DATABASE,
-  });
-  console.log("MySQL connected");
+  try {
+    db = await mysql.createConnection({
+      host: process.env.MYSQL_HOST,
+      user: process.env.MYSQL_USER,
+      password: process.env.MYSQL_PASSWORD,
+      database: process.env.MYSQL_DATABASE,
+      port: process.env.MYSQL_PORT,
+      ssl: { rejectUnauthorized: false }, 
+    });
+    console.log("MySQL connected");
+  } catch (err) {
+    console.error("Không thể kết nối DB:", err);
+    process.exit(1);
+  }
 }
+
 
 async function sendEmailNotification(to, subject, htmlContent) {
   try {
@@ -2575,19 +2582,8 @@ app.delete("/chat/message/:message_id", authMiddleware, async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 10000;
-
-async function startServer() {
-  try {
-    await connectDB(); // Kết nối DB trước
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
-  } catch (err) {
-    console.error("Không thể kết nối DB:", err);
-    process.exit(1); // dừng server nếu DB fail
-  }
-}
-
-startServer();
-
+connectDB()
+  .then(() => {
+    app.listen(5000, () => console.log("Server running on port 5000"));
+  })
+  .catch((err) => console.error("Lỗi kết nối DB:", err));
