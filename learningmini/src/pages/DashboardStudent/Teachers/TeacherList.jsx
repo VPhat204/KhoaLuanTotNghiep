@@ -20,7 +20,7 @@ export default function TeacherList({ onCourseEnrolled }) {
     const fetchTeachers = async () => {
       setLoading(true);
       try {
-        const res = await axios.get("http://localhost:5000/teachers-courses", {
+        const res = await axios.get("https://khoaluantotnghiep-i5m4.onrender.com/teachers-courses", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setTeachers(res.data);
@@ -39,7 +39,7 @@ export default function TeacherList({ onCourseEnrolled }) {
       if (user && user.roles === "student") {
         try {
           const enrolledRes = await axios.get(
-            `http://localhost:5000/users/${user.id}/courses`,
+            `https://khoaluantotnghiep-i5m4.onrender.com/users/${user.id}/courses`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }
@@ -48,7 +48,7 @@ export default function TeacherList({ onCourseEnrolled }) {
           setEnrolledCourses(enrolledIds);
           
           const pendingRes = await axios.get(
-            `http://localhost:5000/users/${user.id}/pending-courses`,
+            `https://khoaluantotnghiep-i5m4.onrender.com/users/${user.id}/pending-courses`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }
@@ -105,7 +105,7 @@ export default function TeacherList({ onCourseEnrolled }) {
       }
 
       await axios.post(
-        `http://localhost:5000/courses/${courseId}/enroll`,
+        `https://khoaluantotnghiep-i5m4.onrender.com/courses/${courseId}/enroll`,
         { status: "pending" },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -150,7 +150,7 @@ export default function TeacherList({ onCourseEnrolled }) {
           <div className="teacher-main-info">
             <div className="teacher-avatar">
               <img 
-                src={`http://localhost:5000${teacher.avatar}`} 
+                src={`https://khoaluantotnghiep-i5m4.onrender.com${teacher.avatar}`} 
                 alt={teacher.name}
                 onError={(e) => e.target.src = require("../../../assets/default.jpg")}
               />
@@ -205,7 +205,7 @@ export default function TeacherList({ onCourseEnrolled }) {
         <div className="teacher-detail-header">
           <div className="teacher-detail-avatar">
             <img 
-              src={`http://localhost:5000${selectedTeacher.avatar}`} 
+              src={`https://khoaluantotnghiep-i5m4.onrender.com${selectedTeacher.avatar}`} 
               alt={selectedTeacher.name}
               onError={(e) => e.target.src = "."}
             />

@@ -94,7 +94,7 @@ const CourseManagement = () => {
   const fetchAllCourses = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/courses', {
+      const response = await fetch('https://khoaluantotnghiep-i5m4.onrender.com/courses', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -142,7 +142,7 @@ const CourseManagement = () => {
 
   const fetchCourseStudents = async (courseId) => {
     try {
-      const response = await fetch(`http://localhost:5000/course-students?courseId=${courseId}`);
+      const response = await fetch(`https://khoaluantotnghiep-i5m4.onrender.com/course-students?courseId=${courseId}`);
       const data = await response.json();
       setStudents(data.students || []);
     } catch (error) {
@@ -163,7 +163,7 @@ const CourseManagement = () => {
 
   const handleDelete = async (courseId) => {
     try {
-      const response = await fetch(`http://localhost:5000/courses/${courseId}`, {
+      const response = await fetch(`https://khoaluantotnghiep-i5m4.onrender.com/courses/${courseId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -212,7 +212,7 @@ const CourseManagement = () => {
 
   const handleApproveSubmit = async (values) => {
     try {
-      const response = await fetch(`http://localhost:5000/courses/${courseForApproval.id}/approve`, {
+      const response = await fetch(`https://khoaluantotnghiep-i5m4.onrender.com/courses/${courseForApproval.id}/approve`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -249,8 +249,8 @@ const CourseManagement = () => {
   const handleSubmit = async (values) => {
     try {
       const url = editingCourse 
-        ? `http://localhost:5000/courses/${editingCourse.id}`
-        : 'http://localhost:5000/courses';
+        ? `https://khoaluantotnghiep-i5m4.onrender.com/courses/${editingCourse.id}`
+        : 'https://khoaluantotnghiep-i5m4.onrender.com/courses';
       
       const method = editingCourse ? 'PUT' : 'POST';
       

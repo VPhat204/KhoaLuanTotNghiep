@@ -10,22 +10,17 @@ export default function CreateCourse({ courseForm, onCreateCourse }) {
   const handleSubmit = async (values) => {
     setSubmitting(true);
     try {
-      // Gọi hàm tạo khóa học
       await onCreateCourse(values);
-      
-      // Hiển thị thông báo thành công
-      messageApi.success({
+            messageApi.success({
         content: t("createcourses.success_message"),
         duration: 4,
       });
       
-      // Hiển thị thông báo chờ phê duyệt
       messageApi.info({
         content: t("createcourses.pending_approval_message"),
         duration: 5,
       });
       
-      // Reset form
       courseForm.resetFields();
       
     } catch (error) {

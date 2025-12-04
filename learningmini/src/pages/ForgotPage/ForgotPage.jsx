@@ -21,7 +21,7 @@ function ForgotPage() {
         messageApi.error(t("enterEmailBeforeSendingOtp"));
         return;
       }
-      await axios.post("http://localhost:5000/forgot-password", { email: emailValue });
+      await axios.post("https://khoaluantotnghiep-i5m4.onrender.com/forgot-password", { email: emailValue });
       setEmail(emailValue);
       setOtpSent(true);
       messageApi.success(t("otpSentToEmail"));
@@ -37,7 +37,7 @@ function ForgotPage() {
         messageApi.error(t("enterOtpBeforeVerify"));
         return;
       }
-      await axios.post("http://localhost:5000/verify-otp", { email, otp: otpValue });
+      await axios.post("https://khoaluantotnghiep-i5m4.onrender.com/verify-otp", { email, otp: otpValue });
       setOtpVerified(true);
       messageApi.success(t("otpVerifiedSuccess"));
     } catch (err) {
@@ -57,7 +57,7 @@ function ForgotPage() {
         messageApi.error(t("passwordMismatch"));
         return;
       }
-      await axios.post("http://localhost:5000/reset-password", { email, password });
+      await axios.post("https://khoaluantotnghiep-i5m4.onrender.com/reset-password", { email, password });
       messageApi.success(t("passwordResetSuccess"));
       form.resetFields();
       setOtpSent(false);

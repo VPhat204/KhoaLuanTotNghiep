@@ -63,7 +63,7 @@ const DetailVideo = ({
       
       if (!course && video.course_id) {
         promises.push(
-          axios.get(`http://localhost:5000/courses/${video.course_id}`, {
+          axios.get(`https://khoaluantotnghiep-i5m4.onrender.com/courses/${video.course_id}`, {
             headers: { Authorization: `Bearer ${token}` }
           }).then(res => setCourse(res.data))
           .catch(err => {
@@ -75,7 +75,7 @@ const DetailVideo = ({
       
       if (comments.length === 0 && video.course_id) {
         promises.push(
-          axios.get(`http://localhost:5000/comments/${video.course_id}`, {
+          axios.get(`https://khoaluantotnghiep-i5m4.onrender.com/comments/${video.course_id}`, {
             headers: { Authorization: `Bearer ${token}` }
           }).then(res => setComments(Array.isArray(res.data) ? res.data : []))
           .catch(err => {
@@ -87,7 +87,7 @@ const DetailVideo = ({
       
       if (students.length === 0 && video.course_id) {
         promises.push(
-          axios.get(`http://localhost:5000/course-students`, {
+          axios.get(`https://khoaluantotnghiep-i5m4.onrender.com/course-students`, {
             params: { courseId: video.course_id }
           }).then(res => setStudents(res.data.students || []))
           .catch(err => {
@@ -99,7 +99,7 @@ const DetailVideo = ({
       
       if (allVideos.length === 0 && video.course_id) {
         promises.push(
-          axios.get(`http://localhost:5000/videos/${video.course_id}`, {
+          axios.get(`https://khoaluantotnghiep-i5m4.onrender.com/videos/${video.course_id}`, {
             headers: { Authorization: `Bearer ${token}` }
           }).then(res => setAllVideos(Array.isArray(res.data) ? res.data : []))
           .catch(err => {

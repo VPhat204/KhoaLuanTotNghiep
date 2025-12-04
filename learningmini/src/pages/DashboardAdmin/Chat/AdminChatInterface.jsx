@@ -50,7 +50,7 @@ const AdminChatInterface = () => {
     if (!token || !user) return;
     
     try {
-      const response = await axios.get('http://localhost:5000/chat/users', {
+      const response = await axios.get('https://khoaluantotnghiep-i5m4.onrender.com/chat/users', {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -82,7 +82,7 @@ const AdminChatInterface = () => {
     }
     
     try {
-      const response = await axios.get(`http://localhost:5000/chat/search/users`, {
+      const response = await axios.get(`https://khoaluantotnghiep-i5m4.onrender.com/chat/search/users`, {
         headers: { Authorization: `Bearer ${token}` },
         params: { search: searchTerm }
       });
@@ -101,7 +101,7 @@ const AdminChatInterface = () => {
     
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:5000/chat/${userId}`, {
+      const response = await axios.get(`https://khoaluantotnghiep-i5m4.onrender.com/chat/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -128,7 +128,7 @@ const AdminChatInterface = () => {
     if (!newMessage.trim() || !selectedUser) return;
     
     try {
-      const response = await axios.post('http://localhost:5000/chat/send', {
+      const response = await axios.post('https://khoaluantotnghiep-i5m4.onrender.com/chat/send', {
         receiver_id: selectedUser.id,
         message: newMessage
       }, {

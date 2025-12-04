@@ -35,7 +35,7 @@ function TeacherOverview({ setSelectedKey }) {
   const fetchTeacherInfo = useCallback(async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/users/${teacherId}`,
+        `https://khoaluantotnghiep-i5m4.onrender.com/users/${teacherId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setTeacherInfo(res.data);
@@ -47,7 +47,7 @@ function TeacherOverview({ setSelectedKey }) {
   const fetchTeacherCourses = useCallback(async () => {
     try {
       const res = await axios.get(
-        "http://localhost:5000/courses/mine",
+        "https://khoaluantotnghiep-i5m4.onrender.com/courses/mine",
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setTeacherCourses(res.data);
@@ -63,7 +63,7 @@ function TeacherOverview({ setSelectedKey }) {
 
       for (const courseId of teacherCourseIds) {
         const res = await axios.get(
-          `http://localhost:5000/course-students?courseId=${courseId}`,
+          `https://khoaluantotnghiep-i5m4.onrender.com/course-students?courseId=${courseId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (res.data.students && res.data.students.length > 0) {
@@ -88,7 +88,7 @@ function TeacherOverview({ setSelectedKey }) {
 
       for (const courseId of teacherCourseIds) {
         const res = await axios.get(
-          `http://localhost:5000/videos/${courseId}`,
+          `https://khoaluantotnghiep-i5m4.onrender.com/videos/${courseId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (res.data && Array.isArray(res.data)) {
@@ -124,7 +124,7 @@ function TeacherOverview({ setSelectedKey }) {
       const weeklyPromises = weeks.map(weekDate => {
         const dateString = weekDate.toISOString().split('T')[0];
         return axios.get(
-          `http://localhost:5000/api/schedule/week?date=${dateString}`,
+          `https://khoaluantotnghiep-i5m4.onrender.com/api/schedule/week?date=${dateString}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
       });
@@ -191,7 +191,7 @@ function TeacherOverview({ setSelectedKey }) {
       for (const courseId of teacherCourseIds) {
         try {
           const res = await axios.get(
-            `http://localhost:5000/assignments/course/${courseId}`,
+            `https://khoaluantotnghiep-i5m4.onrender.com/assignments/course/${courseId}`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
           

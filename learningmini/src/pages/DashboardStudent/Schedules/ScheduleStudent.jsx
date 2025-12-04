@@ -39,7 +39,7 @@ const StudentSchedule = () => {
       const userId = JSON.parse(localStorage.getItem("user"))?.id;
       
       const res = await axios.get(
-        `http://localhost:5000/users/${userId}/courses`,
+        `https://khoaluantotnghiep-i5m4.onrender.com/users/${userId}/courses`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -90,7 +90,7 @@ const StudentSchedule = () => {
     try {
       setLoading(true);
       const res = await axios.get(
-        `http://localhost:5000/api/schedule/week?date=${dateString}`,
+        `https://khoaluantotnghiep-i5m4.onrender.com/api/schedule/week?date=${dateString}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       

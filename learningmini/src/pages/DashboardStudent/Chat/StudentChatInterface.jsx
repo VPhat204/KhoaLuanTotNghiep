@@ -43,12 +43,11 @@ const StudentChatInterface = () => {
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
 
-  // Lấy danh sách admin
   const fetchAdmins = useCallback(async () => {
     if (!token || !user) return;
     
     try {
-      const response = await axios.get('http://localhost:5000/chat/admins', {
+      const response = await axios.get('https://khoaluantotnghiep-i5m4.onrender.com/chat/admins', {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -56,11 +55,10 @@ const StudentChatInterface = () => {
         const adminList = response.data.data;
         setAdmins(adminList);
         
-        // Lấy số tin nhắn chưa đọc với từng admin
         const counts = { ...unreadCounts };
         for (const admin of adminList) {
           try {
-            const unreadResponse = await axios.get(`http://localhost:5000/chat/unread/count/${admin.id}`, {
+            const unreadResponse = await axios.get(`https://khoaluantotnghiep-i5m4.onrender.com/chat/unread/count/${admin.id}`, {
               headers: { Authorization: `Bearer ${token}` }
             });
             
@@ -80,12 +78,11 @@ const StudentChatInterface = () => {
     }
   }, [token, user, unreadCounts]);
 
-  // Lấy danh sách giảng viên
   const fetchTeachers = useCallback(async () => {
     if (!token || !user) return;
     
     try {
-      const response = await axios.get('http://localhost:5000/chat/student/teachers', {
+      const response = await axios.get('https://khoaluantotnghiep-i5m4.onrender.com/chat/student/teachers', {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -93,11 +90,10 @@ const StudentChatInterface = () => {
         const teacherList = response.data.data;
         setTeachers(teacherList);
         
-        // Lấy số tin nhắn chưa đọc với từng giảng viên
         const counts = { ...unreadCounts };
         for (const teacher of teacherList) {
           try {
-            const unreadResponse = await axios.get(`http://localhost:5000/chat/unread/teacher/${teacher.id}`, {
+            const unreadResponse = await axios.get(`https://khoaluantotnghiep-i5m4.onrender.com/chat/unread/teacher/${teacher.id}`, {
               headers: { Authorization: `Bearer ${token}` }
             });
             
@@ -117,19 +113,17 @@ const StudentChatInterface = () => {
     }
   }, [token, user, unreadCounts]);
 
-  // Tính tổng tin nhắn chưa đọc theo tab
   const getTotalUnread = useCallback((type) => {
     const users = type === 'admins' ? admins : teachers;
     return users.reduce((total, user) => total + (unreadCounts[user.id] || 0), 0);
   }, [admins, teachers, unreadCounts]);
 
-  // Lấy tin nhắn với người dùng
   const fetchMessages = useCallback(async (userId) => {
     if (!userId) return;
     
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:5000/chat/${userId}`, {
+      const response = await axios.get(`https://khoaluantotnghiep-i5m4.onrender.com/chat/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -137,7 +131,6 @@ const StudentChatInterface = () => {
         setMessages(response.data.messages);
         setSelectedUser(response.data.user);
         
-        // Cập nhật lại số tin nhắn chưa đọc
         fetchAdmins();
         fetchTeachers();
       }
@@ -149,12 +142,11 @@ const StudentChatInterface = () => {
     }
   }, [token, fetchAdmins, fetchTeachers]);
 
-  // Gửi tin nhắn
   const sendMessage = useCallback(async () => {
     if (!newMessage.trim() || !selectedUser) return;
     
     try {
-      const response = await axios.post('http://localhost:5000/chat/send', {
+      const response = await axios.post('https://khoaluantotnghiep-i5m4.onrender.com/chat/send', {
         receiver_id: selectedUser.id,
         message: newMessage
       }, {
@@ -234,7 +226,6 @@ const StudentChatInterface = () => {
     return date.toLocaleDateString();
   }, []);
 
-  // Load dữ liệu ban đầu
   useEffect(() => {
     if (token && user && user.roles === 'student') {
       fetchAdmins();
@@ -242,12 +233,10 @@ const StudentChatInterface = () => {
     }
   }, [token, user, fetchAdmins, fetchTeachers]);
 
-  // Cuộn xuống khi có tin nhắn mới
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  // Auto refresh tin nhắn
   useEffect(() => {
     const interval = setInterval(() => {
       if (selectedUser) {
@@ -261,7 +250,6 @@ const StudentChatInterface = () => {
     return () => clearInterval(interval);
   }, [selectedUser, fetchMessages, fetchAdmins, fetchTeachers]);
 
-  // Reset selected user khi chuyển tab
   useEffect(() => {
     setSelectedUser(null);
     setMessages([]);
@@ -288,7 +276,6 @@ const StudentChatInterface = () => {
   return (
     <div className="student-chat-container">
       <Row gutter={16} className="student-chat-layout">
-        {/* Sidebar - Danh sách người liên hệ */}
         <Col xs={24} sm={24} md={8} lg={6}>
           <Card 
             className="student-chat-admins-card"
@@ -398,7 +385,6 @@ const StudentChatInterface = () => {
           </Card>
         </Col>
 
-        {/* Chat area - Hiển thị tin nhắn */}
         <Col xs={24} sm={24} md={16} lg={18}>
           <Card 
             className="student-chat-messages-card"
