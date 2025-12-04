@@ -107,13 +107,10 @@ function EnrolledCourses() {
           <div className="enrolled-grid">
             {currentCourses.map((c) => (
               <div className="enrolled-card" key={c.course_id}>
-                
-                <div className="card-header">
-                  
+                <div className="card-enrolled-header">
                   <div className="course-avatar">{c.title.charAt(0)}</div>
                   <h2 className="course-title">{c.title}</h2>
                 </div>
-
                 <p>{c.description}</p>
                 <p><strong>{t('enrolledCourses.teacher')}:</strong> {c.teacher_name}</p>
                 <p><strong>{t('enrolledCourses.teacherEmail')}:</strong> {c.teacher_email}</p>

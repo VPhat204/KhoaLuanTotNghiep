@@ -5,7 +5,7 @@
   "teachers": "Giảng viên",
   "profile": "Hồ sơ",
   "editName": "Đổi tên",
-  "footerText": "Nền tảng E-learning ©2025 | Được tạo với ❤️ bởi Team",
+  "footerText": "Hệ thống E_Study Platform @2025",
   "about": "Giới thiệu",
   "contact": "Liên hệ",
   "privacy": "Chính sách bảo mật",
@@ -54,7 +54,7 @@
   "totalUsers": "Tổng số người dùng",
   "students": "Học sinh",
   "admins": "Quản trị viên",
-  "monthlyAccounts": "Số lượng account student & teacher theo tháng",
+  "monthlyAccounts": "Số lượng tài khoản học viên và giảng viên theo tháng",
   "barChart": "Biểu đồ cột",
   "lineChart": "Biểu đồ đường",
   "pageNotFound": "Không tìm thấy trang",
@@ -683,18 +683,6 @@
     "noValidScore": "Chưa nhập điểm hợp lệ nào!",
     "errorAssignmentNotFound": "Không xác định được bài tập."
   },
-  "createcourses": {
-    "create_title": "Tạo khóa học mới",
-    "name": "Tên khóa học",
-    "name_required": "Vui lòng nhập tên khóa học",
-    "name_placeholder": "Nhập tên khóa học",
-
-    "description": "Mô tả",
-    "description_required": "Vui lòng nhập mô tả",
-    "description_placeholder": "Mô tả khóa học",
-
-    "btn_create": "Tạo khóa học"
-  },
   "teacherCourses": {
     "title": "Giảng viên - Quản lý khóa học",
     "addCourseBtn": "+ Thêm khóa học",
@@ -747,6 +735,8 @@
   "student": "Học viên",
   "selectProofFile": "Chọn file bằng chứng",
   "chooseFile": "Chọn file",
+  "invalidEmail": "Email không hợp lệ",
+  "passwordMinLength": "Mật khẩu quá ngắn",
   "alreadyHaveAccount": "Đã có tài khoản? Đăng nhập",
   "loginSuccess": "Đăng nhập thành công!",
   "invalidServerResponse": "Server không trả dữ liệu hợp lệ.",
@@ -781,5 +771,157 @@
     "paragraph1": "E-learning Platform là hệ thống học trực tuyến được thiết kế để cung cấp các khóa học chất lượng cao, từ những kiến thức cơ bản đến chuyên sâu, phù hợp với mọi đối tượng học viên. Với giao diện thân thiện, dễ sử dụng, bạn có thể dễ dàng tìm kiếm khóa học, theo dõi tiến trình học và tương tác với giảng viên một cách thuận tiện.",
     "paragraph2": "Chúng tôi cung cấp đa dạng các khóa học từ lập trình, thiết kế, marketing, ngoại ngữ đến các kỹ năng mềm. Mỗi khóa học đều được xây dựng bởi các giảng viên uy tín, giàu kinh nghiệm thực tế, giúp học viên phát triển kỹ năng một cách nhanh chóng và hiệu quả.",
     "paragraph3": "Ngoài ra, E-learning Platform còn hỗ trợ học viên bằng hệ thống đánh giá, chứng nhận hoàn tất khóa học, và cộng đồng học tập trực tuyến sôi động, giúp bạn kết nối với những người cùng chí hướng. Hãy bắt đầu hành trình học tập của bạn ngay hôm nay!"
+  },
+  "privacypolicy": {
+    "title": "Chính sách Bảo mật",
+    "introduction": "Chúng tôi cam kết bảo vệ thông tin cá nhân của bạn. Chính sách bảo mật này mô tả cách chúng tôi thu thập, sử dụng và bảo vệ thông tin của bạn.",
+    "principles": {
+      "title": "Nguyên tắc bảo mật",
+      "transparency": "Minh bạch: Chúng tôi luôn công khai cách thức thu thập và sử dụng thông tin",
+      "security": "Bảo mật: Áp dụng các biện pháp bảo mật tiên tiến nhất",
+      "control": "Kiểm soát: Bạn có quyền kiểm soát thông tin cá nhân của mình",
+      "compliance": "Tuân thủ: Tuân thủ nghiêm ngặt các quy định về bảo vệ dữ liệu"
+    },
+    "sections": {
+      "mainContent": "Nội dung chính sách",
+      "details": "Chi tiết",
+      "collection": {
+        "title": "Thu thập thông tin",
+        "description": "Chúng tôi thu thập thông tin cá nhân của bạn khi bạn:",
+        "points": {
+          "register": "Đăng ký tài khoản",
+          "enroll": "Tham gia khóa học",
+          "contact": "Liên hệ với chúng tôi",
+          "useService": "Sử dụng dịch vụ của chúng tôi"
+        },
+        "items": {
+          "name": "Họ và tên",
+          "email": "Email",
+          "phone": "Số điện thoại",
+          "studyInfo": "Thông tin học tập",
+          "paymentInfo": "Thông tin thanh toán (nếu có)"
+        }
+      },
+      "usage": {
+        "title": "Sử dụng thông tin",
+        "description": "Thông tin cá nhân của bạn được sử dụng để:",
+        "points": {
+          "provideService": "Cung cấp và cải thiện dịch vụ",
+          "processRegistration": "Xử lý đăng ký và thanh toán",
+          "sendNotifications": "Gửi thông báo quan trọng",
+          "customerSupport": "Hỗ trợ khách hàng",
+          "analysis": "Phân tích và nghiên cứu"
+        }
+      },
+      "security": {
+        "title": "Bảo mật thông tin",
+        "description": "Chúng tôi cam kết bảo vệ thông tin cá nhân của bạn thông qua:",
+        "points": {
+          "encryption": "Mã hóa dữ liệu",
+          "multiLayer": "Hệ thống bảo mật nhiều lớp",
+          "accessControl": "Kiểm soát truy cập nghiêm ngặt",
+          "staffTraining": "Đào tạo nhân viên về bảo mật"
+        },
+        "items": {
+          "ssl": "SSL/TLS mã hóa",
+          "firewall": "Firewall bảo vệ",
+          "twoFactor": "Xác thực 2 lớp",
+          "backup": "Backup dữ liệu định kỳ"
+        }
+      },
+      "sharing": {
+        "title": "Chia sẻ thông tin",
+        "description": "Chúng tôi không bán, trao đổi hoặc cho thuê thông tin cá nhân của bạn cho bên thứ ba, trừ khi:",
+        "points": {
+          "consent": "Có sự đồng ý của bạn",
+          "legal": "Theo yêu cầu pháp luật",
+          "partners": "Hợp tác với đối tác cung cấp dịch vụ"
+        }
+      }
+    },
+    "contact": {
+      "title": "Thông tin liên hệ",
+      "description": "Nếu bạn có bất kỳ câu hỏi nào về chính sách bảo mật, vui lòng liên hệ:",
+      "email": "Email:",
+      "emailValue": "privacy@example.com",
+      "phone": "Điện thoại:",
+      "phoneValue": "1900 1234",
+      "address": "Địa chỉ:",
+      "addressValue": "123 Đường ABC, Quận XYZ, TP. Hồ Chí Minh"
+    },
+    "lastUpdated": "Cập nhật lần cuối:"
+  },
+  "teacherHomeList": {
+    "title": "Danh sách giảng viên",
+    "loading": "Đang tải danh sách giảng viên...",
+    "noTeachers": "Không tìm thấy giảng viên",
+    "noCourses": "Chưa có khóa học",
+    "notAvailable": "Chưa có",
+    "notUpdated": "Chưa cập nhật",
+    "teachingCourses": "Khóa học giảng dạy",
+    "search": {
+      "placeholder": "Tìm theo tên hoặc email..."
+    },
+    "sort": {
+      "aToZ": "Tên A-Z",
+      "zToA": "Tên Z-A"
+    },
+    "actions": {
+      "viewAllCourses": "Xem tất cả khóa học",
+      "hideCourses": "Ẩn khóa học",
+      "enroll": "Đăng ký học",
+      "enrolling": "Đang đăng ký...",
+      "enrolled": "Đã đăng ký",
+      "cannotEnroll": "Không thể đăng ký",
+      "back": "Quay lại"
+    },
+    "messages": {
+      "loadError": "Lỗi khi tải danh sách giảng viên",
+      "enrolledCoursesError": "Lỗi khi tải khóa học đã đăng ký",
+      "loginRequired": "Vui lòng đăng nhập để đăng ký khóa học",
+      "studentsOnly": "Chỉ sinh viên mới có thể đăng ký khóa học",
+      "alreadyEnrolled": "Bạn đã đăng ký khóa học này rồi",
+      "enrollSuccess": "Đã đăng ký thành công khóa học: {{courseTitle}}",
+      "noPermission": "Bạn không có quyền đăng ký khóa học",
+      "enrollError": "Có lỗi xảy ra khi đăng ký khóa học",
+      "loginPrompt": "Vui lòng"
+    }
+  },
+  "courseHomeDetail": {
+    "notAvailable": "N/A",
+    "noDescription": "Chưa có mô tả chi tiết"
+  },
+  "enrolledCoursesHome": {
+    "lessons": "Số buổi",
+    "hours": "Số giờ"
+  },
+  "mycoursesHome": {
+    "enrolledDate": "Đăng ký"
+  },
+  "loginHome": "Đăng nhập",
+  "adds": {
+    "course":"Khóa học",
+    "topCourse": "Top khóa học",
+    "numberSubs": "lượt đăng ký",
+    "sumSubs": "Tổng lượt đăng ký",
+    "average": "Trung bình",
+    "student/course": "học viên/khóa",
+    "invalidCourse": "Chưa có dữ liệu khóa học"
+  },
+  "createcourses": {
+    "create_title": "Tạo khóa học mới",
+    "name": "Tên khóa học",
+    "name_required": "Vui lòng nhập tên khóa học",
+    "name_placeholder": "Nhập tên khóa học",
+    "description": "Mô tả",
+    "description_required": "Vui lòng nhập mô tả khóa học",
+    "description_placeholder": "Nhập mô tả khóa học",
+    "btn_create": "Tạo khóa học",
+    "creating": "Đang tạo...",
+    "success_message": "Tạo khóa học thành công!",
+    "pending_approval_message": "Khóa học của bạn đang chờ quản trị viên phê duyệt. Bạn sẽ được thông báo khi khóa học được duyệt.",
+    "error_message": "Có lỗi xảy ra khi tạo khóa học. Vui lòng thử lại.",
+    "instruction": "Sau khi tạo, khóa học sẽ được gửi để quản trị viên phê duyệt trước khi hiển thị công khai."
   }
 }
+

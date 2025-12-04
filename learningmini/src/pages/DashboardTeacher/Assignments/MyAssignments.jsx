@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { Card, Button, Modal, Form, Input, Select, message, Table, Popconfirm } from "antd";
+import { useTranslation } from "react-i18next";
 import api from "../../../api";
+import "./MyAssignments.css";
 
 export default function MyAssignments() {
+  const { t } = useTranslation();
   const [courses, setCourses] = useState([]);
   const [assignments, setAssignments] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
@@ -34,25 +37,22 @@ export default function MyAssignments() {
   const handleCreateAssignment = (values) => {
     api.post("/assignments", values)
       .then(() => {
-        message.success("Tạo bài tập thành công!");
+        message.success(t("assign.successCreate"));
         form.resetFields();
         setVisibleAssignmentModal(false);
         api.get(`/assignments/course/${selectedCourse}`).then(res => setAssignments(res.data));
       })
-      .catch(() => message.error("Lỗi tạo bài tập"));
+      .catch(() => message.error(t("assign.errorCreate")));
   };
 
   const handleAddQuestion = (values) => {
     api.post(`/assignments/${currentAssignment}/questions`, values)
       .then(() => {
-        message.success("Thêm câu hỏi thành công!");
+        message.success(t("assign.successAddQuestion"));
         questionForm.resetFields();
         loadQuestions(currentAssignment);
       })
-      .catch(err => {
-        console.error(err);
-        message.error(err.response?.data?.message || "Lỗi thêm câu hỏi");
-      });
+      .catch(err => message.error(err.response?.data?.message || t("assign.errorAddQuestion")));
   };
 
   const loadQuestions = (assignmentId) => {
@@ -62,10 +62,10 @@ export default function MyAssignments() {
   const handleDeleteQuestion = (questionId) => {
     api.delete(`/assignments/${currentAssignment}/questions/${questionId}`)
       .then(() => {
-        message.success("Xóa câu hỏi thành công!");
+        message.success(t("assign.successDeleteQuestion"));
         loadQuestions(currentAssignment);
       })
-      .catch(() => message.error("Lỗi xóa câu hỏi"));
+      .catch(() => message.error(t("assign.errorDeleteQuestion")));
   };
 
   const viewSubmissions = async (assignmentId) => {
@@ -86,102 +86,90 @@ export default function MyAssignments() {
     setGrading(newGrading);
   };
 
-const handleChangeScore = (submissionId, questionId, value) => {
-  setGrading(prev => ({
-    ...prev,
-    [submissionId]: { ...prev[submissionId], [questionId]: value !== "" ? Number(value) : undefined },
-  }));
-};
+  const handleChangeScore = (submissionId, questionId, value) => {
+    setGrading(prev => ({
+      ...prev,
+      [submissionId]: { ...prev[submissionId], [questionId]: value !== "" ? Number(value) : undefined },
+    }));
+  };
 
-const confirmGrading = async () => {
-  try {
-    const payload = [];
-    console.log(submissions.map(s => ({ id: s.id, student_id: s.student_id })));
-    submissions.forEach(sub => {
-      sub.answers.forEach(a => {
-        const score = grading[sub.submission_id]?.[a.question_id];
-        if (score !== undefined && sub.submission_id != null && a.question_id != null) {
-          payload.push({
-            submission_id: sub.submission_id,
-            question_id: a.question_id,
-            score: Number(score)
-          });
-        } else {
-          console.warn("Bỏ qua grade không hợp lệ:", { question_id: a.question_id, score });
-        }
+  const confirmGrading = async () => {
+    try {
+      const payload = [];
+      submissions.forEach(sub => {
+        sub.answers.forEach(a => {
+          const score = grading[sub.submission_id]?.[a.question_id];
+          if (score !== undefined) {
+            payload.push({
+              submission_id: sub.submission_id,
+              question_id: a.question_id,
+              score: Number(score)
+            });
+          }
+        });
       });
-    });
 
-    if (payload.length === 0) {
-      message.warning("Chưa nhập điểm hợp lệ nào!");
-      return;
+      if (payload.length === 0) return message.warning(t("assign.noValidScore"));
+      if (!currentAssignment) return message.error(t("assign.errorAssignmentNotFound"));
+
+      await api.post(`/assignments/${currentAssignment}/grade-answers-bulk`, { grades: payload });
+      message.success(t("assign.successGrade"));
+      viewSubmissions(currentAssignment);
+    } catch {
+      message.error(t("assign.errorGrade"));
     }
-
-    if (!currentAssignment) {
-      message.error("Không xác định được bài tập.");
-      return;
-    }
-
-    await api.post(`/assignments/${currentAssignment}/grade-answers-bulk`, { grades: payload });
-    message.success("Đã gửi điểm thành công!");
-
-    viewSubmissions(currentAssignment);
-
-  } catch (err) {
-    console.error(err);
-    message.error("Lỗi khi gửi điểm!");
-  }
-};
-
+  };
 
   const handleDeleteAnswer = (studentId, questionId) => {
     api.delete(`/assignments/${currentAssignment}/answers/${studentId}/${questionId}`)
       .then(() => {
-        message.success("Đã xóa câu trả lời!");
+        message.success(t("assign.successDeleteAnswer"));
         viewSubmissions(currentAssignment);
       })
-      .catch(() => message.error("Lỗi xóa câu trả lời"));
+      .catch(() => message.error(t("assign.errorDeleteAnswer")));
   };
 
   const handleDeleteSubmission = (studentId) => {
     api.delete(`/assignments/${currentAssignment}/submissions/${studentId}`)
       .then(() => {
-        message.success("Đã xóa toàn bộ bài nộp của học viên!");
+        message.success(t("assign.successDeleteSubmission"));
         viewSubmissions(currentAssignment);
       })
-      .catch(() => message.error("Lỗi xóa bài nộp"));
+      .catch(() => message.error(t("assign.errorDeleteSubmission")));
   };
 
   const submissionColumns = [
-    { title: "Học viên", dataIndex: "student_name" },
+    { title: t("assign.student"), dataIndex: "student_name" },
     {
-      title: "Câu trả lời & Chấm điểm",
+      title: t("assign.answersAndScore"),
       render: (_, record) => (
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 5 }}>
+        <div className="answers-box">
           {(record.answers || []).map((a, index) => (
-            <div key={a.question_id} style={{ borderBottom: "1px solid #eee", paddingBottom: 5, marginBottom: 8 }}>
-              <p><b>Câu {index + 1}:</b> {a.answer_text}</p>
-              <Input
-                type="number"
-                min={0}
-                placeholder="Điểm"
-                value={grading[record.submission_id]?.[a.question_id] ?? 0}
-                onChange={e => handleChangeScore(record.submission_id, a.question_id, e.target.value)}
-                style={{ width: 100, marginRight: 10 }}
-              />
-              <Popconfirm
-                title="Xóa câu trả lời này?"
-                onConfirm={() => handleDeleteAnswer(record.student_id, a.question_id)}
-              >
-                <Button danger size="small">Xóa</Button>
-              </Popconfirm>
+            <div key={a.question_id} className="answer-item">
+              <p><b>{t("assign.question")} {index + 1}:</b> {a.answer_text}</p>
+              <div className="answer-item-info">
+                <Input
+                  type="number"
+                  min={0}
+                  placeholder={t("assign.score")}
+                  value={grading[record.submission_id]?.[a.question_id] ?? 0}
+                  onChange={e => handleChangeScore(record.submission_id, a.question_id, e.target.value)}
+                  className="score-input"
+                />
+                <Popconfirm
+                  title={t("assign.confirmDeleteAnswer")}
+                  onConfirm={() => handleDeleteAnswer(record.student_id, a.question_id)}
+                >
+                  <Button danger size="small" className="assign-danger-btn">{t("assign.delete")}</Button>
+                </Popconfirm>
+              </div>
             </div>
           ))}
           <Popconfirm
-            title="Xóa toàn bộ bài nộp của học viên?"
+            title={t("assign.confirmDeleteSubmission")}
             onConfirm={() => handleDeleteSubmission(record.student_id)}
           >
-            <Button danger style={{ marginTop: 5 }}>Xóa bài nộp</Button>
+            <Button danger className="assign-danger-btn">{t("assign.deleteSubmission")}</Button>
           </Popconfirm>
         </div>
       ),
@@ -189,62 +177,74 @@ const confirmGrading = async () => {
   ];
 
   return (
-    <div>
-      <Card title="Bài tập" extra={<Button onClick={() => setVisibleAssignmentModal(true)}>+ Tạo bài tập</Button>}>
+    <div className="assign-container">
+      <Card
+        title={t("assign.assignments")}
+        extra={<Button type="primary" onClick={() => setVisibleAssignmentModal(true)} className="assign-primary-btn">{t("assign.create")}</Button>}
+        className="assign-card"
+      >
         <Select
-          style={{ marginBottom: 15, width: 200 }}
+          className="course-select"
           value={selectedCourse}
           onChange={val => setSelectedCourse(val)}
           options={courses.map(c => ({ label: c.title, value: c.id }))}
         />
+
         {assignments.map(a => (
-          <Card key={a.id} style={{ marginBottom: 10 }}>
+          <Card key={a.id} className="assignment-item">
             <h3>{a.title}</h3>
-            <p>Điểm tối đa: {a.total_points}</p>
-            <Button onClick={() => { setCurrentAssignment(a.id); setVisibleQuestionModal(true); loadQuestions(a.id); }}>
-              + Thêm câu hỏi
-            </Button>
-            <Button style={{ marginLeft: 10 }} onClick={() => viewSubmissions(a.id)}>
-              Xem bài nộp
-            </Button>
+            <p>{t("assign.maxScore")}: {a.total_points}</p>
+            <Button type="primary" className="assign-primary-btn" onClick={() => { setCurrentAssignment(a.id); setVisibleQuestionModal(true); loadQuestions(a.id); }}>{t("assign.addQuestion")}</Button>
+            <Button className="ml10 assign-primary-btn" onClick={() => viewSubmissions(a.id)}>{t("assign.viewSubmissions")}</Button>
           </Card>
         ))}
       </Card>
 
-      <Modal
-        open={visibleAssignmentModal}
-        onCancel={() => setVisibleAssignmentModal(false)}
-        onOk={() => form.submit()}
-        title="Tạo bài tập mới"
+      <Modal 
+        open={visibleAssignmentModal} 
+        onCancel={() => setVisibleAssignmentModal(false)} 
+        onOk={() => form.submit()} 
+        title={t("assign.createNew")}
+        className="assign-modal"
       >
         <Form form={form} layout="vertical" onFinish={handleCreateAssignment}>
-          <Form.Item name="course_id" label="Khóa học" initialValue={selectedCourse} rules={[{ required: true }]}>
+          <Form.Item name="course_id" label={t("assign.course")} initialValue={selectedCourse} rules={[{ required: true }]}>
             <Select options={courses.map(c => ({ label: c.title, value: c.id }))} />
           </Form.Item>
-          <Form.Item name="title" label="Tiêu đề" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="total_points" label="Điểm tối đa"><Input type="number" /></Form.Item>
+          <Form.Item name="title" label={t("assign.title")} rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="total_points" label={t("assign.maxScore")}>
+            <Input type="number" />
+          </Form.Item>
         </Form>
       </Modal>
 
-      <Modal
-        open={visibleQuestionModal}
-        onCancel={() => setVisibleQuestionModal(false)}
-        onOk={() => questionForm.submit()}
-        title="Thêm câu hỏi"
+      <Modal 
+        open={visibleQuestionModal} 
+        onCancel={() => setVisibleQuestionModal(false)} 
+        onOk={() => questionForm.submit()} 
+        title={t("assign.addQuestion")}
+        className="assign-modal"
       >
         <Form form={questionForm} layout="vertical" onFinish={handleAddQuestion}>
-          <Form.Item name="question_text" label="Câu hỏi" rules={[{ required: true }]}><Input.TextArea /></Form.Item>
-          <Form.Item name="points" label="Điểm" rules={[{ required: true }]}><Input type="number" /></Form.Item>
+          <Form.Item name="question_text" label={t("assign.question")} rules={[{ required: true }]}>
+            <Input.TextArea />
+          </Form.Item>
+          <Form.Item name="points" label={t("assign.score")} rules={[{ required: true }]}>
+            <Input type="number" />
+          </Form.Item>
         </Form>
+
         {questions.length > 0 && (
-          <div style={{ marginTop: 15 }}>
-            <h4>Danh sách câu hỏi:</h4>
+          <div className="question-list">
+            <h4>{t("assign.questionList")}:</h4>
             <ul>
               {questions.map(q => (
                 <li key={q.id}>
-                  {q.question_text} ({q.points} điểm)
-                  <Popconfirm title="Xóa câu hỏi này?" onConfirm={() => handleDeleteQuestion(q.id)}>
-                    <Button danger size="small" style={{ marginLeft: 10 }}>Xóa</Button>
+                  {q.question_text} ({q.points})
+                  <Popconfirm title={t("assign.confirmDeleteQuestion")} onConfirm={() => handleDeleteQuestion(q.id)}>
+                    <Button danger size="small" className="ml10 assign-danger-btn">{t("assign.delete")}</Button>
                   </Popconfirm>
                 </li>
               ))}
@@ -254,15 +254,22 @@ const confirmGrading = async () => {
       </Modal>
 
       {submissions.length > 0 && (
-        <Card title="Danh sách bài nộp"
+        <Card
+          title={t("assign.submissionList")}
           extra={
             <>
-              <Button type="primary" onClick={confirmGrading}> Xác nhận chấm điểm</Button>
-              <Button style={{ marginLeft: 10 }} onClick={() => setSubmissions([])}>Đóng</Button>
+              <Button type="primary" className="assign-primary-btn" onClick={confirmGrading}>{t("assign.confirmGrading")}</Button>
+              <Button className="ml10 assign-primary-btn" onClick={() => setSubmissions([])}>{t("assign.close")}</Button>
             </>
           }
+          className="assign-card"
         >
-          <Table columns={submissionColumns} dataSource={submissions} rowKey="id" />
+          <Table 
+            columns={submissionColumns} 
+            dataSource={submissions} 
+            rowKey="submission_id" 
+            className="assign-table"
+          />
         </Card>
       )}
     </div>

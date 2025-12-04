@@ -1,172 +1,108 @@
-.dashboard-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.admin-dashboard {
+  min-height: 100vh;
+  background: var(--layout-bg);
+  transition: all 0.3s ease;
 }
 
-.dashboard-top {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
+.admin-sider {
+  background: var(--sider-bg) !important;
+  box-shadow: 2px 0 8px var(--shadow-color);
+  transition: all 0.3s ease;
 }
 
-.welcome-card {
-  flex: 2;
-  background: linear-gradient(90deg, #38bdf8, #22c55e);
-  color: #fff;
-  border-radius: 16px;
-  padding: 24px;
+.custom-menu {
+  height: 100%;
+  border-right: 0;
+  padding-top: 15px;
+  background: transparent !important;
+  transition: all 0.3s ease;
 }
 
-.calendar-card {
-  flex: 1;
-  background: #fff;
-  border-radius: 16px;
-  padding: 24px;
-  text-align: center;
-}
-
-.calendar-placeholder {
-  font-size: 50px;
-  margin-top: 20px;
-  color: #bbb;
-}
-
-.dashboard-middle {
-  display: flex;
-  gap: 20px;
-}
-
-.chart-card {
-  flex: 1;
-  border-radius: 16px;
-  padding: 16px;
-}
-
-.chart-circle {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 16px;
-}
-
-.chart-legend {
-  text-align: center;
-  margin-top: 10px;
-}
-
-.dot {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  margin: 0 6px;
-}
-.reading { background: #34d399; }
-.video { background: #60a5fa; }
-.writing { background: #fbbf24; }
-
-.dashboard-bottom {
-  display: flex;
-  gap: 20px;
-}
-
-.courses-card {
-  flex: 2;
-  border-radius: 16px;
-}
-
-.task-card {
-  flex: 1;
-  border-radius: 16px;
-}
-
-.course-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  padding: 10px 0;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.course-progress {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.task-item {
-  background: #f9fafb;
-  border-radius: 12px;
-  padding: 12px;
-  margin-bottom: 10px;
-}
-
-.welcome-card-container {
-  background: #f0f4f8; 
-  border: 2px solid #38bdf8; 
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
-  transition: transform 0.2s ease;
-}
-
-.welcome-card-container:hover {
-  transform: translateY(-5px);
-}
-
-.welcome-card-container h2 {
-  margin-bottom: 12px;
-  color: #1e3a8a;
-}
-
-.welcome-card-container p {
-  margin-bottom: 12px;
-  font-size: 16px;
-  color: #374151;
-}
-
-.welcome-card-container ul {
-  list-style-type: disc;
-  padding-left: 20px;
-  color: #4b5563;
-}
-
-.chart-card {
-  flex: 1;
-  border-radius: 16px;
-  padding: 16px;
-  background: #fff;
-  position: relative;
-}
-
-.chart-card .chart-selector {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  display: flex;
-  gap: 8px;
-}
-
-.chart-card .chart-selector button {
-  padding: 4px 12px;
-  border: 1px solid #38bdf8;
+.custom-menu .ant-menu-item {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--menu-text);
+  padding: 15px 24px;
+  margin: 8px 16px;
   border-radius: 8px;
-  background: #fff;
-  color: #38bdf8;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  border: none;
 }
 
-.chart-card .chart-selector button:hover {
-  background: #38bdf8;
-  color: #fff;
+.custom-menu .ant-menu-item:hover {
+  color: var(--primary-color);
+  background: var(--menu-hover-bg);
+  transform: translateX(4px);
 }
 
-.chart-card .chart-selector button.active {
-  background: #38bdf8;
-  color: #fff;
+.custom-menu .ant-menu-item-selected {
+  color: var(--menu-selected-text) !important;
+  background: var(--primary-color) !important;
+  box-shadow: 0 4px 12px var(--primary-shadow);
 }
 
+.custom-menu .ant-menu-item .anticon {
+  font-size: 20px;
+  margin-right: 12px;
+}
+
+.admin-content {
+  padding: 20px;
+  background: var(--content-bg);
+  transition: all 0.3s ease;
+}
+
+.admin-content-layout {
+  margin: 0;
+  min-height: 280px;
+  background: transparent;
+  border-radius: 8px;
+}
+
+[data-theme="dark"] .admin-dashboard {
+  --layout-bg: #000000;
+  --sider-bg: #141414;
+  --content-bg: #000000;
+  --menu-text: #e6e6e6;
+  --menu-hover-bg: #262626;
+  --menu-selected-text: #ffffff;
+  --primary-color: #1890ff;
+  --primary-shadow: rgba(24, 144, 255, 0.3);
+  --shadow-color: rgba(0, 0, 0, 0.45);
+}
+
+[data-theme="light"] .admin-dashboard {
+  --layout-bg: #f0f2f5;
+  --sider-bg: #ffffff;
+  --content-bg: #f0f2f5;
+  --menu-text: #333333;
+  --menu-hover-bg: #e6f7ff;
+  --menu-selected-text: #ffffff;
+  --primary-color: #1890ff;
+  --primary-shadow: rgba(24, 144, 255, 0.3);
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .admin-sider {
+    position: fixed !important;
+    z-index: 1000;
+    height: 100vh;
+  }
+  
+  .custom-menu .ant-menu-item {
+    font-size: 16px;
+    padding: 12px 20px;
+    margin: 6px 12px;
+  }
+  
+  .admin-content {
+    padding: 15px;
+  }
+}
+
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}

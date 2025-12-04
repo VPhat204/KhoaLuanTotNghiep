@@ -7,7 +7,6 @@ const multer = require("multer");
 const path = require("path");
 const nodemailer = require("nodemailer");
 
-
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -27,6 +26,7 @@ const uploadFields = upload.fields([
   { name: "avatar", maxCount: 1 },
   { name: "proof_file", maxCount: 10 },
 ])
+
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
@@ -48,6 +48,19 @@ async function connectDB() {
   console.log("MySQL connected");
 }
 
+async function sendEmailNotification(to, subject, htmlContent) {
+  try {
+    await transporter.sendMail({
+      from: '"Hệ thống E-Study" <phettpeo160@gmail.com>',
+      to: to,
+      subject: subject,
+      html: htmlContent
+    });
+    console.log(`Đã gửi email thông báo đến: ${to}`);
+  } catch (err) {
+    console.error("Lỗi khi gửi email thông báo:", err);
+  }
+}
 
 async function createNotification(userId, title, link = "") {
   try {
@@ -62,7 +75,7 @@ async function createNotification(userId, title, link = "") {
 
 async function sendOTP(email, otp) {
   await transporter.sendMail({
-    from: '"Hệ thống E-Study" <your_email@gmail.com>', 
+    from: '"Hệ thống E-Study" <phettpeo160@gmail.com>',
     to: email,
     subject: "Mã OTP khôi phục mật khẩu",
     html: `
@@ -78,7 +91,7 @@ async function sendOTP(email, otp) {
 }
 
 async function saveOTP(email, otp) {
-  const expiresAt = new Date(Date.now() + 5 * 60 * 1000); 
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
   await db.execute(
     "INSERT INTO password_reset (email, otp, expires_at) VALUES (?, ?, ?)",
     [email, otp, expiresAt]
@@ -114,6 +127,15 @@ app.post("/register", upload.array("proof_file"), async (req, res) => {
     );
 
     if (roles === "teacher") {
+      const [admins] = await db.execute("SELECT id, name FROM users WHERE roles = 'admin'");
+      for (const admin of admins) {
+        await createNotification(
+          admin.id,
+          `Có giảng viên mới đăng ký: ${name} (${email}) cần duyệt`,
+          "/admin/teachers-pending"
+        );
+      }
+      
       return res.json({ message: "Đăng ký giảng viên thành công. Chờ admin duyệt." });
     } else {
       return res.json({ message: "Đăng ký thành công" });
@@ -123,7 +145,6 @@ app.post("/register", upload.array("proof_file"), async (req, res) => {
     res.status(500).json({ message: "Lỗi server" });
   }
 });
-
 
 app.post("/login", async (req, res) => {
   try {
@@ -140,20 +161,22 @@ app.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign({ id: user.id, email: user.email, roles: user.roles }, "secretkey", { expiresIn: "1d" });
-    res.json({ 
-      id: user.id, 
+    res.json({
+      id: user.id,
       avatar: user.avatar,
       language: user.language,
       phone: user.phone,
       address: user.address,
       birthdate: user.birthdate,
       gender: user.gender,
-      name: user.name, 
-      email: user.email, 
-      roles: user.roles, 
-      proof_info: user.proof_info, 
-      proof_file: user.proof_file, 
-      token });
+      name: user.name,
+      email: user.email,
+      theme: user.theme || 'light',
+      roles: user.roles,
+      proof_info: user.proof_info,
+      proof_file: user.proof_file,
+      token
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Lỗi server" });
@@ -166,7 +189,7 @@ app.post("/forgot-password", async (req, res) => {
     const [user] = await db.execute("SELECT id FROM users WHERE email=?", [email]);
     if (!user.length) return res.status(404).json({ message: "Email không tồn tại" });
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6 số
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
     await saveOTP(email, otp);
     await sendOTP(email, otp);
 
@@ -228,18 +251,110 @@ app.put("/users/:id/language", authMiddleware, async (req, res) => {
   }
 });
 
+app.put('/users/:id/theme', authMiddleware, async (req, res) => {
+  try {
+    const { theme } = req.body;
+    const userId = req.params.id;
+    
+    if (req.user.id !== parseInt(userId) && req.user.roles !== 'admin') {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+    
+    await db.execute('UPDATE users SET theme = ? WHERE id = ?', [theme, userId]);
+    res.json({ success: true, theme });
+  } catch (error) {
+    console.error('Error updating theme:', error);
+    res.status(500).json({ error: 'Failed to update theme' });
+  }
+});
+
+app.get('/users/:id/theme', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    
+    if (req.user.id !== parseInt(userId) && req.user.roles !== 'admin') {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+    
+    const [rows] = await db.execute('SELECT theme FROM users WHERE id = ?', [userId]);
+    
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    res.json({ theme: rows[0].theme || 'light' });
+  } catch (error) {
+    console.error('Error getting theme:', error);
+    res.status(500).json({ error: 'Failed to get theme' });
+  }
+});
+
 app.put("/users/:id/approve-teacher", authMiddleware, async (req, res) => {
   if (req.user.roles !== "admin") return res.status(403).json({ message: "Forbidden" });
-  const { approve } = req.body;
-  await db.execute("UPDATE users SET is_approved=? WHERE id=?", [approve ? 1 : 0, req.params.id]);
+  
+  try {
+    const { approve } = req.body;
+    const teacherId = req.params.id;
+    
+    const [teacher] = await db.execute(
+      "SELECT name, email FROM users WHERE id = ?",
+      [teacherId]
+    );
+    
+    if (teacher.length === 0) {
+      return res.status(404).json({ message: "Không tìm thấy giảng viên" });
+    }
+    
+    await db.execute("UPDATE users SET is_approved=? WHERE id=?", [approve ? 1 : 0, teacherId]);
 
-  if (approve) {
-    await createNotification(req.params.id, "Tài khoản giảng viên của bạn đã được duyệt!");
-  } else {
-    await createNotification(req.params.id, "Tài khoản giảng viên của bạn đã bị từ chối.");
+    const teacherName = teacher[0].name;
+    const teacherEmail = teacher[0].email;
+
+    if (approve) {
+      await sendEmailNotification(
+        teacherEmail,
+        "Tài khoản giảng viên đã được duyệt",
+        `
+        <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+          <h2 style="color: #1890ff;">Chúc mừng ${teacherName}!</h2>
+          <p>Tài khoản giảng viên của bạn đã được duyệt thành công.</p>
+          <p>Bây giờ bạn có thể:</p>
+          <ul>
+            <li>Đăng nhập vào hệ thống</li>
+            <li>Tạo khóa học mới</li>
+            <li>Quản lý học viên</li>
+            <li>Tham gia quá trình giảng dạy</li>
+          </ul>
+          <p>Chúc bạn có những trải nghiệm tuyệt vời trên hệ thống E-Study!</p>
+        </div>
+        `
+      );
+      
+      await createNotification(teacherId, "Tài khoản giảng viên của bạn đã được duyệt!");
+      
+      res.json({ message: "Đã duyệt tài khoản giảng viên và gửi thông báo" });
+    } else {
+      await sendEmailNotification(
+        teacherEmail,
+        "Thông báo về tài khoản giảng viên",
+        `
+        <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+          <h2 style="color: #ff4d4f;">Thông báo từ hệ thống E-Study</h2>
+          <p>Xin chào ${teacherName},</p>
+          <p>Rất tiếc, tài khoản giảng viên của bạn đã bị từ chối.</p>
+          <p>Vui lòng liên hệ với quản trị viên để biết thêm chi tiết.</p>
+        </div>
+        `
+      );
+      
+      await createNotification(teacherId, "Tài khoản giảng viên của bạn đã bị từ chối.");
+      
+      res.json({ message: "Đã từ chối tài khoản giảng viên và gửi thông báo" });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Lỗi server" });
   }
-
-  res.json({ message: `Giảng viên đã ${approve ? "duyệt" : "từ chối"}` });
 });
 
 app.put("/users/:id/lock", authMiddleware, async (req, res) => {
@@ -334,6 +449,8 @@ app.get("/courses", authMiddleware, async (req, res) => {
     if (req.user.roles === "teacher") {
       query += " WHERE c.teacher_id = ?";
       params.push(req.user.id);
+    } else if (req.user.roles === "student") {
+      query += " WHERE c.is_approved = 1";
     }
 
     const [courses] = await db.execute(query, params);
@@ -370,6 +487,17 @@ app.post("/courses", authMiddleware, async (req, res) => {
       return res.status(403).json({ message: "Chỉ giảng viên mới được thêm khóa học." });
     }
 
+    const [teacher] = await db.execute(
+      "SELECT is_approved FROM users WHERE id = ?",
+      [req.user.id]
+    );
+    
+    if (teacher.length === 0 || teacher[0].is_approved === 0) {
+      return res.status(403).json({ 
+        message: "Tài khoản giảng viên chưa được duyệt. Vui lòng chờ admin duyệt tài khoản." 
+      });
+    }
+
     const { title, description, lessons, hours } = req.body;
     const teacherId = req.user.id;
 
@@ -377,22 +505,144 @@ app.post("/courses", authMiddleware, async (req, res) => {
       return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin khóa học." });
     }
 
-    await db.execute(
+    const [result] = await db.execute(
       `INSERT INTO courses (title, description, teacher_id, lessons, hours, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, NOW(), NOW())`,
       [title, description, teacherId, lessons || 0, hours || 0]
     );
 
-    res.json({ message: "Thêm khóa học thành công!" });
+    const courseId = result.insertId;
+
+    const [admins] = await db.execute("SELECT id, name FROM users WHERE roles = 'admin'");
+    const [teacherInfo] = await db.execute("SELECT name FROM users WHERE id = ?", [teacherId]);
+
+    const teacherName = teacherInfo[0].name;
+
+    for (const admin of admins) {
+      await createNotification(
+        admin.id,
+        `Giảng viên ${teacherName} đã tạo khóa học mới: "${title}" cần duyệt`,
+        `/admin/courses-pending`
+      );
+    }
+
+    await createNotification(
+      teacherId,
+      `Khóa học "${title}" của bạn đã được tạo thành công và đang chờ duyệt`,
+      `/teacher/courses`
+    );
+
+    res.json({ 
+      message: "Thêm khóa học thành công! Khóa học đang chờ admin duyệt.",
+      courseId: courseId
+    });
   } catch (err) {
     console.error("❌ Lỗi khi thêm khóa học:", err);
     res.status(500).json({ message: "Lỗi máy chủ" });
   }
 });
 
+app.get("/courses/pending-approval", authMiddleware, async (req, res) => {
+  if (req.user.roles !== "admin") return res.status(403).json({ message: "Forbidden" });
+  
+  try {
+    const [courses] = await db.execute(
+      `SELECT c.*, u.name as teacher_name, u.email as teacher_email
+       FROM courses c
+       JOIN users u ON c.teacher_id = u.id
+       WHERE c.is_approved = 0
+       ORDER BY c.created_at DESC`
+    );
+    res.json(courses);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Lỗi server" });
+  }
+});
+
+app.put("/courses/:id/approve", authMiddleware, async (req, res) => {
+  if (req.user.roles !== "admin") return res.status(403).json({ message: "Forbidden" });
+  
+  try {
+    const courseId = req.params.id;
+    const { approve } = req.body;
+    
+    const [course] = await db.execute(
+      `SELECT c.*, u.name as teacher_name, u.id as teacher_id, u.email as teacher_email
+       FROM courses c 
+       JOIN users u ON c.teacher_id = u.id 
+       WHERE c.id = ?`,
+      [courseId]
+    );
+    
+    if (course.length === 0) {
+      return res.status(404).json({ message: "Khóa học không tồn tại" });
+    }
+    
+    const courseData = course[0];
+    const teacherId = courseData.teacher_id;
+    
+    if (approve) {
+      await db.execute(
+        "UPDATE courses SET is_approved = 1, updated_at = NOW() WHERE id = ?",
+        [courseId]
+      );
+      
+      await createNotification(
+        teacherId,
+        `Khóa học "${courseData.title}" của bạn đã được duyệt. Học viên có thể đăng ký ngay!`,
+        `/teacher/courses/${courseId}`
+      );
+      
+      const [enrolledStudents] = await db.execute(
+        "SELECT student_id FROM course_enrollments WHERE course_id = ?",
+        [courseId]
+      );
+      
+      for (const student of enrolledStudents) {
+        await createNotification(
+          student.student_id,
+          `Khóa học "${courseData.title}" mà bạn đã đăng ký đã được duyệt và sẽ bắt đầu sớm`,
+          `/student/courses/${courseId}`
+        );
+      }
+      
+      res.json({ 
+        success: true,
+        message: "Đã duyệt khóa học thành công",
+        is_approved: 1
+      });
+    } else {
+      await db.execute(
+        "UPDATE courses SET is_approved = 2, updated_at = NOW() WHERE id = ?",
+        [courseId]
+      );
+      
+      await createNotification(
+        teacherId,
+        `Khóa học "${courseData.title}" của bạn đã bị từ chối. Vui lòng liên hệ admin để biết thêm chi tiết.`,
+        `/teacher/courses/${courseId}`
+      );
+      
+      res.json({ 
+        success: true,
+        message: "Đã từ chối khóa học",
+        is_approved: 2
+      });
+    }
+  } catch (err) {
+    console.error("Lỗi khi duyệt khóa học:", err);
+    res.status(500).json({ 
+      success: false,
+      message: "Lỗi server",
+      error: err.message 
+    });
+  }
+});
+
 app.get("/courses/mine", authMiddleware, async (req, res) => {
   try {
-    const teacherId = req.user.id; 
+    const teacherId = req.user.id;
     const [courses] = await db.execute(
       "SELECT * FROM courses WHERE teacher_id = ?",
       [teacherId]
@@ -400,6 +650,55 @@ app.get("/courses/mine", authMiddleware, async (req, res) => {
     res.json(courses);
   } catch (err) {
     console.error(err);
+    res.status(500).json({ message: "Lỗi server" });
+  }
+});
+
+app.put("/courses/:id", authMiddleware, async (req, res) => {
+  try {
+    const courseId = req.params.id;
+    const { title, description, lessons, hours } = req.body;
+    
+    if (req.user.roles !== "admin") {
+      const [course] = await db.execute("SELECT teacher_id FROM courses WHERE id = ?", [courseId]);
+      if (course.length === 0) return res.status(404).json({ message: "Khóa học không tồn tại" });
+      if (course[0].teacher_id !== req.user.id) {
+        return res.status(403).json({ message: "Không có quyền chỉnh sửa khóa học này" });
+      }
+    }
+
+    await db.execute(
+      "UPDATE courses SET title = ?, description = ?, lessons = ?, hours = ?, updated_at = NOW() WHERE id = ?",
+      [title, description, lessons, hours, courseId]
+    );
+
+    res.json({ message: "Cập nhật khóa học thành công" });
+  } catch (err) {
+    console.error("Lỗi khi cập nhật khóa học:", err);
+    res.status(500).json({ message: "Lỗi server" });
+  }
+});
+
+app.delete("/courses/:id", authMiddleware, async (req, res) => {
+  try {
+    const courseId = req.params.id;
+    
+    if (req.user.roles !== "admin") {
+      const [course] = await db.execute("SELECT teacher_id FROM courses WHERE id = ?", [courseId]);
+      if (course.length === 0) return res.status(404).json({ message: "Khóa học không tồn tại" });
+      if (course[0].teacher_id !== req.user.id) {
+        return res.status(403).json({ message: "Không có quyền xóa khóa học này" });
+      }
+    }
+
+    await db.execute("DELETE FROM course_enrollments WHERE course_id = ?", [courseId]);
+    await db.execute("DELETE FROM schedule WHERE course_id = ?", [courseId]);
+    
+    await db.execute("DELETE FROM courses WHERE id = ?", [courseId]);
+
+    res.json({ message: "Xóa khóa học thành công" });
+  } catch (err) {
+    console.error("Lỗi khi xóa khóa học:", err);
     res.status(500).json({ message: "Lỗi server" });
   }
 });
@@ -555,7 +854,7 @@ app.get("/courses/:id/progress", authMiddleware, async (req, res) => {
 
 app.get("/course-students", async (req, res) => {
   try {
-    const courseId = req.query.courseId || 1; 
+    const courseId = req.query.courseId || 1;
     const [students] = await db.execute(
       `SELECT u.id AS student_id, u.name AS student_name, u.email, u.phone, u.gender, ce.enrolled_at
        FROM course_enrollments ce
@@ -614,14 +913,43 @@ app.get("/courses/:id/students-count", async (req, res) => {
 
 app.post("/assignments", authMiddleware, async (req, res) => {
   try {
-    if (req.user.roles !== "teacher") 
+    if (req.user.roles !== "teacher")
       return res.status(403).json({ message: "Chỉ giảng viên mới được tạo bài tập." });
 
     const { course_id, title, total_points } = req.body;
+
+    const [course] = await db.execute(
+      "SELECT id, title, is_approved FROM courses WHERE id = ?",
+      [course_id]
+    );
+    
+    if (course.length === 0) {
+      return res.status(404).json({ message: "Khóa học không tồn tại" });
+    }
+    
+    if (course[0].is_approved === 0) {
+      return res.status(400).json({ 
+        message: "Khóa học chưa được duyệt. Vui lòng chờ admin duyệt khóa học trước khi tạo bài tập." 
+      });
+    }
+
     await db.execute(
       "INSERT INTO assignments (course_id, title, total_points, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())",
       [course_id, title, total_points || 100]
     );
+
+    const [students] = await db.execute(
+      "SELECT student_id, u.email, u.name FROM course_enrollments ce JOIN users u ON ce.student_id = u.id WHERE ce.course_id=?",
+      [course_id]
+    );
+    
+    for (const s of students) {
+      await createNotification(
+        s.student_id,
+        `Khóa học "${course[0].title}" có bài tập mới: ${title}`
+      );
+    }
+
     res.json({ message: "Tạo bài tập thành công" });
   } catch (err) {
     console.error(err);
@@ -645,7 +973,7 @@ app.get("/assignments/course/:courseId", authMiddleware, async (req, res) => {
 
 app.post("/assignments/submit", authMiddleware, async (req, res) => {
   try {
-    if (req.user.roles !== "student") 
+    if (req.user.roles !== "student")
       return res.status(403).json({ message: "Chỉ sinh viên mới nộp bài." });
 
     const { assignment_id } = req.body;
@@ -655,13 +983,44 @@ app.post("/assignments/submit", authMiddleware, async (req, res) => {
        ON DUPLICATE KEY UPDATE completed=1, submitted_at=NOW()`,
       [assignment_id, req.user.id]
     );
-    const [assignment] = await db.execute("SELECT course_id FROM assignments WHERE id=?", [assignment_id]);
-    const [course] = await db.execute("SELECT teacher_id FROM courses WHERE id=?", [assignment[0].course_id]);
+    
+    const [assignment] = await db.execute("SELECT course_id, title FROM assignments WHERE id=?", [assignment_id]);
+    const [course] = await db.execute("SELECT teacher_id, title FROM courses WHERE id=?", [assignment[0].course_id]);
+    
     if (course[0].teacher_id != null) {
-      await createNotification(course[0].teacher_id, `Sinh viên đã nộp bài tập #${assignment_id}`);
+      const [student] = await db.execute("SELECT name FROM users WHERE id = ?", [req.user.id]);
+      const studentName = student[0].name;
+      
+      await createNotification(
+        course[0].teacher_id,
+        `Học viên ${studentName} đã nộp bài tập "${assignment[0].title}" trong khóa học "${course[0].title}"`
+      );
+      
+      const [teacher] = await db.execute("SELECT email, name FROM users WHERE id = ?", [course[0].teacher_id]);
+      
+      if (teacher.length > 0) {
+        await sendEmailNotification(
+          teacher[0].email,
+          "Có học viên nộp bài tập",
+          `
+          <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+            <h2 style="color: #1890ff;">Thông báo từ hệ thống E-Study</h2>
+            <p>Xin chào ${teacher[0].name},</p>
+            <p>Học viên <strong>${studentName}</strong> đã nộp bài tập:</p>
+            <ul>
+              <li><strong>Khóa học:</strong> ${course[0].title}</li>
+              <li><strong>Bài tập:</strong> ${assignment[0].title}</li>
+              <li><strong>Thời gian nộp:</strong> ${new Date().toLocaleString()}</li>
+            </ul>
+            <p>Vui lòng vào hệ thống để chấm bài.</p>
+          </div>
+          `
+        );
+      }
     } else {
       console.error("teacher_id bị undefined, không thể tạo thông báo");
     }
+    
     res.json({ message: "Đã nộp bài" });
   } catch (err) {
     console.error(err);
@@ -671,7 +1030,7 @@ app.post("/assignments/submit", authMiddleware, async (req, res) => {
 
 app.get("/assignments/:assignmentId/submissions", authMiddleware, async (req, res) => {
   try {
-    if (req.user.roles !== "teacher") 
+    if (req.user.roles !== "teacher")
       return res.status(403).json({ message: "Chỉ giảng viên mới xem danh sách bài nộp." });
 
     const { assignmentId } = req.params;
@@ -726,7 +1085,6 @@ app.post("/assignments/grade", authMiddleware, async (req, res) => {
   }
 });
 
-
 app.get("/assignments/:id/questions", authMiddleware, async (req, res) => {
   const assignmentId = req.params.id;
   try {
@@ -742,7 +1100,7 @@ app.get("/assignments/:id/questions", authMiddleware, async (req, res) => {
 });
 
 app.post("/assignments/:id/questions", authMiddleware, async (req, res) => {
-  if (req.user.roles !== "teacher") 
+  if (req.user.roles !== "teacher")
     return res.status(403).json({ message: "Chỉ giảng viên mới thêm câu hỏi" });
 
   const assignmentId = req.params.id;
@@ -766,7 +1124,7 @@ app.post("/assignments/:id/submit-answers", authMiddleware, async (req, res) => 
   if (req.user.roles !== "student") return res.status(403).json({ message: "Chỉ sinh viên mới nộp bài" });
   const assignmentId = req.params.id;
   const studentId = req.user.id;
-  const { answers } = req.body; 
+  const { answers } = req.body;
 
   try {
     for (const [question_id, answer_text] of Object.entries(answers)) {
@@ -805,12 +1163,12 @@ app.delete("/assignments/:assignmentId/submissions/:studentId", async (req, res)
   const { assignmentId, studentId } = req.params;
 
   try {
-     await db.execute(
+    await db.execute(
       "DELETE FROM answers WHERE assignment_id = ? AND student_id = ?",
       [assignmentId, studentId]
     );
 
-     const [result] = await db.execute(
+    const [result] = await db.execute(
       "DELETE FROM assignment_submissions WHERE assignment_id = ? AND student_id = ?",
       [assignmentId, studentId]
     );
@@ -848,27 +1206,27 @@ app.delete("/assignments/:assignmentId/answers/:studentId/:questionId", async (r
 
 app.post("/assignments/:assignmentId/grade-answers-bulk", authMiddleware, async (req, res) => {
   try {
-    if (req.user.roles !== "teacher") 
+    if (req.user.roles !== "teacher")
       return res.status(403).json({ message: "Chỉ giảng viên mới chấm điểm." });
 
-    const { grades } = req.body;  
-    if (!grades || !grades.length) 
+    const { grades } = req.body;
+    if (!grades || !grades.length)
       return res.status(400).json({ message: "Không có điểm hợp lệ để lưu." });
 
     for (const g of grades) {
       await db.execute(
-        `INSERT INTO grades (submission_id, question_id, score) 
+        `INSERT INTO grades (submission_id, question_id, score)
          VALUES (?, ?, ?)
          ON DUPLICATE KEY UPDATE score = VALUES(score)`,
         [g.submission_id, g.question_id, g.score]
       );
       await createNotification(
-        g.student_id, 
+        g.student_id,
         `Bài tập #${g.submission_id} đã được chấm: ${g.score} điểm`
       );
     }
 
-     const submissionIds = [...new Set(grades.map(g => g.submission_id))];
+    const submissionIds = [...new Set(grades.map(g => g.submission_id))];
     const totalScores = {};
     for (const subId of submissionIds) {
       const [rows] = await db.execute(
@@ -878,7 +1236,7 @@ app.post("/assignments/:assignmentId/grade-answers-bulk", authMiddleware, async 
       totalScores[subId] = rows[0].total || 0;
     }
 
-     return res.json({ message: "Đã chấm điểm thành công!", totalScores });
+    return res.json({ message: "Đã chấm điểm thành công!", totalScores });
 
   } catch (err) {
     console.error(err);
@@ -886,22 +1244,21 @@ app.post("/assignments/:assignmentId/grade-answers-bulk", authMiddleware, async 
   }
 });
 
-
 app.get("/assignments/:id/answers/student/:studentId", authMiddleware, async (req, res) => {
   const assignmentId = req.params.id;
   const studentId = req.params.studentId;
 
   try {
     const [answers] = await db.execute(`
-  SELECT 
-    a.id AS answer_id, 
-    a.question_id, 
-    a.answer_text, 
+  SELECT
+    a.id AS answer_id,
+    a.question_id,
+    a.answer_text,
     g.score
   FROM answers a
   LEFT JOIN assignment_submissions s
     ON s.assignment_id = a.assignment_id AND s.student_id = a.student_id
-  LEFT JOIN grades g 
+  LEFT JOIN grades g
     ON g.submission_id = s.id AND g.question_id = a.question_id
   WHERE a.assignment_id = ? AND a.student_id = ?
 `, [assignmentId, studentId]
@@ -918,9 +1275,9 @@ app.get("/assignments/course/:courseId/student/:studentId", authMiddleware, asyn
   const [rows] = await db.execute(
     `SELECT a.*, s.completed, s.submitted_at, g.score
      FROM assignments a
-     LEFT JOIN assignment_submissions s 
+     LEFT JOIN assignment_submissions s
        ON a.id = s.assignment_id AND s.student_id=?
-     LEFT JOIN grades g 
+     LEFT JOIN grades g
        ON s.id = g.submission_id
      WHERE a.course_id=?`,
     [studentId, courseId]
@@ -934,7 +1291,7 @@ app.get("/api/schedule/week", authMiddleware, async (req, res) => {
     const inputDate = new Date(date);
     const startOfWeek = new Date(inputDate);
     const day = startOfWeek.getDay();
-    const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1); 
+    const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
     startOfWeek.setDate(diff);
     startOfWeek.setHours(0, 0, 0, 0);
 
@@ -948,17 +1305,17 @@ app.get("/api/schedule/week", authMiddleware, async (req, res) => {
 
     const [rows] = await db.execute(
       `SELECT s.*, c.title, c.teacher_id, c.lessons, c.color, u.name as teacher_name
-       FROM schedule s 
-       LEFT JOIN courses c ON s.course_id = c.id 
+       FROM schedule s
+       LEFT JOIN courses c ON s.course_id = c.id
        LEFT JOIN users u ON c.teacher_id = u.id
        WHERE s.date BETWEEN ? AND ?
        ORDER BY s.date, s.period, s.order_index`,
       [dates[0], dates[6]]
     );
 
-    const scheduleData = { 
+    const scheduleData = {
       Sáng: Array(7).fill().map(() => [{ type: 'empty' }, { type: 'empty' }]),
-      Chiều: Array(7).fill().map(() => [{ type: 'empty' }, { type: 'empty' }]), 
+      Chiều: Array(7).fill().map(() => [{ type: 'empty' }, { type: 'empty' }]),
       Tối: Array(7).fill().map(() => [{ type: 'empty' }, { type: 'empty' }])
     };
 
@@ -971,7 +1328,7 @@ app.get("/api/schedule/week", authMiddleware, async (req, res) => {
       
       if (dayIndex !== -1 && r.period in scheduleData) {
         const orderIndex = parseInt(r.order_index) || 0;
-        if (orderIndex >= 0 && orderIndex < 2) {          
+        if (orderIndex >= 0 && orderIndex < 2) {
           scheduleData[r.period][dayIndex][orderIndex] = {
             type: r.type || 'theory',
             title: r.title || `Khóa học ${r.course_id}`,
@@ -981,7 +1338,7 @@ app.get("/api/schedule/week", authMiddleware, async (req, res) => {
             course_id: r.course_id,
             teacher_id: r.teacher_id,
             url: r.url || '',
-            date: normalizedDate, 
+            date: normalizedDate,
             period: r.period,
             order_index: orderIndex,
             color: r.color || '#9E9E9E'
@@ -1003,10 +1360,10 @@ app.post("/api/schedule/assign", async (req, res) => {
   
   try {
     const [course] = await db.execute(
-      `SELECT c.*, u.name as teacher_name 
-       FROM courses c 
-       LEFT JOIN users u ON c.teacher_id = u.id 
-       WHERE c.id=?`, 
+      `SELECT c.*, u.name as teacher_name
+       FROM courses c
+       LEFT JOIN users u ON c.teacher_id = u.id
+       WHERE c.id=?`,
       [course_id]
     );
     
@@ -1028,23 +1385,23 @@ app.post("/api/schedule/assign", async (req, res) => {
     const [result] = await db.execute(
       "INSERT INTO schedule (course_id, teacher_id, url, date, period, lesson, type, order_index) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
       [
-        course_id, 
-        course[0].teacher_id, 
-        '', 
-        formattedDate, 
-        period, 
-        lesson || `Tiết ${course[0].lessons || 1}`, 
-        type || 'theory', 
+        course_id,
+        course[0].teacher_id,
+        '',
+        formattedDate,
+        period,
+        lesson || `Tiết ${course[0].lessons || 1}`,
+        type || 'theory',
         order_index
       ]
     );
     
     const [newSchedule] = await db.execute(
       `SELECT s.*, c.title, c.teacher_id, c.color, c.lessons, u.name as teacher_name
-       FROM schedule s 
-       LEFT JOIN courses c ON s.course_id = c.id 
+       FROM schedule s
+       LEFT JOIN courses c ON s.course_id = c.id
        LEFT JOIN users u ON c.teacher_id = u.id
-       WHERE s.id=?`, 
+       WHERE s.id=?`,
       [result.insertId]
     );
     
@@ -1062,10 +1419,10 @@ app.get("/api/schedules/:id", authMiddleware, async (req, res) => {
   try {
     const [schedule] = await db.execute(
       `SELECT s.*, c.title, c.teacher_id, c.color, c.lessons, u.name as teacher_name
-       FROM schedule s 
-       LEFT JOIN courses c ON s.course_id = c.id 
+       FROM schedule s
+       LEFT JOIN courses c ON s.course_id = c.id
        LEFT JOIN users u ON c.teacher_id = u.id
-       WHERE s.id = ?`, 
+       WHERE s.id = ?`,
       [id]
     );
     
@@ -1096,10 +1453,10 @@ app.put("/api/schedules/:id", async (req, res) => {
     
     const [updated] = await db.execute(
       `SELECT s.*, c.title, c.teacher_id, c.color, c.lessons, u.name as teacher_name
-       FROM schedule s 
-       LEFT JOIN courses c ON s.course_id = c.id 
+       FROM schedule s
+       LEFT JOIN courses c ON s.course_id = c.id
        LEFT JOIN users u ON c.teacher_id = u.id
-       WHERE s.id = ?`, 
+       WHERE s.id = ?`,
       [id]
     );
     
@@ -1111,10 +1468,10 @@ app.put("/api/schedules/:id", async (req, res) => {
     
   } catch (err) {
     console.error("Error updating schedule:", err);
-    res.status(500).json({ 
-      message: "Lỗi cập nhật lịch", 
+    res.status(500).json({
+      message: "Lỗi cập nhật lịch",
       error: err.message,
-      sqlMessage: err.sqlMessage 
+      sqlMessage: err.sqlMessage
     });
   }
 });
@@ -1132,10 +1489,10 @@ app.post("/api/schedules", async (req, res) => {
     
     const [newSchedule] = await db.execute(
       `SELECT s.*, c.title, c.teacher_id, c.color, c.lessons, u.name as teacher_name
-       FROM schedule s 
-       LEFT JOIN courses c ON s.course_id = c.id 
+       FROM schedule s
+       LEFT JOIN courses c ON s.course_id = c.id
        LEFT JOIN users u ON c.teacher_id = u.id
-       WHERE s.id=?`, 
+       WHERE s.id=?`,
       [result.insertId]
     );
     
@@ -1164,25 +1521,191 @@ app.delete("/api/schedules/:id", async (req, res) => {
 });
 
 app.post("/videos/add", authMiddleware, async (req, res) => {
-  const { course_id, title, url, duration } = req.body;
-  const userId = req.user.id;
+  try {
+    const { course_id, title, url, duration } = req.body;
+    const userId = req.user.id;
 
-  const [user] = await db.query("SELECT roles FROM users WHERE id = ?", [userId]);
-  if (user[0].roles !== "teacher") return res.status(403).json({ message: "Chỉ giảng viên được thêm video." });
+    if (req.user.roles !== "teacher" && req.user.roles !== "admin") {
+      return res.status(403).json({ message: "Chỉ giảng viên được thêm video." });
+    }
 
-  await db.query("INSERT INTO videos (course_id, title, url, duration) VALUES (?, ?, ?, ?)", [
-    course_id,
-    title,
-    url,
-    duration,
-  ]);
+    if (!course_id || !title || !url) {
+      return res.status(400).json({ message: "Thiếu thông tin bắt buộc" });
+    }
 
-  const [students] = await db.execute("SELECT student_id FROM course_enrollments WHERE course_id=?", [course_id]);
-  for (const s of students) {
-    await createNotification(s.student_id, `Khóa học của bạn có video mới: ${title}`);
+    const [course] = await db.execute(
+      "SELECT id, title, is_approved FROM courses WHERE id = ?",
+      [course_id]
+    );
+    
+    if (course.length === 0) {
+      return res.status(404).json({ message: "Khóa học không tồn tại" });
+    }
+    
+    if (course[0].is_approved === 0) {
+      return res.status(400).json({ 
+        message: "Khóa học chưa được duyệt. Vui lòng chờ admin duyệt khóa học trước khi thêm video." 
+      });
+    }
+
+    if (req.user.roles === "teacher") {
+      const [courseCheck] = await db.execute("SELECT teacher_id FROM courses WHERE id = ?", [course_id]);
+      if (courseCheck.length === 0) {
+        return res.status(404).json({ message: "Khóa học không tồn tại" });
+      }
+      if (courseCheck[0].teacher_id !== userId) {
+        return res.status(403).json({ message: "Bạn không có quyền thêm video vào khóa học này" });
+      }
+    }
+
+    const durationValue = duration ? duration.toString() : "0";
+
+    await db.execute(
+      "INSERT INTO videos (course_id, title, url, duration) VALUES (?, ?, ?, ?)",
+      [course_id, title, url, durationValue]
+    );
+
+    const [students] = await db.execute(
+      "SELECT student_id, u.email, u.name FROM course_enrollments ce JOIN users u ON ce.student_id = u.id WHERE ce.course_id=?",
+      [course_id]
+    );
+    
+    for (const s of students) {
+      await createNotification(
+        s.student_id,
+        `Khóa học "${course[0].title}" có video mới: ${title}`
+      );
+      
+      await sendEmailNotification(
+        s.email,
+        "Khóa học của bạn có video mới",
+        `
+        <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+          <h2 style="color: #1890ff;">Thông báo từ hệ thống E-Study</h2>
+          <p>Xin chào ${s.name},</p>
+          <p>Khóa học <strong>"${course[0].title}"</strong> mà bạn đang theo học có video mới:</p>
+          <ul>
+            <li><strong>Tên video:</strong> ${title}</li>
+            <li><strong>Thời gian:</strong> ${durationValue} phút</li>
+            <li><strong>Thời gian đăng:</strong> ${new Date().toLocaleString()}</li>
+          </ul>
+          <p>Hãy truy cập khóa học để xem video mới!</p>
+        </div>
+        `
+      );
+    }
+
+    res.json({ message: "Thêm video thành công" });
+  } catch (err) {
+    console.error("Lỗi khi thêm video:", err);
+    res.status(500).json({ message: "Lỗi server khi thêm video" });
   }
+});
 
-  res.json({ message: "Thêm video thành công" });
+app.get("/videos", authMiddleware, async (req, res) => {
+  try {
+    let query = "SELECT * FROM videos";
+    let params = [];
+
+    if (req.user.roles === "teacher") {
+      query += " WHERE course_id IN (SELECT id FROM courses WHERE teacher_id = ?)";
+      params.push(req.user.id);
+    }
+
+    query += " ORDER BY created_at DESC";
+
+    const [videos] = await db.execute(query, params);
+    res.json(videos);
+  } catch (err) {
+    console.error("Lỗi khi lấy danh sách video:", err);
+    res.status(500).json({ message: "Lỗi server" });
+  }
+});
+
+app.put("/videos/:id", authMiddleware, async (req, res) => {
+  try {
+    const videoId = req.params.id;
+    const { title, url, duration, course_id } = req.body;
+    const userId = req.user.id;
+
+    const [video] = await db.execute("SELECT * FROM videos WHERE id = ?", [videoId]);
+    if (video.length === 0) {
+      return res.status(404).json({ message: "Video không tồn tại" });
+    }
+
+    if (req.user.roles === "admin") {
+      await db.execute(
+        "UPDATE videos SET title = ?, url = ?, duration = ?, course_id = ?, created_at = NOW() WHERE id = ?",
+        [title, url, duration || "0", course_id, videoId]
+      );
+    }
+    else if (req.user.roles === "teacher") {
+      const [course] = await db.execute(
+        "SELECT teacher_id FROM courses WHERE id = ?",
+        [course_id || video[0].course_id]
+      );
+      
+      if (course.length === 0) {
+        return res.status(404).json({ message: "Khóa học không tồn tại" });
+      }
+      
+      if (course[0].teacher_id !== userId) {
+        return res.status(403).json({ message: "Không có quyền chỉnh sửa video này" });
+      }
+
+      await db.execute(
+        "UPDATE videos SET title = ?, url = ?, duration = ?, course_id = ?, created_at = NOW() WHERE id = ?",
+        [title, url, duration || "0", course_id, videoId]
+      );
+    } else {
+      return res.status(403).json({ message: "Không có quyền chỉnh sửa video" });
+    }
+
+    console.log("Video updated successfully");
+    res.json({ message: "Cập nhật video thành công" });
+  } catch (err) {
+    console.error("Lỗi khi cập nhật video:", err);
+    res.status(500).json({ message: "Lỗi server khi cập nhật video" });
+  }
+});
+
+app.delete("/videos/:id", authMiddleware, async (req, res) => {
+  try {
+    const videoId = req.params.id;
+    const userId = req.user.id
+    const [video] = await db.execute("SELECT * FROM videos WHERE id = ?", [videoId]);
+    if (video.length === 0) {
+      return res.status(404).json({ message: "Video không tồn tại" });
+    }
+
+    if (req.user.roles === "admin") {
+      await db.execute("DELETE FROM videos WHERE id = ?", [videoId]);
+    }
+    else if (req.user.roles === "teacher") {
+      const [course] = await db.execute(
+        "SELECT teacher_id FROM courses WHERE id = ?",
+        [video[0].course_id]
+      );
+      
+      if (course.length === 0) {
+        return res.status(404).json({ message: "Khóa học không tồn tại" });
+      }
+      
+      if (course[0].teacher_id !== userId) {
+        return res.status(403).json({ message: "Không có quyền xóa video này" });
+      }
+
+      await db.execute("DELETE FROM videos WHERE id = ?", [videoId]);
+    } else {
+      return res.status(403).json({ message: "Không có quyền xóa video" });
+    }
+
+    console.log("Video deleted successfully");
+    res.json({ message: "Xóa video thành công" });
+  } catch (err) {
+    console.error("Lỗi khi xóa video:", err);
+    res.status(500).json({ message: "Lỗi server khi xóa video" });
+  }
 });
 
 app.get("/videos/:course_id", async (req, res) => {
@@ -1191,38 +1714,344 @@ app.get("/videos/:course_id", async (req, res) => {
   res.json(videos);
 });
 
-app.post("/comments/add", authMiddleware, async (req, res) => {
-  const { course_id, content } = req.body;
-  const userId = req.user.id;
-  await db.query("INSERT INTO comments (course_id, user_id, content) VALUES (?, ?, ?)", [
-    course_id,
-    userId,
-    content,
-  ]);
-
-  const [students] = await db.execute(
-    "SELECT student_id FROM course_enrollments WHERE course_id=? AND student_id != ?",
-    [course_id, userId]
-  );
-  for (const s of students) {
-    await createNotification(s.student_id, `Có bình luận mới trong khóa học của bạn`);
-  }
-
-  res.json({ message: "Đã đăng bình luận" });
-});
-
 app.get("/comments/:course_id", async (req, res) => {
   try {
     const { course_id } = req.params;
+    const { nested } = req.query;
+    
+    if (nested === 'true') {
+      const response = await fetch(`http://localhost:5000/comments/${course_id}/tree`);
+      const data = await response.json();
+      res.json(data);
+    } else {
+      const [results] = await db.execute(
+        `SELECT c.id, c.content, c.created_at, c.parent_id, u.name AS user_name
+         FROM comments c
+         JOIN users u ON c.user_id = u.id
+         WHERE c.course_id = ? AND c.deleted_at IS NULL
+         ORDER BY c.created_at DESC`,
+        [course_id]
+      );
+      res.json(results);
+    }
+  } catch (err) {
+    console.error("Lỗi lấy bình luận:", err);
+    res.status(500).json({ message: "Lỗi khi lấy bình luận" });
+  }
+});
+
+app.get("/comments/:course_id/tree", async (req, res) => {
+  try {
+    const { course_id } = req.params;
+    
     const [results] = await db.execute(
-      `SELECT c.id, c.content, c.created_at, u.name AS user_name
+      `SELECT
+        c.id,
+        c.content,
+        c.created_at,
+        c.parent_id,
+        c.is_edited,
+        c.edited_at,
+        c.deleted_at,
+        u.id as user_id,
+        u.name AS user_name,
+        u.avatar,
+        u.roles as user_role
        FROM comments c
        JOIN users u ON c.user_id = u.id
        WHERE c.course_id = ?
-       ORDER BY c.created_at DESC`,
+       ORDER BY c.created_at ASC`,
       [course_id]
     );
-    res.json(results);
+    
+    const commentMap = {};
+    const rootComments = [];
+    
+    results.forEach(comment => {
+      commentMap[comment.id] = { ...comment, replies: [] };
+    });
+    
+    results.forEach(comment => {
+      if (comment.parent_id) {
+        if (commentMap[comment.parent_id]) {
+          commentMap[comment.parent_id].replies.push(commentMap[comment.id]);
+        }
+      } else {
+        rootComments.push(commentMap[comment.id]);
+      }
+    });
+    
+    res.json(rootComments);
+  } catch (err) {
+    console.error("Lỗi lấy bình luận tree:", err);
+    res.status(500).json({ message: "Lỗi khi lấy bình luận" });
+  }
+});
+
+app.post("/comments/add", authMiddleware, async (req, res) => {
+  try {
+    const { course_id, content, parent_id } = req.body;
+    const userId = req.user.id;
+    
+    if (!content || !content.trim()) {
+      return res.status(400).json({ message: "Nội dung bình luận không được để trống" });
+    }
+    
+    const [course] = await db.execute("SELECT id FROM courses WHERE id = ?", [course_id]);
+    if (course.length === 0) {
+      return res.status(404).json({ message: "Khóa học không tồn tại" });
+    }
+    
+    if (parent_id) {
+      const [parentComment] = await db.execute(
+        "SELECT id, course_id FROM comments WHERE id = ?",
+        [parent_id]
+      );
+      if (parentComment.length === 0) {
+        return res.status(404).json({ message: "Bình luận cha không tồn tại" });
+      }
+      if (parentComment[0].course_id !== parseInt(course_id)) {
+        return res.status(400).json({ message: "Bình luận không thuộc khóa học này" });
+      }
+    }
+    
+    const [result] = await db.execute(
+      "INSERT INTO comments (course_id, user_id, parent_id, content) VALUES (?, ?, ?, ?)",
+      [course_id, userId, parent_id || null, content]
+    );
+    
+    const [newComment] = await db.execute(
+      `SELECT
+        c.id,
+        c.content,
+        c.created_at,
+        c.parent_id,
+        c.is_edited,
+        c.edited_at,
+        u.id as user_id,
+        u.name AS user_name,
+        u.avatar,
+        u.roles as user_role
+       FROM comments c
+       JOIN users u ON c.user_id = u.id
+       WHERE c.id = ?`,
+      [result.insertId]
+    );
+    
+    if (parent_id) {
+      const [parentComment] = await db.execute(
+        "SELECT user_id FROM comments WHERE id = ?",
+        [parent_id]
+      );
+      if (parentComment.length > 0 && parentComment[0].user_id !== userId) {
+        await createNotification(
+          parentComment[0].user_id,
+          `Có người trả lời bình luận của bạn`
+        );
+      }
+    } else {
+      const [students] = await db.execute(
+        "SELECT student_id FROM course_enrollments WHERE course_id = ? AND student_id != ?",
+        [course_id, userId]
+      );
+      for (const s of students) {
+        await createNotification(s.student_id, `Có bình luận mới trong khóa học`);
+      }
+      
+      const [courseInfo] = await db.execute(
+        "SELECT teacher_id FROM courses WHERE id = ?",
+        [course_id]
+      );
+      if (courseInfo.length > 0 && courseInfo[0].teacher_id !== userId) {
+        await createNotification(
+          courseInfo[0].teacher_id,
+          `Có học viên bình luận trong khóa học của bạn`
+        );
+      }
+    }
+    
+    res.json({
+      message: "Đã đăng bình luận thành công",
+      comment: newComment[0]
+    });
+  } catch (err) {
+    console.error("Lỗi khi thêm bình luận:", err);
+    res.status(500).json({ message: "Lỗi khi đăng bình luận" });
+  }
+});
+
+app.put("/comments/:id", authMiddleware, async (req, res) => {
+  try {
+    const commentId = req.params.id;
+    const { content } = req.body;
+    const userId = req.user.id;
+    
+    if (!content || !content.trim()) {
+      return res.status(400).json({ message: "Nội dung bình luận không được để trống" });
+    }
+    
+    const [comment] = await db.execute(
+      "SELECT id, user_id, course_id FROM comments WHERE id = ?",
+      [commentId]
+    );
+    
+    if (comment.length === 0) {
+      return res.status(404).json({ message: "Bình luận không tồn tại" });
+    }
+    
+    const commentData = comment[0];
+    
+    if (req.user.roles !== "admin" && commentData.user_id !== userId) {
+      if (req.user.roles === "teacher") {
+        const [course] = await db.execute(
+          "SELECT teacher_id FROM courses WHERE id = ?",
+          [commentData.course_id]
+        );
+        if (course.length === 0 || course[0].teacher_id !== userId) {
+          return res.status(403).json({ message: "Không có quyền chỉnh sửa bình luận này" });
+        }
+      } else {
+        return res.status(403).json({ message: "Không có quyền chỉnh sửa bình luận này" });
+      }
+    }
+    
+    await db.execute(
+      "UPDATE comments SET content = ?, is_edited = 1, edited_at = NOW() WHERE id = ?",
+      [content, commentId]
+    );
+    
+    const [updatedComment] = await db.execute(
+      `SELECT
+        c.id,
+        c.content,
+        c.created_at,
+        c.parent_id,
+        c.is_edited,
+        c.edited_at,
+        u.id as user_id,
+        u.name AS user_name,
+        u.avatar,
+        u.roles as user_role
+       FROM comments c
+       JOIN users u ON c.user_id = u.id
+       WHERE c.id = ?`,
+      [commentId]
+    );
+    
+    res.json({
+      message: "Đã cập nhật bình luận thành công",
+      comment: updatedComment[0]
+    });
+  } catch (err) {
+    console.error("Lỗi khi cập nhật bình luận:", err);
+    res.status(500).json({ message: "Lỗi khi cập nhật bình luận" });
+  }
+});
+
+app.delete("/comments/:id", authMiddleware, async (req, res) => {
+  try {
+    const commentId = req.params.id;
+    const userId = req.user.id;
+    
+    const [comment] = await db.execute(
+      "SELECT id, user_id, course_id, parent_id FROM comments WHERE id = ? AND deleted_at IS NULL",
+      [commentId]
+    );
+    
+    if (comment.length === 0) {
+      return res.status(404).json({ message: "Bình luận không tồn tại hoặc đã bị xóa" });
+    }
+    
+    const commentData = comment[0];
+    
+    if (req.user.roles !== "admin" && commentData.user_id !== userId) {
+      if (req.user.roles === "teacher") {
+        const [course] = await db.execute(
+          "SELECT teacher_id FROM courses WHERE id = ?",
+          [commentData.course_id]
+        );
+        if (course.length === 0 || course[0].teacher_id !== userId) {
+          return res.status(403).json({ message: "Không có quyền xóa bình luận này" });
+        }
+      } else {
+        return res.status(403).json({ message: "Không có quyền xóa bình luận này" });
+      }
+    }
+    
+    if (req.user.roles !== "admin") {
+      const [replies] = await db.execute(
+        "SELECT COUNT(*) as reply_count FROM comments WHERE parent_id = ? AND deleted_at IS NULL",
+        [commentId]
+      );
+      
+      if (replies[0].reply_count > 0) {
+        return res.status(400).json({
+          message: "Không thể xóa bình luận đã có phản hồi"
+        });
+      }
+    }
+    
+    await db.execute(
+      "UPDATE comments SET deleted_at = NOW() WHERE id = ?",
+      [commentId]
+    );
+    
+    res.json({ message: "Đã xóa bình luận thành công" });
+  } catch (err) {
+    console.error("Lỗi khi xóa bình luận:", err);
+    res.status(500).json({ message: "Lỗi khi xóa bình luận" });
+  }
+});
+
+app.get("/courses/:id/comments-count", async (req, res) => {
+  try {
+    const courseId = req.params.id;
+    
+    const [result] = await db.execute(
+      `SELECT
+        COUNT(*) as total_comments,
+        COUNT(DISTINCT user_id) as unique_users
+       FROM comments
+       WHERE course_id = ? AND deleted_at IS NULL`,
+      [courseId]
+    );
+    
+    res.json(result[0]);
+  } catch (err) {
+    console.error("Lỗi lấy số lượng bình luận:", err);
+    res.status(500).json({ message: "Lỗi khi lấy số lượng bình luận" });
+  }
+});
+
+app.get("/comments/:id", async (req, res) => {
+  try {
+    const commentId = req.params.id;
+    
+    const [result] = await db.execute(
+      `SELECT
+        c.id,
+        c.content,
+        c.created_at,
+        c.parent_id,
+        c.is_edited,
+        c.edited_at,
+        c.deleted_at,
+        c.course_id,
+        u.id as user_id,
+        u.name AS user_name,
+        u.avatar,
+        u.roles as user_role
+       FROM comments c
+       JOIN users u ON c.user_id = u.id
+       WHERE c.id = ?`,
+      [commentId]
+    );
+    
+    if (result.length === 0) {
+      return res.status(404).json({ message: "Bình luận không tồn tại" });
+    }
+    
+    res.json(result[0]);
   } catch (err) {
     console.error("Lỗi lấy bình luận:", err);
     res.status(500).json({ message: "Lỗi khi lấy bình luận" });
@@ -1254,6 +2083,493 @@ app.put("/notifications/:id/read", authMiddleware, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Lỗi khi đánh dấu thông báo" });
+  }
+});
+
+app.get("/chat/users", authMiddleware, async (req, res) => {
+  try {
+    if (req.user.roles !== "admin") {
+      return res.status(403).json({ 
+        success: false,
+        message: "Chỉ admin mới xem được danh sách người dùng" 
+      });
+    }
+    
+    const [users] = await db.execute(
+      `SELECT DISTINCT 
+        u.id, 
+        u.name, 
+        u.email, 
+        u.avatar, 
+        u.roles,
+        (SELECT COUNT(*) FROM messages m 
+         WHERE m.sender_id = u.id 
+         AND m.receiver_id = ? 
+         AND m.is_read = 0) as unread_count,
+        (SELECT m.message FROM messages m 
+         WHERE (m.sender_id = u.id AND m.receiver_id = ?)
+         OR (m.sender_id = ? AND m.receiver_id = u.id)
+         ORDER BY m.created_at DESC LIMIT 1) as last_message,
+        (SELECT m.created_at FROM messages m 
+         WHERE (m.sender_id = u.id AND m.receiver_id = ?)
+         OR (m.sender_id = ? AND m.receiver_id = u.id)
+         ORDER BY m.created_at DESC LIMIT 1) as last_message_time
+      FROM users u
+      WHERE u.id != ? 
+        AND u.roles != 'admin'
+        AND EXISTS (
+          SELECT 1 FROM messages m 
+          WHERE (m.sender_id = u.id AND m.receiver_id = ?)
+          OR (m.sender_id = ? AND m.receiver_id = u.id)
+        )
+      ORDER BY last_message_time DESC`,
+      [
+        req.user.id,
+        req.user.id,
+        req.user.id,
+        req.user.id,
+        req.user.id,
+        req.user.id,
+        req.user.id,
+        req.user.id
+      ]
+    );
+    
+    res.json({ 
+      success: true,
+      data: users 
+    });
+  } catch (err) {
+    console.error("Lỗi khi lấy danh sách người dùng:", err);
+    res.status(500).json({ 
+      success: false,
+      message: "Lỗi server" 
+    });
+  }
+});
+
+app.get("/chat/search/users", authMiddleware, async (req, res) => {
+  try {
+    if (req.user.roles !== "admin") {
+      return res.status(403).json({ 
+        success: false,
+        message: "Chỉ admin mới có quyền tìm kiếm" 
+      });
+    }
+    
+    const { search } = req.query;
+    
+    if (!search || search.trim().length < 2) {
+      return res.status(400).json({ 
+        success: false,
+        message: "Nhập ít nhất 2 ký tự để tìm kiếm" 
+      });
+    }
+    
+    const searchTerm = `%${search.trim()}%`;
+    
+    const [users] = await db.execute(
+      `SELECT id, name, email, avatar, roles
+       FROM users
+       WHERE (name LIKE ? OR email LIKE ?) 
+         AND id != ? 
+         AND roles != 'admin'
+       ORDER BY name
+       LIMIT 20`,
+      [searchTerm, searchTerm, req.user.id]
+    );
+    
+    res.json({ 
+      success: true,
+      data: users 
+    });
+  } catch (err) {
+    console.error("Lỗi khi tìm kiếm người dùng:", err);
+    res.status(500).json({ 
+      success: false,
+      message: "Lỗi server" 
+    });
+  }
+});
+
+app.get("/chat/unread/count/:other_user_id", authMiddleware, async (req, res) => {
+  try {
+    const other_user_id = req.params.other_user_id;
+    
+    const [result] = await db.execute(
+      "SELECT COUNT(*) as unread_count FROM messages WHERE receiver_id = ? AND sender_id = ? AND is_read = 0",
+      [req.user.id, other_user_id]
+    );
+    
+    res.json({ 
+      success: true,
+      unread_count: result[0].unread_count 
+    });
+  } catch (err) {
+    console.error("Lỗi khi đếm tin nhắn chưa đọc:", err);
+    res.status(500).json({ 
+      success: false,
+      message: "Lỗi server" 
+    });
+  }
+});
+
+app.get("/chat/admins", authMiddleware, async (req, res) => {
+  try {
+    const [admins] = await db.execute(
+      "SELECT id, name, email, avatar, roles FROM users WHERE roles = 'admin' ORDER BY name"
+    );
+    res.json({
+      success: true,
+      data: admins
+    });
+  } catch (err) {
+    console.error("Lỗi khi lấy danh sách admin:", err);
+    res.status(500).json({ 
+      success: false, 
+      message: "Lỗi server" 
+    });
+  }
+});
+
+app.get("/chat/:other_user_id", authMiddleware, async (req, res) => {
+  try {
+    const current_user_id = req.user.id;
+    const other_user_id = req.params.other_user_id;
+    
+    const [user] = await db.execute(
+      "SELECT id, name FROM users WHERE id = ?",
+      [other_user_id]
+    );
+    
+    if (user.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Người dùng không tồn tại" 
+      });
+    }
+    
+    const [messages] = await db.execute(
+      `SELECT m.*, 
+              u.name as sender_name, 
+              u.avatar as sender_avatar,
+              CASE WHEN m.sender_id = ? THEN 'sent' ELSE 'received' END as message_type
+       FROM messages m
+       JOIN users u ON m.sender_id = u.id
+       WHERE (m.sender_id = ? AND m.receiver_id = ?)
+          OR (m.sender_id = ? AND m.receiver_id = ?)
+       ORDER BY m.created_at ASC`,
+      [current_user_id, current_user_id, other_user_id, other_user_id, current_user_id]
+    );
+    
+    await db.execute(
+      "UPDATE messages SET is_read = 1 WHERE receiver_id = ? AND sender_id = ? AND is_read = 0",
+      [current_user_id, other_user_id]
+    );
+    
+    const [userInfo] = await db.execute(
+      "SELECT id, name, email, avatar, roles FROM users WHERE id = ?",
+      [other_user_id]
+    );
+    
+    res.json({
+      success: true,
+      user: userInfo[0],
+      messages: messages
+    });
+  } catch (err) {
+    console.error("Lỗi khi lấy tin nhắn:", err);
+    res.status(500).json({ 
+      success: false, 
+      message: "Lỗi server" 
+    });
+  }
+});
+
+app.post("/chat/send", authMiddleware, async (req, res) => {
+  try {
+    const { receiver_id, message } = req.body;
+    const sender_id = req.user.id;
+    
+    if (!receiver_id || !message || !message.trim()) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Thiếu thông tin tin nhắn" 
+      });
+    }
+    
+    const [receiver] = await db.execute(
+      "SELECT id, name FROM users WHERE id = ?",
+      [receiver_id]
+    );
+    
+    if (receiver.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Người nhận không tồn tại" 
+      });
+    }
+    
+    const [result] = await db.execute(
+      "INSERT INTO messages (sender_id, receiver_id, message) VALUES (?, ?, ?)",
+      [sender_id, receiver_id, message.trim()]
+    );
+    
+    const [newMessage] = await db.execute(
+      `SELECT m.*, u.name as sender_name, u.avatar as sender_avatar
+       FROM messages m
+       JOIN users u ON m.sender_id = u.id
+       WHERE m.id = ?`,
+      [result.insertId]
+    );
+    
+    await createNotification(
+      receiver_id,
+      `Bạn có tin nhắn mới`
+    );
+    
+    res.json({
+      success: true,
+      message: "Đã gửi tin nhắn",
+      chat: newMessage[0]
+    });
+  } catch (err) {
+    console.error("Lỗi khi gửi tin nhắn:", err);
+    res.status(500).json({ 
+      success: false, 
+      message: "Lỗi server" 
+    });
+  }
+});
+
+app.get("/chat/teacher/users", authMiddleware, async (req, res) => {
+  try {
+    if (req.user.roles !== "teacher") {
+      return res.status(403).json({ 
+        success: false,
+        message: "Chỉ giảng viên mới xem được danh sách học viên" 
+      });
+    }
+    
+    const [students] = await db.execute(
+      `SELECT DISTINCT 
+        u.id, 
+        u.name, 
+        u.email, 
+        u.avatar, 
+        u.roles
+      FROM users u
+      JOIN course_enrollments ce ON u.id = ce.student_id
+      JOIN courses c ON ce.course_id = c.id
+      WHERE c.teacher_id = ? AND u.roles = 'student'
+      ORDER BY u.name`,
+      [req.user.id]
+    );
+    
+    const studentsWithMessages = await Promise.all(
+      students.map(async (student) => {
+        const [unreadResult] = await db.execute(
+          "SELECT COUNT(*) as unread_count FROM messages WHERE receiver_id = ? AND sender_id = ? AND is_read = 0",
+          [req.user.id, student.id]
+        );
+        
+        const [lastMessage] = await db.execute(
+          `SELECT message, created_at 
+           FROM messages 
+           WHERE (sender_id = ? AND receiver_id = ?) 
+              OR (sender_id = ? AND receiver_id = ?)
+           ORDER BY created_at DESC 
+           LIMIT 1`,
+          [req.user.id, student.id, student.id, req.user.id]
+        );
+        
+        return {
+          ...student,
+          unread_count: unreadResult[0].unread_count,
+          last_message: lastMessage[0]?.message || null,
+          last_message_time: lastMessage[0]?.created_at || null
+        };
+      })
+    );
+    
+    res.json({ 
+      success: true,
+      data: studentsWithMessages 
+    });
+  } catch (err) {
+    console.error("Lỗi khi lấy danh sách học viên:", err);
+    res.status(500).json({ 
+      success: false,
+      message: "Lỗi server" 
+    });
+  }
+});
+
+app.get("/chat/search/students", authMiddleware, async (req, res) => {
+  try {
+    if (req.user.roles !== "teacher") {
+      return res.status(403).json({ 
+        success: false,
+        message: "Chỉ giảng viên mới có quyền tìm kiếm" 
+      });
+    }
+    
+    const { search } = req.query;
+    
+    if (!search || search.trim().length < 2) {
+      return res.status(400).json({ 
+        success: false,
+        message: "Nhập ít nhất 2 ký tự để tìm kiếm" 
+      });
+    }
+    
+    const searchTerm = `%${search.trim()}%`;
+    
+    const [students] = await db.execute(
+      `SELECT DISTINCT 
+        u.id, 
+        u.name, 
+        u.email, 
+        u.avatar, 
+        u.roles
+      FROM users u
+      JOIN course_enrollments ce ON u.id = ce.student_id
+      JOIN courses c ON ce.course_id = c.id
+      WHERE c.teacher_id = ? 
+        AND u.roles = 'student'
+        AND (u.name LIKE ? OR u.email LIKE ?)
+      ORDER BY u.name
+      LIMIT 20`,
+      [req.user.id, searchTerm, searchTerm]
+    );
+    
+    res.json({ 
+      success: true,
+      data: students 
+    });
+  } catch (err) {
+    console.error("Lỗi khi tìm kiếm học viên:", err);
+    res.status(500).json({ 
+      success: false,
+      message: "Lỗi server" 
+    });
+  }
+});
+
+app.get("/chat/unread/count", authMiddleware, async (req, res) => {
+  try {
+    const [result] = await db.execute(
+      "SELECT COUNT(*) as unread_count FROM messages WHERE receiver_id = ? AND is_read = 0",
+      [req.user.id]
+    );
+    
+    res.json({ unread_count: result[0].unread_count });
+  } catch (err) {
+    console.error("Lỗi khi đếm tin nhắn chưa đọc:", err);
+    res.status(500).json({ message: "Lỗi server" });
+  }
+});
+
+app.get("/chat/unread/by-user", authMiddleware, async (req, res) => {
+  try {
+    const [result] = await db.execute(
+      `SELECT sender_id, COUNT(*) as unread_count 
+       FROM messages 
+       WHERE receiver_id = ? AND is_read = 0
+       GROUP BY sender_id`,
+      [req.user.id]
+    );
+    
+    res.json(result);
+  } catch (err) {
+    console.error("Lỗi khi đếm tin nhắn chưa đọc theo người:", err);
+    res.status(500).json({ message: "Lỗi server" });
+  }
+});
+
+app.get("/chat/student/teachers", authMiddleware, async (req, res) => {
+  try {
+    if (req.user.roles !== "student") {
+      return res.status(403).json({ 
+        success: false,
+        message: "Chỉ học viên mới xem được danh sách giảng viên" 
+      });
+    }
+    
+    const [teachers] = await db.execute(
+      `SELECT DISTINCT 
+        u.id, 
+        u.name, 
+        u.email, 
+        u.avatar, 
+        u.roles
+      FROM users u
+      JOIN courses c ON u.id = c.teacher_id
+      JOIN course_enrollments ce ON c.id = ce.course_id
+      WHERE ce.student_id = ? AND u.roles = 'teacher'
+      ORDER BY u.name`,
+      [req.user.id]
+    );
+    
+    res.json({
+      success: true,
+      data: teachers
+    });
+  } catch (err) {
+    console.error("Lỗi khi lấy danh sách giảng viên:", err);
+    res.status(500).json({ 
+      success: false,
+      message: "Lỗi server" 
+    });
+  }
+});
+
+app.get("/chat/unread/teacher/:teacher_id", authMiddleware, async (req, res) => {
+  try {
+    const teacher_id = req.params.teacher_id;
+    
+    const [result] = await db.execute(
+      "SELECT COUNT(*) as unread_count FROM messages WHERE receiver_id = ? AND sender_id = ? AND is_read = 0",
+      [req.user.id, teacher_id]
+    );
+    
+    res.json({ 
+      success: true,
+      unread_count: result[0].unread_count 
+    });
+  } catch (err) {
+    console.error("Lỗi khi đếm tin nhắn chưa đọc với giảng viên:", err);
+    res.status(500).json({ 
+      success: false,
+      message: "Lỗi server" 
+    });
+  }
+});
+
+app.delete("/chat/message/:message_id", authMiddleware, async (req, res) => {
+  try {
+    const message_id = req.params.message_id;
+    const user_id = req.user.id;
+    
+    const [message] = await db.execute(
+      "SELECT sender_id FROM messages WHERE id = ?",
+      [message_id]
+    );
+    
+    if (message.length === 0) {
+      return res.status(404).json({ message: "Tin nhắn không tồn tại" });
+    }
+    
+    if (message[0].sender_id !== user_id && req.user.roles !== "admin") {
+      return res.status(403).json({ message: "Không có quyền xóa tin nhắn này" });
+    }
+    
+    await db.execute("DELETE FROM messages WHERE id = ?", [message_id]);
+    
+    res.json({ message: "Đã xóa tin nhắn" });
+  } catch (err) {
+    console.error("Lỗi khi xóa tin nhắn:", err);
+    res.status(500).json({ message: "Lỗi server" });
   }
 });
 

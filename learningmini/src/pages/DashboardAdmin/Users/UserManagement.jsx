@@ -15,6 +15,7 @@ import {
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
+import './UserManagement.css';
 
 const { Option } = Select;
 
@@ -29,6 +30,7 @@ function UserManagement() {
   const [resetUserId, setResetUserId] = useState(null);
   const [resetForm] = Form.useForm();
   const [viewUser, setViewUser] = useState(null); 
+  const [messageApi, contextHolder] = message.useMessage();
   const token = localStorage.getItem("token");
 
   const fetchUsers = useCallback(async () => {
@@ -38,9 +40,9 @@ function UserManagement() {
       });
       setUsers(res.data);
     } catch (err) {
-      message.error(t('userManagements.messages.loadError'));
+      messageApi.error(t('userManagements.messages.loadError'));
     }
-  }, [token, t]);
+  }, [token, t, messageApi]);
 
   useEffect(() => {
     fetchUsers();
@@ -62,7 +64,7 @@ function UserManagement() {
             "Content-Type": "multipart/form-data",
           },
         });
-        message.success(t('userManagements.messages.updateSuccess'));
+        messageApi.success(t('userManagements.messages.updateSuccess'));
       } else {
         if (values.roles === "teacher") {
           const formData = new FormData();
@@ -76,7 +78,7 @@ function UserManagement() {
           await axios.post("http://localhost:5000/register", formData, {
             headers: { "Content-Type": "multipart/form-data" },
           });
-          message.success(t('userManagements.messages.teacherRegisterSuccess'));
+          messageApi.success(t('userManagements.messages.teacherRegisterSuccess'));
         } else {
           await axios.post(
             "http://localhost:5000/users",
@@ -88,7 +90,7 @@ function UserManagement() {
             },
             { headers: { Authorization: `Bearer ${token}` } }
           );
-          message.success(t('userManagements.messages.addSuccess'));
+          messageApi.success(t('userManagements.messages.addSuccess'));
         }
       }
       setIsModalOpen(false);
@@ -97,7 +99,7 @@ function UserManagement() {
       setEditingUser(null);
       fetchUsers();
     } catch (err) {
-      message.error(err.response?.data?.message || t('userManagements.messages.saveError'));
+      messageApi.error(err.response?.data?.message || t('userManagements.messages.saveError'));
     }
   };
 
@@ -106,10 +108,10 @@ function UserManagement() {
       await axios.delete(`http://localhost:5000/users/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      message.success(t('userManagements.messages.deleteSuccess'));
+      messageApi.success(t('userManagements.messages.deleteSuccess'));
       fetchUsers();
     } catch {
-      message.error(t('userManagements.messages.deleteError'));
+      messageApi.error(t('userManagements.messages.deleteError'));
     }
   };
 
@@ -120,10 +122,10 @@ function UserManagement() {
         { approve: !approved },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      message.success(res.data.message);
+      messageApi.success(res.data.message);
       fetchUsers();
     } catch (err) {
-      message.error(err.response?.data?.message || t('userManagements.messages.approveError'));
+      messageApi.error(err.response?.data?.message || t('userManagements.messages.approveError'));
     }
   };
 
@@ -134,10 +136,10 @@ function UserManagement() {
         { lock: !Number(locked) },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      message.success(res.data.message);
+      messageApi.success(res.data.message);
       fetchUsers();
     } catch (err) {
-      message.error(err.response?.data?.message || t('userManagements.messages.lockError'));
+      messageApi.error(err.response?.data?.message || t('userManagements.messages.lockError'));
     }
   };
 
@@ -148,12 +150,12 @@ function UserManagement() {
         { newPassword: values.newPassword },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      message.success(t('userManagements.messages.resetPasswordSuccess'));
+      messageApi.success(t('userManagements.messages.resetPasswordSuccess'));
       setPasswordModal(false);
       setResetUserId(null);
       resetForm.resetFields();
     } catch (err) {
-      message.error(err.response?.data?.message || t('userManagements.messages.resetPasswordError'));
+      messageApi.error(err.response?.data?.message || t('userManagements.messages.resetPasswordError'));
     }
   };
 
@@ -199,7 +201,7 @@ function UserManagement() {
       key: "roles",
       render: (role) => {
         const color = role === "admin" ? "volcano" : role === "teacher" ? "geekblue" : "green";
-        return <Tag color={color}>{t(`userManagements.roles.${role}`)}</Tag>;
+        return <Tag color={color} className="user-management-tag">{t(`userManagements.roles.${role}`)}</Tag>;
       },
     },
     {
@@ -214,12 +216,13 @@ function UserManagement() {
               size="small"
               type={approved ? "default" : "primary"}
               onClick={() => handleApprove(record.id, approved)}
+              className="status-button"
             >
               {approved ? t('userManagements.approval.approved') : t('userManagements.approval.pending')}
             </Button>
           );
         }
-        return <Tag color="default">{t('userManagements.approval.notRequired')}</Tag>;
+        return <Tag color="default" className="user-management-tag">{t('userManagements.approval.notRequired')}</Tag>;
       },
     },
     {
@@ -229,7 +232,12 @@ function UserManagement() {
       render: (_, record) => {
         const locked = Number(record.is_locked) === 1;
         return (
-          <Button size="small" type={locked ? "default" : "primary"} onClick={() => handleLock(record.id, locked)}>
+          <Button 
+            size="small" 
+            type={locked ? "default" : "primary"} 
+            onClick={() => handleLock(record.id, locked)}
+            className="status-button"
+          >
             {locked ? t('userManagements.status.locked') : t('userManagements.status.active')}
           </Button>
         );
@@ -245,14 +253,14 @@ function UserManagement() {
             {t('userManagements.actions.view')}
           </Button>
         ) : (
-          <Tag>{t('userManagements.verification.none')}</Tag>
+          <Tag className="user-management-tag">{t('userManagements.verification.none')}</Tag>
         ),
     },
     {
       title: t('userManagements.columns.actions'),
       key: "actions",
       render: (_, record) => (
-        <Space>
+        <Space className="user-management-actions">
           <Button type="link" onClick={() => openModal(record)}>
             {t('userManagements.actions.edit')}
           </Button>
@@ -275,8 +283,9 @@ function UserManagement() {
   ];
 
   return (
-    <div style={{ padding: "24px", background: "#fff", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
-      <h2 style={{ marginBottom: 16 }}>{t('userManagements.title')}</h2>
+    <div className="user-management-container">
+      {contextHolder}
+      <h2 className="user-management-header">{t('userManagements.title')}</h2>
 
       <Button type="primary" style={{ marginBottom: 16 }} onClick={() => openModal()}>
         + {t('userManagements.actions.addUser')}
@@ -288,6 +297,7 @@ function UserManagement() {
         rowKey="id" 
         bordered 
         pagination={{ pageSize: 6 }} 
+        className="user-management-table"
       />
 
       <Modal
@@ -298,8 +308,9 @@ function UserManagement() {
         cancelText={t('commons.cancel')}
         onOk={() => form.submit()}
         width={600}
+        className="user-management-modal"
       >
-        <Form form={form} layout="vertical" onFinish={handleAddOrEdit}>
+        <Form form={form} layout="vertical" onFinish={handleAddOrEdit} className="user-management-form">
           <Form.Item 
             name="name" 
             label={t('userManagements.form.name')} 
@@ -348,7 +359,7 @@ function UserManagement() {
                   beforeUpload={(file) => {
                     const isImage = /\.(jpg|jpeg|png|gif)$/i.test(file.name);
                     if (!isImage) {
-                      message.error(t('userManagements.validation.imageOnly'));
+                      messageApi.error(t('userManagements.validation.imageOnly'));
                       return Upload.LIST_IGNORE;  
                     }
                     setFile((prev) => [...prev, file]);
@@ -361,14 +372,14 @@ function UserManagement() {
                   <Button icon={<UploadOutlined />}>{t('userManagements.actions.selectImages')}</Button>
                 </Upload>
                 {file.length > 0 && (
-                  <ul>
+                  <ul className="upload-file-list">
                     {file.map((f, idx) => (
                       <li key={idx}>{f.name}</li>
                     ))}
                   </ul>
                 )}
                 {editingUser?.proof_file && (
-                  <ul>
+                  <ul className="upload-file-list">
                     {Array.isArray(editingUser.proof_file)
                       ? editingUser.proof_file.map((f, idx) => (
                           <li key={idx}>
@@ -407,8 +418,9 @@ function UserManagement() {
         okText={t('userManagements.actions.reset')}
         cancelText={t('commons.cancel')}
         onOk={() => resetForm.submit()}
+        className="user-management-modal"
       >
-        <Form form={resetForm} layout="vertical" onFinish={handleResetPassword}>
+        <Form form={resetForm} layout="vertical" onFinish={handleResetPassword} className="user-management-form">
           <Form.Item 
             name="newPassword" 
             label={t('userManagements.form.newPassword')} 
@@ -418,40 +430,50 @@ function UserManagement() {
           </Form.Item>
         </Form>
       </Modal>
-
       <Modal
         title={t('userManagements.modal.verificationInfoTitle')}
         open={!!viewUser}
         onCancel={() => setViewUser(null)}
         footer={<Button onClick={() => setViewUser(null)}>{t('commons.close')}</Button>}
         width={700}
+        className="user-management-modal verification-modal"
       >
         {viewUser && (
-          <div>
-            <p><strong>{t('userManagements.form.verificationInfo')}:</strong> {viewUser.proof_info}</p>
+          <div className="verification-modal-content">
+            <p>
+              <strong>{t('userManagements.form.verificationInfo')}:</strong>
+            </p>
+            <div className="verification-info-text">
+              {viewUser.proof_info}
+            </div>
+            
             {viewUser.proof_file && (
-              <>
+              <div className="verification-file-section">
                 {/\.(jpg|jpeg|png|gif)$/i.test(viewUser.proof_file) && (
                   <img
                     src={`http://localhost:5000/uploads/${viewUser.proof_file}`}
                     alt="proof"
-                    style={{ maxWidth: "100%", maxHeight: "400px", borderRadius: 8 }}
+                    className="verification-image"
                   />
                 )}
                 {viewUser.proof_file.toLowerCase().endsWith(".pdf") && (
                   <iframe
                     src={`http://localhost:5000/uploads/${viewUser.proof_file}`}
                     title="proof-pdf"
-                    width="100%"
-                    height="400px"
+                    className="verification-iframe"
                   />
                 )}
                 <p>
-                  <a href={`http://localhost:5000/uploads/${viewUser.proof_file}`} target="_blank" rel="noreferrer">
-                    {t('userManagements.actions.downloadFile')}
+                  <a 
+                    href={`http://localhost:5000/uploads/${viewUser.proof_file}`} 
+                    target="_blank" 
+                    rel="noreferrer"
+                    className="download-link"
+                  >
+                    📎 {t('userManagements.actions.downloadFile')}
                   </a>
                 </p>
-              </>
+              </div>
             )}
           </div>
         )}

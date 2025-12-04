@@ -1,32 +1,33 @@
 .student-assignments {
   min-height: 100vh;
-  background: #f9f9f9;
+  background: var(--assignments-bg-color, #f9f9f9);
   padding: 24px;
   font-family: 'Segoe UI', sans-serif;
+  transition: all 0.3s ease;
 }
 
 .assignments-header {
-  background: #fff;
+  background: var(--assignments-card-bg, #fff);
   border-radius: 16px;
   padding: 24px;
   margin-bottom: 24px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: var(--assignments-card-shadow, 0 4px 12px rgba(0,0,0,0.05));
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--assignments-border-color, #e0e0e0);
 }
 
 .header-content h1 {
   font-size: 28px;
   font-weight: 700;
-  color: #222;
+  color: var(--assignments-heading-color, #222);
   margin: 0 0 8px 0;
 }
 
 .header-content p {
   font-size: 14px;
-  color: #555;
+  color: var(--assignments-text-color, #555);
   margin: 0;
 }
 
@@ -38,9 +39,9 @@
 .stat-card {
   text-align: center;
   padding: 12px 20px;
-  background: #e0f3ff;
+  background: var(--assignments-stat-bg, #e0f3ff);
   border-radius: 12px;
-  color: #0077cc;
+  color: var(--assignments-primary-color, #0077cc);
   min-width: 100px;
 }
 
@@ -62,22 +63,22 @@
 }
 
 .assignment-card {
-  background: #fff;
+  background: var(--assignments-card-bg, #fff);
   border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: var(--assignments-card-shadow, 0 4px 12px rgba(0,0,0,0.05));
   overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
-  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
+  border: 1px solid var(--assignments-border-color, #e0e0e0);
 }
 
 .assignment-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+  box-shadow: var(--assignments-card-hover-shadow, 0 10px 20px rgba(0,0,0,0.08));
 }
 
 .assignment-card-header {
   padding: 20px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--assignments-divider-color, #f0f0f0);
 }
 
 .assignment-title-section {
@@ -90,7 +91,7 @@
 .assignment-title {
   font-size: 18px;
   font-weight: 600;
-  color: #222;
+  color: var(--assignments-heading-color, #222);
   margin: 0;
 }
 
@@ -104,12 +105,12 @@
   display: flex;
   gap: 16px;
   font-size: 12px;
-  color: #555;
+  color: var(--assignments-text-muted, #555);
 }
 
 .meta-item.highlight {
-  background: #dff4e0;
-  color: #228b22;
+  background: var(--assignments-success-bg, #dff4e0);
+  color: var(--assignments-success-color, #228b22);
   padding: 4px 8px;
   border-radius: 8px;
   font-weight: 600;
@@ -117,8 +118,8 @@
 
 .assignment-progress {
   padding: 16px 20px;
-  border-top: 1px solid #f0f0f0;
-  border-bottom: 1px solid #f0f0f0;
+  border-top: 1px solid var(--assignments-divider-color, #f0f0f0);
+  border-bottom: 1px solid var(--assignments-divider-color, #f0f0f0);
 }
 
 .progress-info {
@@ -126,23 +127,24 @@
   justify-content: space-between;
   margin-bottom: 6px;
   font-size: 13px;
-  color: #555;
+  color: var(--assignments-text-color, #555);
 }
 
 .questions-collapse .ant-collapse-header {
   padding: 16px 20px !important;
   font-weight: 600 !important;
-  background: #fefefe !important;
+  background: var(--assignments-collapse-header-bg, #fefefe) !important;
+  color: var(--assignments-heading-color, #222) !important;
 }
 
 .questions-collapse .ant-collapse-content-box {
   padding: 16px !important;
-  background: #fafafa !important;
+  background: var(--assignments-collapse-content-bg, #fafafa) !important;
 }
 
 .question-item {
-  background: #fff;
-  border: 1px solid #e0e0e0;
+  background: var(--assignments-card-bg, #fff);
+  border: 1px solid var(--assignments-border-color, #e0e0e0);
   border-radius: 10px;
   padding: 16px;
   margin-bottom: 12px;
@@ -157,30 +159,42 @@
 }
 
 .question-number {
-  background: #e6f2ff;
-  color: #0077cc;
+  background: var(--assignments-tag-bg, #e6f2ff);
+  color: var(--assignments-primary-color, #0077cc);
   padding: 2px 8px;
   border-radius: 10px;
   font-weight: 600;
 }
 
+.points-tag {
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+}
+
 .answer-textarea {
   border-radius: 8px !important;
-  border: 1px solid #ccc !important;
+  border: 1px solid var(--assignments-input-border, #ccc) !important;
   resize: vertical !important;
+  background: var(--assignments-input-bg, #fff) !important;
+  color: var(--assignments-text-color, #333) !important;
+}
+
+.answer-textarea:disabled {
+  background: var(--assignments-input-disabled-bg, #f5f5f5) !important;
+  color: var(--assignments-text-disabled, #999) !important;
 }
 
 .assignment-actions {
   padding: 16px 20px;
   text-align: right;
-  background: #fafafa;
+  background: var(--assignments-actions-bg, #fafafa);
 }
 
 .submit-button {
   border-radius: 10px !important;
   font-weight: 600 !important;
   font-size: 14px !important;
-  background: #0077cc !important;
+  background: var(--assignments-primary-color, #0077cc) !important;
   border: none !important;
   color: #fff !important;
   width: 100% !important;
@@ -188,14 +202,19 @@
 }
 
 .submit-button:hover {
-  background: #005fa3 !important;
+  background: var(--assignments-primary-dark, #005fa3) !important;
+}
+
+.submit-button:disabled {
+  background: var(--assignments-button-disabled-bg, #ccc) !important;
+  color: var(--assignments-button-disabled-color, #666) !important;
 }
 
 .assignments-empty,
 .questions-empty {
   padding: 40px 20px;
   text-align: center;
-  color: #555;
+  color: var(--assignments-text-muted, #555);
 }
 
 .assignments-loading {
@@ -204,12 +223,81 @@
   align-items: center;
   justify-content: center;
   height: 50vh;
-  color: #555;
+  color: var(--assignments-text-color, #555);
 }
 
 .assignments-loading p {
   margin-top: 12px;
   font-size: 14px;
+}
+
+.question-text {
+  color: var(--assignments-text-color, #333);
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.collapse-header {
+  color: var(--assignments-heading-color, #222);
+}
+
+.questions-count {
+  font-weight: 600;
+  color: var(--assignments-text-color, #555);
+}
+
+[data-theme="dark"] {
+  --assignments-bg-color: #141414;
+  --assignments-card-bg: #141414;
+  --assignments-heading-color: rgba(255, 255, 255, 0.85);
+  --assignments-text-color: rgba(255, 255, 255, 0.65);
+  --assignments-text-muted: rgba(255, 255, 255, 0.45);
+  --assignments-primary-color: #177ddc;
+  --assignments-primary-dark: #0d5ea6;
+  --assignments-border-color: #333;
+  --assignments-divider-color: #303030;
+  --assignments-card-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --assignments-card-hover-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+  --assignments-stat-bg: rgba(23, 125, 220, 0.2);
+  --assignments-success-bg: rgba(82, 196, 26, 0.2);
+  --assignments-success-color: #52c41a;
+  --assignments-collapse-header-bg: #1a1a1a;
+  --assignments-collapse-content-bg: #1f1f1f;
+  --assignments-tag-bg: rgba(23, 125, 220, 0.2);
+  --assignments-input-bg: #1f1f1f;
+  --assignments-input-disabled-bg: #2a2a2a;
+  --assignments-input-border: #434343;
+  --assignments-text-disabled: rgba(255, 255, 255, 0.3);
+  --assignments-actions-bg: #1a1a1a;
+  --assignments-button-disabled-bg: #434343;
+  --assignments-button-disabled-color: rgba(255, 255, 255, 0.4);
+}
+
+[data-theme="light"] {
+  --assignments-bg-color: #f9f9f9;
+  --assignments-card-bg: #ffffff;
+  --assignments-heading-color: #222222;
+  --assignments-text-color: #555555;
+  --assignments-text-muted: #666666;
+  --assignments-primary-color: #0077cc;
+  --assignments-primary-dark: #005fa3;
+  --assignments-border-color: #e0e0e0;
+  --assignments-divider-color: #f0f0f0;
+  --assignments-card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --assignments-card-hover-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  --assignments-stat-bg: #e0f3ff;
+  --assignments-success-bg: #dff4e0;
+  --assignments-success-color: #228b22;
+  --assignments-collapse-header-bg: #fefefe;
+  --assignments-collapse-content-bg: #fafafa;
+  --assignments-tag-bg: #e6f2ff;
+  --assignments-input-bg: #ffffff;
+  --assignments-input-disabled-bg: #f5f5f5;
+  --assignments-input-border: #cccccc;
+  --assignments-text-disabled: #999999;
+  --assignments-actions-bg: #fafafa;
+  --assignments-button-disabled-bg: #cccccc;
+  --assignments-button-disabled-color: #666666;
 }
 
 @media (max-width: 768px) {
@@ -227,10 +315,34 @@
   .assignment-title-section {
     flex-direction: column;
     align-items: flex-start;
+    gap: 8px;
   }
 
   .assignment-meta {
     flex-direction: column;
     gap: 8px;
+  }
+
+  .student-assignments {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-stats {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .stat-card {
+    width: 100%;
+  }
+
+  .assignment-card-header {
+    padding: 16px;
+  }
+
+  .questions-collapse .ant-collapse-header {
+    padding: 12px 16px !important;
   }
 }

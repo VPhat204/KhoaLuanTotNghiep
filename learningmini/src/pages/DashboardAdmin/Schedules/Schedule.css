@@ -1,51 +1,59 @@
-.schedule-container {
+.admin-schedule-with-courses {
   max-width: 1400px;
   margin: 0 auto;
   padding: 24px;
   font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  color: #1a1a1a;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  color: var(--text-primary);
+  background: var(--bg-gradient);
   min-height: 100vh;
 }
 
-.schedule-header {
-  margin-bottom: 32px;
-  background: white;
-  padding: 24px;
+.admin-schedule-section {
+  background: var(--card-bg);
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e2e8f0;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--card-border);
+  margin-bottom: 32px;
 }
 
-.header-top {
+.admin-schedule-admin-header {
+  margin-bottom: 32px;
+  background: var(--header-bg);
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: var(--header-shadow);
+  border: 1px solid var(--header-border);
+}
+
+.admin-header-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border-light);
 }
 
-.header-top h1 {
+.admin-header-top h1 {
   margin: 0;
-  color: #1e293b;
+  color: var(--text-primary);
   font-size: 32px;
   font-weight: 700;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  background: var(--gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.header-actions {
+.admin-header-actions {
   display: flex;
   gap: 12px;
 }
 
-.print-btn, .settings-btn {
+.admin-print-btn, .admin-settings-btn {
   padding: 10px 20px;
-  border: 1.5px solid #e2e8f0;
-  background: white;
+  border: 1.5px solid var(--button-border);
+  background: var(--button-bg);
   border-radius: 10px;
   cursor: pointer;
   font-size: 14px;
@@ -54,30 +62,31 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  color: var(--button-text);
 }
 
-.print-btn:hover {
-  background: #3b82f6;
-  border-color: #3b82f6;
+.admin-print-btn:hover {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
   color: white;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+  box-shadow: var(--button-hover-shadow);
 }
 
-.settings-btn {
+.admin-settings-btn {
   font-size: 18px;
   padding: 10px 14px;
 }
 
-.settings-btn:hover {
-  background: #64748b;
-  border-color: #64748b;
+.admin-settings-btn:hover {
+  background: var(--secondary-color);
+  border-color: var(--secondary-color);
   color: white;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(100, 116, 139, 0.3);
+  box-shadow: var(--button-hover-shadow);
 }
 
-.header-controls {
+.admin-header-controls {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -85,16 +94,16 @@
   gap: 24px;
 }
 
-.filter-buttons {
+.admin-filter-buttons {
   display: flex;
-  background: #f8fafc;
+  background: var(--filter-bg);
   border-radius: 12px;
   padding: 6px;
-  border: 1.5px solid #e2e8f0;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+  border: 1.5px solid var(--filter-border);
+  box-shadow: var(--filter-shadow);
 }
 
-.filter-btn {
+.admin-filter-btn {
   padding: 10px 24px;
   border: none;
   background: transparent;
@@ -103,184 +112,185 @@
   font-size: 14px;
   font-weight: 600;
   transition: all 0.3s ease;
-  color: #64748b;
+  color: var(--filter-text);
 }
 
-.filter-btn.active {
-  background: white;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+.admin-filter-btn.active {
+  background: var(--filter-active-bg);
+  box-shadow: var(--filter-active-shadow);
   font-weight: 700;
-  color: #3b82f6;
+  color: var(--primary-color);
   transform: translateY(-1px);
 }
 
-.filter-btn:hover:not(.active) {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+.admin-filter-btn:hover:not(.active) {
+  background: var(--filter-hover-bg);
+  color: var(--primary-color);
 }
 
-.date-controls {
+.admin-date-controls {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.date-display {
+.admin-date-display {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 12px 20px;
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid var(--input-border);
   border-radius: 10px;
-  background: white;
+  background: var(--input-bg);
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 14px;
   font-weight: 600;
   min-width: 150px;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--input-shadow);
+  color: var(--text-primary);
 }
 
-.date-display:hover {
-  border-color: #3b82f6;
-  background: #f8fafc;
+.admin-date-display:hover {
+  border-color: var(--primary-color);
+  background: var(--input-hover-bg);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  box-shadow: var(--input-hover-shadow);
 }
 
-.calendar-icon {
+.admin-calendar-icon {
   font-size: 16px;
-  color: #3b82f6;
+  color: var(--primary-color);
 }
 
-.date-text {
+.admin-date-text {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
-.navigation-buttons {
+.admin-navigation-buttons {
   display: flex;
   gap: 8px;
 }
 
-.nav-btn {
+.admin-nav-btn {
   padding: 10px 20px;
-  border: 1.5px solid #e2e8f0;
-  background: white;
+  border: 1.5px solid var(--button-border);
+  background: var(--button-bg);
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
   transition: all 0.3s ease;
-  color: #475569;
+  color: var(--button-text);
 }
 
-.nav-btn:hover {
-  background: #3b82f6;
-  border-color: #3b82f6;
+.admin-nav-btn:hover {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
   color: white;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  box-shadow: var(--button-hover-shadow);
 }
 
-.nav-btn.current {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+.admin-nav-btn.current {
+  background: var(--gradient-primary);
   color: white;
-  border-color: #3b82f6;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  border-color: var(--primary-color);
+  box-shadow: var(--button-active-shadow);
 }
 
-.nav-btn.current:hover {
-  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+.admin-nav-btn.current:hover {
+  background: var(--gradient-primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+  box-shadow: var(--button-active-hover-shadow);
 }
 
-.schedule-table-container {
+.admin-schedule-table-container {
   overflow-x: auto;
   margin-bottom: 32px;
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid var(--table-border);
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  background: white;
+  box-shadow: var(--table-shadow);
+  background: var(--table-bg);
 }
 
-.schedule-table {
+.admin-schedule-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   min-width: 1000px;
-  background: white;
+  background: var(--table-bg);
 }
 
-.header-cell {
-  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+.admin-header-cell {
+  background: var(--table-header-bg);
   padding: 20px 12px;
   text-align: center;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid var(--table-border);
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
   position: sticky;
   top: 0;
   z-index: 10;
 }
 
-.time-header {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+.admin-time-header {
+  background: var(--gradient-primary);
   color: white;
   font-weight: 800;
 }
 
-.day {
+.admin-day {
   font-size: 15px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
-.date {
+.admin-date {
   font-size: 13px;
-  color: #64748b;
+  color: var(--text-secondary);
   margin-top: 4px;
   font-weight: 500;
 }
 
-.time-period {
-  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+.admin-time-period {
+  background: var(--table-header-bg);
   padding: 24px 12px;
   text-align: center;
   font-weight: 700;
-  border-right: 2px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
+  border-right: 2px solid var(--table-border);
+  border-bottom: 1px solid var(--table-border);
   width: 100px;
   font-size: 14px;
-  color: #1e293b;
+  color: var(--text-primary);
   position: sticky;
   left: 0;
   z-index: 5;
 }
 
-.time-slot {
+.admin-time-slot {
   height: 160px;
-  border-bottom: 1px solid #f1f5f9;
-  border-right: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--table-row-border);
+  border-right: 1px solid var(--table-row-border);
   vertical-align: top;
   padding: 8px;
   min-width: 160px;
   position: relative;
   transition: all 0.2s ease;
-  background: white;
+  background: var(--table-cell-bg);
 }
 
-.time-slot:hover {
-  background: #f8fafc;
+.admin-time-slot:hover {
+  background: var(--table-cell-hover-bg);
 }
 
-.time-slot:last-child {
+.admin-time-slot:last-child {
   border-right: none;
 }
 
-.event-item {
+.admin-event-item {
   position: relative;
   padding: 12px;
   border-radius: 8px;
@@ -288,14 +298,14 @@
   height: 100%;
   font-size: 11px;
   line-height: 1.3;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--event-shadow);
   border: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
   overflow: visible;
   min-height: 120px;
 }
 
-.event-item::before {
+.admin-event-item::before {
   content: '';
   position: absolute;
   top: 0;
@@ -305,45 +315,45 @@
   background: rgba(255, 255, 255, 0.5);
 }
 
-.event-item:hover {
+.admin-event-item:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--event-hover-shadow);
   z-index: 5;
 }
 
-.event-item.theory {
+.admin-event-item.theory {
   background: linear-gradient(135deg, #9E9E9E, #757575);
 }
 
-.event-item.practice {
+.admin-event-item.practice {
   background: linear-gradient(135deg, #4CAF50, #388E3C);
 }
 
-.event-item.online {
+.admin-event-item.online {
   background: linear-gradient(135deg, #2196F3, #1976D2);
 }
 
-.event-item.exam {
+.admin-event-item.exam {
   background: linear-gradient(135deg, #FFEB3B, #FBC02D);
   color: #1a1a1a;
 }
 
-.event-item.pause {
+.admin-event-item.pause {
   background: linear-gradient(135deg, #FF9800, #F57C00);
 }
 
-.event-item.clinical {
+.admin-event-item.clinical {
   background: linear-gradient(135deg, #90CAF9, #42A5F5);
 }
 
-.event-top-bar {
+.admin-event-top-bar {
   margin-bottom: 8px;
   padding-right: 0;
   position: relative;
   min-height: 20px;
 }
 
-.event-title {
+.admin-event-title {
   font-weight: 700;
   font-size: 12px;
   line-height: 1.2;
@@ -353,33 +363,33 @@
   padding-right: 50px;
 }
 
-.event-details {
+.admin-event-details {
   font-size: 10px;
   line-height: 1.3;
 }
 
-.event-details div {
+.admin-event-details div {
   margin-bottom: 2px;
   display: flex;
   align-items: center;
   gap: 3px;
 }
 
-.event-details strong {
+.admin-event-details strong {
   font-weight: 600;
   opacity: 0.9;
   min-width: 25px;
   font-size: 9px;
 }
 
-.event-note {
+.admin-event-note {
   margin-top: 6px;
   font-style: italic;
   font-size: 9px;
   opacity: 0.8;
 }
 
-.event-note a {
+.admin-event-note a {
   color: inherit;
   text-decoration: underline;
   word-break: break-all;
@@ -387,397 +397,172 @@
   margin-top: 2px;
 }
 
-.schedule-legend {
+.admin-schedule-legend {
   margin-top: 32px;
   padding: 24px;
-  background: white;
+  background: var(--card-bg);
   border-radius: 16px;
-  border: 1.5px solid #e2e8f0;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: 1.5px solid var(--card-border);
+  box-shadow: var(--card-shadow);
 }
 
-.schedule-legend h3 {
+.admin-schedule-legend h3 {
   margin: 0 0 20px 0;
   font-size: 20px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
   text-align: center;
 }
 
-.legend-items {
+.admin-legend-items {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
   justify-content: center;
 }
 
-.legend-item {
+.admin-legend-item {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 10px 16px;
-  background: #f8fafc;
+  background: var(--legend-bg);
   border-radius: 10px;
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid var(--legend-border);
   transition: all 0.3s ease;
 }
 
-.legend-item:hover {
+.admin-legend-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--legend-hover-shadow);
 }
 
-.legend-color {
+.admin-legend-color {
   width: 24px;
   height: 24px;
   border-radius: 6px;
-  border: 2px solid white;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  border: 2px solid var(--legend-color-border);
+  box-shadow: var(--legend-color-shadow);
 }
 
-.legend-label {
+.admin-legend-label {
   font-size: 14px;
   font-weight: 600;
-  color: #475569;
+  color: var(--text-primary);
 }
 
-.settings-panel {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 360px;
-  background: white;
-  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  padding: 0;
-  transform: translateX(100%);
-  animation: slideInRight 0.3s ease forwards;
-}
-
-@keyframes slideInRight {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
-.settings-content {
-  padding: 32px;
-  height: 100%;
-  overflow-y: auto;
-}
-
-.settings-content h3 {
-  margin: 0 0 24px 0;
-  font-size: 24px;
-  font-weight: 700;
-  color: #1e293b;
-  text-align: center;
-}
-
-.setting-option {
-  margin-bottom: 16px;
-  padding: 16px;
-  background: #f8fafc;
-  border-radius: 10px;
-  border: 1.5px solid #e2e8f0;
-  transition: all 0.3s ease;
-}
-
-.setting-option:hover {
-  background: white;
-  border-color: #3b82f6;
-  transform: translateX(4px);
-}
-
-.setting-option label {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  color: #475569;
-  margin: 0;
-}
-
-.setting-option input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-  border: 2px solid #cbd5e1;
-  accent-color: #3b82f6;
-}
-
-.close-settings {
-  margin-top: 24px;
-  padding: 12px 24px;
-  border: 1.5px solid #e2e8f0;
-  background: white;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  width: 100%;
-  transition: all 0.3s ease;
-  color: #475569;
-}
-
-.close-settings:hover {
-  background: #3b82f6;
-  border-color: #3b82f6;
-  color: white;
-  transform: translateY(-1px);
-}
-
-.date-picker-overlay {
+.admin-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--modal-overlay-bg);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2000;
-  animation: fadeIn 0.2s ease;
+  animation: admin-fadeIn 0.2s ease;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.date-picker {
-  background: white;
-  padding: 32px;
+.admin-modal-content {
+  background: var(--modal-bg);
   border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  min-width: 380px;
+  box-shadow: var(--modal-shadow);
+  border: 1px solid var(--modal-border);
   max-width: 90vw;
-  animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 90vh;
+  overflow: hidden;
+  animation: admin-scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@keyframes scaleIn {
-  from {
-    transform: scale(0.9);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.date-picker h3 {
-  margin: 0 0 24px 0;
-  color: #1e293b;
-  font-size: 24px;
-  font-weight: 700;
-  text-align: center;
-}
-
-.date-input {
-  width: 100%;
-  padding: 16px 20px;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  font-size: 16px;
-  margin-bottom: 24px;
-  transition: all 0.3s ease;
-  background: #f8fafc;
-  font-weight: 500;
-}
-
-.date-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  background: white;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.date-picker-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-}
-
-.cancel-btn, .apply-btn {
-  padding: 12px 24px;
-  border: 2px solid;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  min-width: 100px;
-}
-
-.cancel-btn {
-  background: white;
-  border-color: #e2e8f0;
-  color: #64748b;
-}
-
-.cancel-btn:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
-  color: #475569;
-  transform: translateY(-1px);
-}
-
-.apply-btn {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  border-color: #3b82f6;
-  color: white;
-}
-
-.apply-btn:hover {
-  background: linear-gradient(135deg, #1d4ed8, #1e40af);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-}
-
-.courses-section {
-  background: white;
+.admin-modal-header {
   padding: 24px;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1.5px solid #e2e8f0;
-  margin-top: 32px;
+  border-bottom: 1px solid var(--modal-border);
+  background: var(--modal-header-bg);
 }
 
-.courses-section h2 {
-  margin: 0 0 20px 0;
-  color: #1e293b;
+.admin-modal-header h3 {
+  margin: 0;
+  color: var(--text-primary);
   font-size: 24px;
   font-weight: 700;
-  text-align: center;
 }
 
-.courses-list {
+.admin-close-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+}
+
+.admin-close-btn:hover {
+  color: var(--text-primary);
+  transform: scale(1.1);
+}
+
+.admin-modal-body {
+  padding: 24px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.admin-modal-footer {
+  padding: 20px 24px;
+  border-top: 1px solid var(--modal-border);
+  background: var(--modal-footer-bg);
   display: flex;
-  flex-direction: column;
+  justify-content: flex-end;
   gap: 12px;
 }
 
-.course-item {
-  background: white;
-  padding: 16px;
+.admin-course-selection-item {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: 12px;
-  border: 1.5px solid #e2e8f0;
-  cursor: grab;
+  padding: 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.course-item:hover {
-  border-color: #3b82f6;
+.admin-course-selection-item:hover {
+  border-color: var(--primary-color);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.15);
+  box-shadow: var(--card-hover-shadow);
 }
 
-.course-item:active {
-  cursor: grabbing;
-}
-
-.course-header {
+.admin-course-selection-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 8px;
 }
 
-.course-header strong {
-  color: #1e293b;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.3;
-  flex: 1;
-  margin-right: 12px;
-}
-
-.course-type {
-  font-size: 11px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  color: white;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.course-type.theory { background: linear-gradient(135deg, #9E9E9E, #757575); }
-.course-type.practice { background: linear-gradient(135deg, #4CAF50, #388E3C); }
-.course-type.online { background: linear-gradient(135deg, #2196F3, #1976D2); }
-.course-type.exam { background: linear-gradient(135deg, #FFEB3B, #FBC02D); color: #1a1a1a; }
-
-.course-teacher {
-  font-size: 13px;
-  color: #64748b;
-  margin: 4px 0;
-  font-weight: 500;
-}
-
-.course-room {
-  font-size: 12px;
-  color: #94a3b8;
+.admin-course-selection-header h4 {
   margin: 0;
-  font-weight: 500;
-}
-
-.schedule-type-selector {
-  margin: 15px 0;
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-}
-
-.schedule-type-selector h3 {
-  margin: 0 0 10px 0;
-  font-size: 14px;
-  color: #495057;
+  color: var(--text-primary);
+  font-size: 16px;
   font-weight: 600;
 }
 
-.schedule-type-buttons {
-  display: flex;
-  gap: 8px;
+.admin-course-selection-info p {
+  margin: 4px 0;
+  color: var(--text-secondary);
+  font-size: 14px;
 }
 
-.type-btn {
-  flex: 1;
-  padding: 8px 12px;
-  border: 1px solid #dee2e6;
-  background: white;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-  transition: all 0.2s;
+.admin-course-selection-info strong {
+  color: var(--text-primary);
 }
 
-.type-btn:hover {
-  background: #e9ecef;
-  border-color: #adb5bd;
-}
-
-.type-btn.active {
-  background: #007bff;
-  color: white;
-  border-color: #007bff;
-}
-
-.edit-form {
+.admin-edit-form {
   margin-top: 8px;
   padding: 8px;
   background: rgba(255, 255, 255, 0.15);
@@ -786,15 +571,15 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.form-group {
+.admin-form-group {
   margin-bottom: 6px;
 }
 
-.form-group:last-child {
+.admin-form-group:last-child {
   margin-bottom: 0;
 }
 
-.form-group label {
+.admin-form-group label {
   display: block;
   font-size: 9px;
   color: rgba(255, 255, 255, 0.9);
@@ -804,8 +589,8 @@
   letter-spacing: 0.3px;
 }
 
-.form-group input,
-.form-group select {
+.admin-form-group input,
+.admin-form-group select {
   width: 100%;
   padding: 4px 6px;
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -817,32 +602,32 @@
   font-weight: 500;
 }
 
-.form-group input::placeholder {
+.admin-form-group input::placeholder {
   color: rgba(255, 255, 255, 0.6);
   font-size: 9px;
 }
 
-.form-group input:focus,
-.form-group select:focus {
+.admin-form-group input:focus,
+.admin-form-group select:focus {
   outline: none;
   border-color: rgba(255, 255, 255, 0.8);
   background: rgba(255, 255, 255, 0.2);
 }
 
-.form-group select option {
+.admin-form-group select option {
   background: #2d3748;
   color: white;
   padding: 6px;
   font-size: 10px;
 }
 
-.course-actions {
+.admin-course-actions {
   display: flex;
   gap: 4px;
   align-items: center;
 }
 
-.action-btn {
+.admin-action-btn {
   padding: 4px 6px;
   border: none;
   border-radius: 4px;
@@ -854,34 +639,34 @@
   justify-content: center;
 }
 
-.edit-btn {
+.admin-edit-btn {
   background: #17a2b8;
   color: white;
 }
 
-.edit-btn:hover {
+.admin-edit-btn:hover {
   background: #138496;
 }
 
-.save-btn {
+.admin-save-btn {
   background: #28a745;
   color: white;
 }
 
-.save-btn:hover {
+.admin-save-btn:hover {
   background: #218838;
 }
 
-.cancel-btn {
+.admin-cancel-btn {
   background: #6c757d;
   color: white;
 }
 
-.cancel-btn:hover {
+.admin-cancel-btn:hover {
   background: #5a6268;
 }
 
-.event-actions {
+.admin-event-actions {
   position: absolute;
   top: 8px;
   right: 8px;
@@ -895,12 +680,12 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.event-item:hover .event-actions {
+.admin-event-item:hover .admin-event-actions {
   opacity: 1;
   transform: scale(1);
 }
 
-.event-actions button {
+.admin-event-actions button {
   padding: 4px 6px;
   border: none;
   border-radius: 4px;
@@ -918,258 +703,573 @@
   backdrop-filter: blur(5px);
 }
 
-.event-item.editing .event-actions {
+.admin-event-item.editing .admin-event-actions {
   opacity: 1;
   transform: scale(1);
 }
 
-.event-actions button .anticon {
+.admin-event-actions button .anticon {
   font-size: 10px;
 }
 
-.event-actions .edit-btn {
+.admin-event-actions .admin-edit-btn {
   color: #1890ff;
   background: rgba(255, 255, 255, 0.9);
 }
 
-.event-actions .edit-btn:hover {
+.admin-event-actions .admin-edit-btn:hover {
   background: #1890ff;
   color: white;
   transform: scale(1.1);
 }
 
-.event-actions .save-btn {
+.admin-event-actions .admin-save-btn {
   color: #52c41a;
   background: rgba(255, 255, 255, 0.9);
 }
 
-.event-actions .save-btn:hover {
+.admin-event-actions .admin-save-btn:hover {
   background: #52c41a;
   color: white;
   transform: scale(1.1);
 }
 
-.event-actions .cancel-btn {
+.admin-event-actions .admin-cancel-btn {
   color: #fa8c16;
   background: rgba(255, 255, 255, 0.9);
 }
 
-.event-actions .cancel-btn:hover {
+.admin-event-actions .admin-cancel-btn:hover {
   background: #fa8c16;
   color: white;
   transform: scale(1.1);
 }
 
-.event-actions .remove-btn {
+.admin-event-actions .admin-remove-btn {
   color: #ff4d4f;
   background: rgba(255, 255, 255, 0.9);
   font-size: 10px;
   font-weight: bold;
 }
 
-.event-actions .remove-btn:hover {
+.admin-event-actions .admin-remove-btn:hover {
   background: #ff4d4f;
   color: white;
   transform: scale(1.1);
 }
 
-.event-item.editing {
+.admin-event-item.editing {
   border: 2px solid rgba(59, 130, 246, 0.8);
   box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
   z-index: 10;
 }
 
-.empty-slot {
+.admin-empty-slot {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 11px;
   text-align: center;
   padding: 16px;
-  border: 2px dashed #cbd5e1;
+  border: 2px dashed var(--empty-slot-border);
   border-radius: 8px;
   transition: all 0.3s ease;
-  background: rgba(248, 250, 252, 0.5);
+  background: var(--empty-slot-bg);
 }
 
-.empty-slot:hover {
-  border-color: #3b82f6;
-  background: rgba(59, 130, 246, 0.05);
-  color: #3b82f6;
+.admin-empty-slot:hover {
+  border-color: var(--primary-color);
+  background: var(--empty-slot-hover-bg);
+  color: var(--primary-color);
 }
 
-.empty-icon {
+.admin-empty-icon {
   font-size: 20px;
   font-weight: bold;
   margin-bottom: 6px;
-  color: #cbd5e1;
+  color: var(--empty-icon-color);
   transition: all 0.3s ease;
 }
 
-.empty-slot:hover .empty-icon {
-  color: #3b82f6;
+.admin-empty-slot:hover .admin-empty-icon {
+  color: var(--primary-color);
   transform: scale(1.1);
 }
 
-.drop-zone.drag-over {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(34, 197, 94, 0.1));
-  border: 2px dashed #3b82f6;
-  border-radius: 8px;
+.admin-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--loading-overlay-bg);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+}
+
+.admin-loading-spinner {
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.admin-date-picker-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--modal-overlay-bg);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: admin-fadeIn 0.2s ease;
+}
+
+.admin-date-picker {
+  background: var(--modal-bg);
+  padding: 32px;
+  border-radius: 20px;
+  box-shadow: var(--modal-shadow);
+  min-width: 380px;
+  max-width: 90vw;
+  animation: admin-scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.admin-date-picker h3 {
+  margin: 0 0 24px 0;
+  color: var(--text-primary);
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.admin-date-input {
+  width: 100%;
+  padding: 16px 20px;
+  border: 2px solid var(--input-border);
+  border-radius: 12px;
+  font-size: 16px;
+  margin-bottom: 24px;
+  transition: all 0.3s ease;
+  background: var(--input-bg);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.admin-date-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  background: var(--input-hover-bg);
+  box-shadow: 0 0 0 3px var(--primary-shadow);
+}
+
+.admin-date-picker-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.admin-cancel-btn, .admin-apply-btn {
+  padding: 12px 24px;
+  border: 2px solid;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  min-width: 100px;
+}
+
+.admin-cancel-btn {
+  background: var(--button-bg);
+  border-color: var(--button-border);
+  color: var(--button-text);
+}
+
+.admin-cancel-btn:hover {
+  background: var(--button-hover-bg);
+  border-color: var(--button-hover-border);
+  color: var(--button-hover-text);
+  transform: translateY(-1px);
+}
+
+.admin-apply-btn {
+  background: var(--gradient-primary);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+.admin-apply-btn:hover {
+  background: var(--gradient-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--button-hover-shadow);
+}
+
+.admin-courses-section {
+  background: var(--card-bg);
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: var(--card-shadow);
+  border: 1.5px solid var(--card-border);
+  margin-top: 32px;
+}
+
+.admin-courses-section h2 {
+  margin: 0 0 20px 0;
+  color: var(--text-primary);
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.admin-courses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-course-item {
+  background: var(--card-bg);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1.5px solid var(--card-border);
+  cursor: grab;
+  transition: all 0.3s ease;
+  box-shadow: var(--card-shadow);
+}
+
+.admin-course-item:hover {
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: var(--card-hover-shadow);
+}
+
+.admin-course-item:active {
+  cursor: grabbing;
+}
+
+.admin-course-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.admin-course-header strong {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  flex: 1;
+  margin-right: 12px;
+}
+
+.admin-course-type {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  color: white;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-course-type.theory { background: linear-gradient(135deg, #9E9E9E, #757575); }
+.admin-course-type.practice { background: linear-gradient(135deg, #4CAF50, #388E3C); }
+.admin-course-type.online { background: linear-gradient(135deg, #2196F3, #1976D2); }
+.admin-course-type.exam { background: linear-gradient(135deg, #FFEB3B, #FBC02D); color: #1a1a1a; }
+
+.admin-course-teacher {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 4px 0;
+  font-weight: 500;
+}
+
+.admin-course-room {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 500;
+}
+
+[data-theme="dark"] {
+  --bg-gradient: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+  --text-primary: #e6e6e6;
+  --text-secondary: #8c8c8c;
+  --card-bg: #1a1a1a;
+  --card-border: #333;
+  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --card-hover-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --header-bg: #1f1f1f;
+  --header-border: #333;
+  --header-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  --border-light: #333;
+  --gradient-primary: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  --gradient-primary-hover: linear-gradient(135deg, #1d4ed8, #1e40af);
+  --primary-color: #1890ff;
+  --primary-shadow: rgba(24, 144, 255, 0.2);
+  --secondary-color: #64748b;
+  --button-bg: #2d2d2d;
+  --button-border: #444;
+  --button-text: #e6e6e6;
+  --button-hover-bg: #3b82f6;
+  --button-hover-border: #3b82f6;
+  --button-hover-text: white;
+  --button-hover-shadow: 0 6px 20px rgba(24, 144, 255, 0.3);
+  --button-active-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
+  --button-active-hover-shadow: 0 6px 16px rgba(24, 144, 255, 0.5);
+  --filter-bg: #2d2d2d;
+  --filter-border: #444;
+  --filter-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  --filter-text: #8c8c8c;
+  --filter-active-bg: #1a1a1a;
+  --filter-active-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+  --filter-hover-bg: rgba(24, 144, 255, 0.1);
+  --input-bg: #2d2d2d;
+  --input-border: #444;
+  --input-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --input-hover-bg: #262626;
+  --input-hover-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+  --table-bg: #1a1a1a;
+  --table-border: #333;
+  --table-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  --table-header-bg: linear-gradient(135deg, #2d2d2d, #262626);
+  --table-cell-bg: #1a1a1a;
+  --table-cell-hover-bg: #262626;
+  --table-row-border: #333;
+  --event-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --event-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --legend-bg: #2d2d2d;
+  --legend-border: #444;
+  --legend-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --legend-color-border: #1a1a1a;
+  --legend-color-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  --modal-overlay-bg: rgba(0, 0, 0, 0.7);
+  --modal-bg: #1a1a1a;
+  --modal-border: #333;
+  --modal-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  --modal-header-bg: #1f1f1f;
+  --modal-footer-bg: #1f1f1f;
+  --empty-slot-border: #444;
+  --empty-slot-bg: rgba(45, 45, 45, 0.5);
+  --empty-slot-hover-bg: rgba(24, 144, 255, 0.1);
+  --empty-icon-color: #666;
+  --loading-overlay-bg: rgba(0, 0, 0, 0.8);
+}
+
+[data-theme="light"] {
+  --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  --text-primary: #1a1a1a;
+  --text-secondary: #64748b;
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --card-hover-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --header-bg: #ffffff;
+  --header-border: #e2e8f0;
+  --header-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --border-light: #f1f5f9;
+  --gradient-primary: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  --gradient-primary-hover: linear-gradient(135deg, #1d4ed8, #1e40af);
+  --primary-color: #3b82f6;
+  --primary-shadow: rgba(59, 130, 246, 0.2);
+  --secondary-color: #64748b;
+  --button-bg: #ffffff;
+  --button-border: #e2e8f0;
+  --button-text: #475569;
+  --button-hover-bg: #3b82f6;
+  --button-hover-border: #3b82f6;
+  --button-hover-text: white;
+  --button-hover-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+  --button-active-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  --button-active-hover-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+  --filter-bg: #f8fafc;
+  --filter-border: #e2e8f0;
+  --filter-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+  --filter-text: #64748b;
+  --filter-active-bg: #ffffff;
+  --filter-active-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+  --filter-hover-bg: rgba(59, 130, 246, 0.1);
+  --input-bg: #ffffff;
+  --input-border: #e2e8f0;
+  --input-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --input-hover-bg: #f8fafc;
+  --input-hover-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  --table-bg: #ffffff;
+  --table-border: #e2e8f0;
+  --table-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --table-header-bg: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  --table-cell-bg: #ffffff;
+  --table-cell-hover-bg: #f8fafc;
+  --table-row-border: #f1f5f9;
+  --event-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --event-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  --legend-bg: #f8fafc;
+  --legend-border: #e2e8f0;
+  --legend-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --legend-color-border: #ffffff;
+  --legend-color-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  --modal-overlay-bg: rgba(0, 0, 0, 0.5);
+  --modal-bg: #ffffff;
+  --modal-border: #e2e8f0;
+  --modal-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  --modal-header-bg: #fafafa;
+  --modal-footer-bg: #fafafa;
+  --empty-slot-border: #cbd5e1;
+  --empty-slot-bg: rgba(248, 250, 252, 0.5);
+  --empty-slot-hover-bg: rgba(59, 130, 246, 0.05);
+  --empty-icon-color: #cbd5e1;
+  --loading-overlay-bg: rgba(255, 255, 255, 0.9);
+}
+
+@keyframes admin-fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes admin-scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @media (max-width: 768px) {
-  .event-actions {
+  .admin-schedule-with-courses {
+    padding: 16px;
+  }
+  
+  .admin-header-top {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  
+  .admin-header-controls {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .admin-filter-buttons {
+    justify-content: center;
+  }
+  
+  .admin-date-controls {
+    justify-content: center;
+  }
+  
+  .admin-time-slot {
+    height: 140px;
+    min-width: 140px;
+  }
+  
+  .admin-event-item {
+    padding: 10px;
+    font-size: 10px;
+    min-height: 110px;
+  }
+  
+  .admin-event-actions {
     top: 4px;
     right: 4px;
     gap: 3px;
   }
   
-  .event-actions button {
+  .admin-event-actions button {
     width: 18px;
     height: 18px;
     font-size: 9px;
     padding: 3px;
   }
   
-  .event-title {
+  .admin-event-title {
     padding-right: 45px;
     font-size: 11px;
   }
-  
-  .event-actions button .anticon {
-    font-size: 9px;
-  }
-  
-  .time-slot {
-    height: 140px;
-    min-width: 140px;
-    padding: 6px;
-  }
-  
-  .event-item {
-    padding: 10px;
-    font-size: 10px;
-    min-height: 110px;
-  }
-  
-  .schedule-type-buttons {
-    flex-direction: column;
-  }
-  
-  .course-actions {
-    flex-direction: column;
-  }
-  
-  .action-btn {
-    width: 100%;
-    margin-bottom: 2px;
-  }
 }
 
-@media (max-width: 1024px) {
-  .schedule-container {
-    padding: 16px;
+@media (max-width: 576px) {
+  .admin-schedule-with-courses {
+    padding: 12px;
   }
   
-  .header-controls {
+  .admin-modal-content {
+    margin: 20px;
+    width: calc(100% - 40px);
+  }
+  
+  .admin-legend-items {
     flex-direction: column;
-    align-items: stretch;
-    gap: 16px;
+    align-items: center;
   }
   
-  .filter-buttons {
-    justify-content: center;
-  }
-  
-  .date-controls {
-    justify-content: center;
-  }
-}
-
-@media (max-width: 768px) {
-  .header-top {
-    flex-direction: column;
-    gap: 16px;
-    align-items: stretch;
-    text-align: center;
-  }
-  
-  .header-actions {
-    justify-content: center;
-  }
-  
-  .date-picker {
+  .admin-date-picker {
     margin: 20px;
     padding: 24px;
     min-width: auto;
   }
   
-  .date-picker-actions {
+  .admin-date-picker-actions {
     flex-direction: column;
   }
   
-  .cancel-btn, .apply-btn {
-    width: 100%;
-  }
-  
-  .legend-items {
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-  }
-  
-  .legend-item {
-    width: 200px;
-    justify-content: center;
-  }
-  
-  .settings-panel {
+  .admin-cancel-btn, .admin-apply-btn {
     width: 100%;
   }
 }
 
 @media print {
-  .schedule-container {
+  .admin-schedule-with-courses {
     background: white;
     padding: 0;
   }
   
-  .header-actions,
-  .settings-panel,
-  .courses-section {
+  .admin-header-actions,
+  .admin-courses-section {
     display: none;
   }
   
-  .schedule-table-container {
+  .admin-schedule-table-container {
     box-shadow: none;
     border: 2px solid #1a1a1a;
   }
   
-  .schedule-legend {
+  .admin-schedule-legend {
     border: 2px solid #1a1a1a;
     break-inside: avoid;
   }
   
-  .event-item {
+  .admin-event-item {
     box-shadow: none;
     border: 1px solid #1a1a1a;
   }
   
-  .event-actions {
+  .admin-event-actions {
     display: none !important;
   }
   
-  .event-title {
+  .admin-event-title {
     padding-right: 0;
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .event-actions button {
-    background: rgba(0, 0, 0, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
+.admin-schedule-with-courses * {
+  transition: background-color 0.3s ease, 
+              color 0.3s ease, 
+              border-color 0.3s ease, 
+              box-shadow 0.3s ease;
 }

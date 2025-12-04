@@ -49,27 +49,29 @@ function StudentList() {
     <div className="my-courses-container">
       <h1>{t("studentlist.myCourses")}</h1>
 
-      <div className="course-select">
-        <label>{t("studentlist.chooseCourse")}:</label>
-        <select
-          value={selectedCourse?.id || ""}
-          onChange={(e) =>
-            setSelectedCourse(courses.find(c => c.id === parseInt(e.target.value)))
-          }
-        >
-          {courses.map(c => (
-            <option key={c.id} value={c.id}>
-              {c.title}
-            </option>
-          ))}
-        </select>
+      <div className="course-teacher-select">
+        <div className="course-select">
+          <label>{t("studentlist.chooseCourse")}:</label>
+          <select
+            value={selectedCourse?.id || ""}
+            onChange={(e) =>
+              setSelectedCourse(courses.find(c => c.id === parseInt(e.target.value)))
+            }
+          >
+            {courses.map(c => (
+              <option key={c.id} value={c.id}>
+                {c.title}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      {selectedCourse && <h2 className="course-title">{selectedCourse.title}</h2>}
+      {selectedCourse && <h2 className="course-teacher-title">{selectedCourse.title}</h2>}
 
       <div>
         {loading ? (
-          <p>{t("studentlist.loading")}</p>
+          <p style={{ color: 'var(--student-list-text-primary)' }}>{t("studentlist.loading")}</p>
         ) : (
           <table className="students-table">
             <thead>
@@ -84,18 +86,25 @@ function StudentList() {
             </thead>
 
             <tbody>
-              {students.map((s, idx) => (
-                <tr key={s.student_id}>
-                  <td>{idx + 1}</td>
-                  <td>{s.student_name}</td>
-                  <td>{s.email}</td>
-                  <td>{s.phone || "-"}</td>
-                  <td>{s.gender}</td>
-                  <td>{new Date(s.enrolled_at).toLocaleDateString()}</td>
+              {students.length > 0 ? (
+                students.map((s, idx) => (
+                  <tr key={s.student_id}>
+                    <td>{idx + 1}</td>
+                    <td>{s.student_name}</td>
+                    <td>{s.email}</td>
+                    <td>{s.phone || "-"}</td>
+                    <td>{s.gender}</td>
+                    <td>{new Date(s.enrolled_at).toLocaleDateString()}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: 'center', color: 'var(--student-list-text-secondary)' }}>
+                    {t("studentlist.noStudents")}
+                  </td>
                 </tr>
-              ))}
+              )}
             </tbody>
-
           </table>
         )}
       </div>

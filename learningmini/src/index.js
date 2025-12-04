@@ -6,12 +6,15 @@ import "./languages/i18n";
 import '../node_modules/antd/dist/reset.css';
 import reportWebVitals from './reportWebVitals';
 import { UserProvider } from "./context/userContext";
+import { ThemeProvider } from './context/themeContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <UserProvider>
-      <App />
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
     </UserProvider>
   </React.StrictMode>
 );

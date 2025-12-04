@@ -1,259 +1,282 @@
 import { useEffect, useState } from "react";
-import { Card, Button, Modal, Form, Input, Select, message, Table, Popconfirm } from "antd";
-import { useTranslation } from "react-i18next";
-import api from "../../../api";
-import "./MyAssignments.css";
+import axios from "axios";
+import { message } from "antd";
+import "./TeacherList.css";
 
-export default function MyAssignments() {
-  const { t } = useTranslation();
-  const [courses, setCourses] = useState([]);
-  const [assignments, setAssignments] = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState(null);
-  const [visibleAssignmentModal, setVisibleAssignmentModal] = useState(false);
-  const [visibleQuestionModal, setVisibleQuestionModal] = useState(false);
-  const [currentAssignment, setCurrentAssignment] = useState(null);
-  const [questions, setQuestions] = useState([]);
-  const [submissions, setSubmissions] = useState([]);
-  const [grading, setGrading] = useState({});
-  const [form] = Form.useForm();
-  const [questionForm] = Form.useForm();
+export default function TeacherList({ onCourseEnrolled }) {
+  const [teachers, setTeachers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [enrolling, setEnrolling] = useState({});
+  const [selectedTeacher, setSelectedTeacher] = useState(null);
+  const [enrolledCourses, setEnrolledCourses] = useState(new Set());
+  const [pendingCourses, setPendingCourses] = useState(new Set());
+  const [viewMode, setViewMode] = useState("grid");
+
+  const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user"));
+  const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
-    api.get("/courses").then(res => {
-      setCourses(res.data);
-      if (res.data.length > 0) setSelectedCourse(res.data[0].id);
-    });
-  }, []);
-
-  useEffect(() => {
-    if (!selectedCourse) return;
-    setAssignments([]);
-    setSubmissions([]);
-    setCurrentAssignment(null);
-    setQuestions([]);
-    api.get(`/assignments/course/${selectedCourse}`).then(res => setAssignments(res.data));
-  }, [selectedCourse]);
-
-  const handleCreateAssignment = (values) => {
-    api.post("/assignments", values)
-      .then(() => {
-        message.success(t("assign.successCreate"));
-        form.resetFields();
-        setVisibleAssignmentModal(false);
-        api.get(`/assignments/course/${selectedCourse}`).then(res => setAssignments(res.data));
-      })
-      .catch(() => message.error(t("assign.errorCreate")));
-  };
-
-  const handleAddQuestion = (values) => {
-    api.post(`/assignments/${currentAssignment}/questions`, values)
-      .then(() => {
-        message.success(t("assign.successAddQuestion"));
-        questionForm.resetFields();
-        loadQuestions(currentAssignment);
-      })
-      .catch(err => message.error(err.response?.data?.message || t("assign.errorAddQuestion")));
-  };
-
-  const loadQuestions = (assignmentId) => {
-    api.get(`/assignments/${assignmentId}/questions`).then(res => setQuestions(res.data));
-  };
-
-  const handleDeleteQuestion = (questionId) => {
-    api.delete(`/assignments/${currentAssignment}/questions/${questionId}`)
-      .then(() => {
-        message.success(t("assign.successDeleteQuestion"));
-        loadQuestions(currentAssignment);
-      })
-      .catch(() => message.error(t("assign.errorDeleteQuestion")));
-  };
-
-  const viewSubmissions = async (assignmentId) => {
-    const res = await api.get(`/assignments/${assignmentId}/submissions`);
-    const submissionsWithAnswers = await Promise.all(
-      res.data.map(async sub => {
-        const answersRes = await api.get(`/assignments/${assignmentId}/answers/student/${sub.student_id}`);
-        return { ...sub, answers: answersRes.data };
-      })
-    );
-    setSubmissions(submissionsWithAnswers);
-    setCurrentAssignment(assignmentId);
-    const newGrading = {};
-    submissionsWithAnswers.forEach(sub => {
-      newGrading[sub.submission_id] = {};
-      sub.answers.forEach(a => newGrading[sub.submission_id][a.question_id] = a.score ?? 0);
-    });
-    setGrading(newGrading);
-  };
-
-  const handleChangeScore = (submissionId, questionId, value) => {
-    setGrading(prev => ({
-      ...prev,
-      [submissionId]: { ...prev[submissionId], [questionId]: value !== "" ? Number(value) : undefined },
-    }));
-  };
-
-  const confirmGrading = async () => {
-    try {
-      const payload = [];
-      submissions.forEach(sub => {
-        sub.answers.forEach(a => {
-          const score = grading[sub.submission_id]?.[a.question_id];
-          if (score !== undefined) {
-            payload.push({
-              submission_id: sub.submission_id,
-              question_id: a.question_id,
-              score: Number(score)
-            });
-          }
+    const fetchTeachers = async () => {
+      setLoading(true);
+      try {
+        const res = await axios.get("http://localhost:5000/teachers-courses", {
+          headers: { Authorization: `Bearer ${token}` },
         });
+        setTeachers(res.data);
+      } catch (err) {
+        console.error(err);
+        messageApi.error("Lỗi khi tải danh sách giảng viên");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTeachers();
+  }, [token, messageApi]);
+
+  useEffect(() => {
+    const fetchEnrolledCourses = async () => {
+      if (user && user.roles === "student") {
+        try {
+          const enrolledRes = await axios.get(
+            `http://localhost:5000/users/${user.id}/courses`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          const enrolledIds = new Set(enrolledRes.data.map(course => course.id));
+          setEnrolledCourses(enrolledIds);
+          
+          const pendingRes = await axios.get(
+            `http://localhost:5000/users/${user.id}/pending-courses`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          const pendingIds = new Set(pendingRes.data.map(course => course.id));
+          setPendingCourses(pendingIds);
+          
+        } catch (err) {
+          console.error("Lỗi khi lấy khóa học:", err);
+        }
+      }
+    };
+    fetchEnrolledCourses();
+  }, [token, user]);
+
+  const getCourseStatus = (courseId) => {
+    if (enrolledCourses.has(courseId)) {
+      return "enrolled";
+    }
+    if (pendingCourses.has(courseId)) {
+      return "pending";
+    }
+    return "available";
+  };
+
+  const handleViewCourses = (teacher) => {
+    setSelectedTeacher(teacher);
+    setViewMode("detail");
+  };
+
+  const handleBackToList = () => {
+    setSelectedTeacher(null);
+    setViewMode("grid");
+  };
+
+  const handleEnroll = async (courseId, courseTitle) => {
+    try {
+      setEnrolling(prev => ({ ...prev, [courseId]: true }));
+      
+      if (user.roles !== "student") {
+        messageApi.error("Chỉ sinh viên mới có thể đăng ký khóa học");
+        return;
+      }
+
+      const status = getCourseStatus(courseId);
+      if (status === "enrolled") {
+        messageApi.warning("Bạn đã đăng ký khóa học này rồi");
+        return;
+      }
+      
+      if (status === "pending") {
+        messageApi.info("Khóa học này đang chờ xác nhận. Vui lòng kiên nhẫn!");
+        return;
+      }
+
+      await axios.post(
+        `http://localhost:5000/courses/${courseId}/enroll`,
+        { status: "pending" },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      setPendingCourses(prev => new Set([...prev, courseId]));
+      
+      messageApi.success({
+        content: `Đã gửi yêu cầu đăng ký khóa học: ${courseTitle}`,
+        duration: 3,
       });
-
-      if (payload.length === 0) return message.warning(t("assign.noValidScore"));
-      if (!currentAssignment) return message.error(t("assign.errorAssignmentNotFound"));
-
-      await api.post(`/assignments/${currentAssignment}/grade-answers-bulk`, { grades: payload });
-      message.success(t("assign.successGrade"));
-      viewSubmissions(currentAssignment);
-    } catch {
-      message.error(t("assign.errorGrade"));
+      
+      messageApi.info({
+        content: "Khóa học của bạn đang chờ xác nhận.",
+        duration: 5,
+      });
+      
+      if (onCourseEnrolled) {
+        onCourseEnrolled();
+      }
+      
+    } catch (error) {
+      console.error("Lỗi khi đăng ký:", error);
+      if (error.response?.status === 403) {
+        messageApi.error("Bạn không có quyền đăng ký khóa học");
+      } else if (error.response?.status === 409) {
+        messageApi.warning("Bạn đã gửi yêu cầu đăng ký cho khóa học này rồi");
+        setPendingCourses(prev => new Set([...prev, courseId]));
+      } else {
+        messageApi.error("Có lỗi xảy ra khi gửi yêu cầu đăng ký khóa học");
+      }
+    } finally {
+      setEnrolling(prev => ({ ...prev, [courseId]: false }));
     }
   };
 
-  const handleDeleteAnswer = (studentId, questionId) => {
-    api.delete(`/assignments/${currentAssignment}/answers/${studentId}/${questionId}`)
-      .then(() => {
-        message.success(t("assign.successDeleteAnswer"));
-        viewSubmissions(currentAssignment);
-      })
-      .catch(() => message.error(t("assign.errorDeleteAnswer")));
-  };
-
-  const handleDeleteSubmission = (studentId) => {
-    api.delete(`/assignments/${currentAssignment}/submissions/${studentId}`)
-      .then(() => {
-        message.success(t("assign.successDeleteSubmission"));
-        viewSubmissions(currentAssignment);
-      })
-      .catch(() => message.error(t("assign.errorDeleteSubmission")));
-  };
-
-  const submissionColumns = [
-    { title: t("assign.student"), dataIndex: "student_name" },
-    {
-      title: t("assign.answersAndScore"),
-      render: (_, record) => (
-        <div className="answers-box">
-          {(record.answers || []).map((a, index) => (
-            <div key={a.question_id} className="answer-item">
-              <p><b>{t("assign.question")} {index + 1}:</b> {a.answer_text}</p>
-              <div className="answer-item-info">
-                <Input
-                type="number"
-                min={0}
-                placeholder={t("assign.score")}
-                value={grading[record.submission_id]?.[a.question_id] ?? 0}
-              onChange={e => handleChangeScore(record.submission_id, a.question_id, e.target.value)}
-              className="score-input"
-            />
-              <Popconfirm
-                title={t("assign.confirmDeleteAnswer")}
-                onConfirm={() => handleDeleteAnswer(record.student_id, a.question_id)}
-              >
-                <Button danger size="small">{t("assign.delete")}</Button>
-              </Popconfirm>
+  const renderGridView = () => (
+    <div className="teachers-grid">
+      {teachers.map((teacher) => (
+        <div key={teacher.id} className="teacher-card">
+          <div className="teacher-main-info">
+            <div className="teacher-avatar">
+              <img 
+                src={`http://localhost:5000${teacher.avatar}`} 
+                alt={teacher.name}
+                onError={(e) => e.target.src = require("../../../assets/default.jpg")}
+              />
+            </div>
+            <div className="teacher-details">
+              <div className="detail-row">
+                <span className="teacher-name">{teacher.name}</span>
+                <span className="teacher-gender">{teacher.gender || "-"}</span>
+              </div>
+              <div className="detail-row">
+                <span className="teacher-date">
+                  {teacher.birthdate ? new Date(teacher.birthdate).toLocaleDateString() : "Chưa cập nhật"}
+                </span>
+                <span className="teacher-phone">{teacher.phone || "Chưa cập nhật"}</span>
+              </div>
+              <div className="detail-row">
+                <span className="teacher-email">{teacher.email}</span>
               </div>
             </div>
-          ))}
-          <Popconfirm
-            title={t("assign.confirmDeleteSubmission")}
-            onConfirm={() => handleDeleteSubmission(record.student_id)}
-          >
-            <Button danger>{t("assign.deleteSubmission")}</Button>
-          </Popconfirm>
+          </div>
+          
+          <div className="teacher-actions">
+            <button 
+              className="view-courses-btn"
+              onClick={() => handleViewCourses(teacher)}
+            >
+              Xem tất cả khóa học
+            </button>
+          </div>
         </div>
-      ),
-    },
-  ];
+      ))}
+    </div>
+  );
 
-  return (
-    <div className="assign-container">
-      <Card
-        title={t("assign.assignments")}
-        extra={<Button type="primary" onClick={() => setVisibleAssignmentModal(true)}>{t("assign.create")}</Button>}
-        className="assign-card"
-      >
-        <Select
-          className="course-select"
-          value={selectedCourse}
-          onChange={val => setSelectedCourse(val)}
-          options={courses.map(c => ({ label: c.title, value: c.id }))}
-        />
+  const renderDetailView = () => (
+    <div className="teacher-detail-view">
+      <div className="breadcrumb">
+        <span className="breadcrumb-item" onClick={handleBackToList}>
+          Thông tin giảng viên
+        </span>
+        <span className="breadcrumb-separator">›</span>
+        <span className="breadcrumb-current">{selectedTeacher.name}</span>
+      </div>
 
-        {assignments.map(a => (
-          <Card key={a.id} className="assignment-item">
-            <h3>{a.title}</h3>
-            <p>{t("assign.maxScore")}: {a.total_points}</p>
-            <Button type="primary" onClick={() => { setCurrentAssignment(a.id); setVisibleQuestionModal(true); loadQuestions(a.id); }}>{t("assign.addQuestion")}</Button>
-            <Button className="ml10" onClick={() => viewSubmissions(a.id)}>{t("assign.viewSubmissions")}</Button>
-          </Card>
-        ))}
-      </Card>
+      <div className="back-button-container">
+        <button className="back-button" onClick={handleBackToList}>
+          Quay lại danh sách
+        </button>
+      </div>
 
-      <Modal open={visibleAssignmentModal} onCancel={() => setVisibleAssignmentModal(false)} onOk={() => form.submit()} title={t("assign.createNew")}>
-        <Form form={form} layout="vertical" onFinish={handleCreateAssignment}>
-          <Form.Item name="course_id" label={t("assign.course")} initialValue={selectedCourse} rules={[{ required: true }]}>
-            <Select options={courses.map(c => ({ label: c.title, value: c.id }))} />
-          </Form.Item>
-          <Form.Item name="title" label={t("assign.title")} rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="total_points" label={t("assign.maxScore")}>
-            <Input type="number" />
-          </Form.Item>
-        </Form>
-      </Modal>
+      <div className="teacher-detail-info">
+        <div className="teacher-detail-header">
+          <div className="teacher-detail-avatar">
+            <img 
+              src={`http://localhost:5000${selectedTeacher.avatar}`} 
+              alt={selectedTeacher.name}
+              onError={(e) => e.target.src = "."}
+            />
+          </div>
+          <div className="teacher-detail-main">
+            <h2 className="teacher-detail-name">{selectedTeacher.name}</h2>
+            <div className="teacher-detail-meta">
+              <span className="teacher-detail-gender">{selectedTeacher.gender || "Chưa cập nhật"}</span>
+              <span className="teacher-detail-birthdate">
+                {selectedTeacher.birthdate ? new Date(selectedTeacher.birthdate).toLocaleDateString() : "Chưa cập nhật"}
+              </span>
+              <span className="teacher-detail-phone">{selectedTeacher.phone || "Chưa cập nhật"}</span>
+            </div>
+            <div className="teacher-detail-email">{selectedTeacher.email}</div>
+          </div>
+        </div>
+      </div>
 
-      <Modal open={visibleQuestionModal} onCancel={() => setVisibleQuestionModal(false)} onOk={() => questionForm.submit()} title={t("assign.addQuestion")}>
-        <Form form={questionForm} layout="vertical" onFinish={handleAddQuestion}>
-          <Form.Item name="question_text" label={t("assign.question")} rules={[{ required: true }]}>
-            <Input.TextArea />
-          </Form.Item>
-          <Form.Item name="points" label={t("assign.score")} rules={[{ required: true }]}>
-            <Input type="number" />
-          </Form.Item>
-        </Form>
-
-        {questions.length > 0 && (
-          <div className="question-list">
-            <h4>{t("assign.questionList")}:</h4>
-            <ul>
-              {questions.map(q => (
-                <li key={q.id}>
-                  {q.question_text} ({q.points})
-                  <Popconfirm title={t("assign.confirmDeleteQuestion")} onConfirm={() => handleDeleteQuestion(q.id)}>
-                    <Button danger size="small" className="ml10">{t("assign.delete")}</Button>
-                  </Popconfirm>
-                </li>
-              ))}
-            </ul>
+      <div className="teacher-courses-section">
+        <h3 className="courses-section-title">Khóa học giảng dạy</h3>
+        {selectedTeacher.courses.length === 0 ? (
+          <p className="no-courses">Giảng viên chưa có khóa học nào</p>
+        ) : (
+          <div className="courses-list">
+            {selectedTeacher.courses.map((course) => {
+              const status = getCourseStatus(course.id);
+              const isEnrolled = status === "enrolled";
+              const isPending = status === "pending";
+              
+              return (
+                <div key={course.id} className={`course-list-item ${status}`}>
+                  <div className="course-list-content">
+                    <div className="course-list-info">
+                      <h4 className="course-list-title">{course.title}</h4>
+                      <p className="course-list-description">{course.description}</p>
+                      {isPending && (
+                        <div className="course-status-badge pending">
+                          ⏳ Đang chờ xác nhận
+                        </div>
+                      )}
+                    </div>
+                    <div className="course-list-actions">
+                      <button 
+                        className={`enroll-btn ${status} ${enrolling[course.id] ? 'enrolling' : ''}`}
+                        onClick={() => handleEnroll(course.id, course.title)}
+                        disabled={isEnrolled || isPending || enrolling[course.id]}
+                      >
+                        {enrolling[course.id] ? "Đang xử lý..." : 
+                         isEnrolled ? "Đã đăng ký" : 
+                         isPending ? "Chờ xác nhận" : 
+                         "Đăng ký học"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
-      </Modal>
+      </div>
+    </div>
+  );
 
-      {submissions.length > 0 && (
-        <Card
-          title={t("assign.submissionList")}
-          extra={
-            <>
-              <Button type="primary" onClick={confirmGrading}>{t("assign.confirmGrading")}</Button>
-              <Button className="ml10" onClick={() => setSubmissions([])}>{t("assign.close")}</Button>
-            </>
-          }
-          className="assign-card"
-        >
-          <Table columns={submissionColumns} dataSource={submissions} rowKey="submission_id" />
-        </Card>
+  return (
+    <div className="teacher-list-container">
+      {contextHolder}
+      <h1>Danh sách giảng viên</h1>
+      {loading ? (
+        <p>Đang tải danh sách giảng viên...</p>
+      ) : (
+        viewMode === "grid" ? renderGridView() : renderDetailView()
       )}
     </div>
   );

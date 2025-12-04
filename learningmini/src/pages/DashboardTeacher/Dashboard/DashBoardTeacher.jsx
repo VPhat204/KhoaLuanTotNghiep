@@ -6,6 +6,7 @@ import {
   TeamOutlined,
   ReadOutlined,
   ScheduleOutlined,
+  WechatWorkOutlined,
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import api from "../../../api";
@@ -16,6 +17,7 @@ import CreateCourse from "../Courses/CreateCourse";
 import MyAssignments from "../Assignments/MyAssignments";
 import ScheduleTeacher from "../Schedules/ScheduleTeacher"
 import TeacherOverview from "./Overview/TeacherOverview";
+import TeacherChatInterface from "../Chat/TeacherChatInterface";
 
 const { Sider, Content } = Layout;
 
@@ -73,6 +75,8 @@ function DashboardTeacher() {
         return <MyAssignments teacherId={teacherId} />;
       case "schedules":
         return <ScheduleTeacher />;
+      case "chats":
+        return <TeacherChatInterface />;
       default:
         return <h2>{t('dashboard')}</h2>;
     }
@@ -100,6 +104,11 @@ function DashboardTeacher() {
       label: t('courseManagements.myAssignments')
     },
     {
+      key: "chats",
+      icon: <WechatWorkOutlined />,
+      label: "Chat"
+    },
+    {
       key: "schedules",
       icon: <ScheduleOutlined />,
       label: t('teachingSchedule')
@@ -107,25 +116,18 @@ function DashboardTeacher() {
   ];
 
   return (
-    <Layout style={{ minHeight: "100vh" }}>
-      <Sider width={200} style={{ background: "#fff" }}>
+    <Layout className="dashboard-teacher">
+      <Sider width={260} className="teacher-sider">
         <Menu
           mode="inline"
           selectedKeys={[selectedKey]}
-          style={{ height: "100%", borderRight: 0, paddingTop: "15px" }}
+          className="teacher-menu"
           onClick={(e) => setSelectedKey(e.key)}
           items={menuItems}
         />
       </Sider>
-      <Layout style={{ padding: "20px", background: "#f0f4f8" }}>
-        <Content
-          style={{
-            margin: 0,
-            minHeight: 280,
-            background: "transparent",
-            borderRadius: 8,
-          }}
-        >
+      <Layout className="teacher-content">
+        <Content className="teacher-content-layout">
           {renderContent()}
         </Content>
       </Layout>

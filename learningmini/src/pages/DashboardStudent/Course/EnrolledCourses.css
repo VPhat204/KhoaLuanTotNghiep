@@ -1,9 +1,12 @@
 .enrolled-container {
   position: relative;
   padding: 30px 20px;
-  background-color: #f8f9fa;
+  background-color: var(--enrolled-bg-color, #f8f9fa);
   border-radius: 8px;
+  min-height: 100vh;
+  transition: all 0.3s ease;
 }
+
 .enrolled-controls {
   display: flex;
   justify-content: flex-end;
@@ -19,19 +22,20 @@
 
 .enrolled-card {
   position: relative;
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--enrolled-border-color, #e9ecef);
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--enrolled-card-shadow, 0 2px 10px rgba(0, 0, 0, 0.08));
   padding: 15px 15px 20px 15px;
-  background-color: #fff;
-  transition: box-shadow 0.2s;
+  background-color: var(--enrolled-card-bg, #fff);
+  transition: all 0.3s ease;
 }
 
 .enrolled-card:hover {
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  box-shadow: var(--enrolled-card-hover-shadow, 0 4px 10px rgba(0,0,0,0.1));
+  transform: translateY(-2px);
 }
 
-.card-header {
+.card-enrolled-header {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -42,7 +46,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: #1890ff;
+  background: linear-gradient(135deg, var(--enrolled-primary-color, #1890ff), var(--enrolled-primary-light, #40a9ff));
   color: #fff;
   font-weight: bold;
   font-size: 18px;
@@ -57,6 +61,7 @@
   font-size: 18px;
   font-weight: 600;
   margin: 0;
+  color: var(--enrolled-heading-color, #000);
 }
 
 .status-badge {
@@ -69,15 +74,15 @@
 }
 
 .status-confirmed {
-  color: #28a745;
-  border: 1px solid #28a745;
-  background-color: #f6ffed;
+  color: var(--enrolled-success-color, #28a745);
+  border: 1px solid var(--enrolled-success-color, #28a745);
+  background-color: var(--enrolled-success-bg, #f6ffed);
 }
 
 .status-pending {
-  color: #dc3545;
-  border: 1px solid #dc3545;
-  background-color: #fff5f5;
+  color: var(--enrolled-error-color, #dc3545);
+  border: 1px solid var(--enrolled-error-color, #dc3545);
+  background-color: var(--enrolled-error-bg, #fff5f5);
 }
 
 .enrolled-card h2 {
@@ -86,20 +91,26 @@
   font-size: 18px;
   font-weight: 600;
   padding-left: 0;
+  color: var(--enrolled-heading-color, #000);
 }
 
 .enrolled-card p {
   margin: 4px 0;
   font-size: 14px;
   line-height: 1.4;
-  color: #495057;
+  color: var(--enrolled-text-color, #495057);
   padding-left: 0;
+}
+
+.enrolled-card strong {
+  color: var(--enrolled-heading-color, #000);
 }
 
 .enrolled-actions {
   display: flex;
   justify-content: space-between;
   margin-top: 10px;
+  align-items: center;
 }
 
 .confirm-all-wrapper {
@@ -110,16 +121,19 @@
 
 .confirm-all-btn {
   border-radius: 5px;
-  background-color: #1890ff;
+  background: linear-gradient(135deg, var(--enrolled-primary-color, #1890ff), var(--enrolled-primary-light, #40a9ff));
   color: #fff;
   border: none;
   padding: 8px 20px;
   font-weight: 500;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: var(--enrolled-button-shadow, 0 2px 6px rgba(0,0,0,0.1));
+  transition: all 0.3s ease;
 }
 
 .confirm-all-btn:hover {
-  background-color: #40a9ff;
+  background: linear-gradient(135deg, var(--enrolled-primary-dark, #096dd9), var(--enrolled-primary-color, #1890ff));
+  transform: translateY(-1px);
+  box-shadow: var(--enrolled-button-hover-shadow, 0 4px 12px rgba(24, 144, 255, 0.3));
 }
 
 .pagination-wrapper {
@@ -127,4 +141,96 @@
   display: flex;
   justify-content: center;
   padding: 15px 0;
+}
+
+.enrolled-container h1 {
+  color: var(--enrolled-heading-color, #000);
+  margin-bottom: 20px;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.enrolled-container p {
+  color: var(--enrolled-text-color, #495057);
+  font-size: 16px;
+}
+
+[data-theme="dark"] {
+  --enrolled-bg-color: #141414;
+  --enrolled-card-bg: #141414;
+  --enrolled-border-color: #333;
+  --enrolled-heading-color: rgba(255, 255, 255, 0.85);
+  --enrolled-text-color: rgba(255, 255, 255, 0.65);
+  --enrolled-primary-color: #177ddc;
+  --enrolled-primary-light: #3c9ae8;
+  --enrolled-primary-dark: #0d5ea6;
+  --enrolled-success-color: #49aa19;
+  --enrolled-success-bg: rgba(82, 196, 26, 0.1);
+  --enrolled-error-color: #d84a4a;
+  --enrolled-error-bg: rgba(255, 77, 79, 0.1);
+  --enrolled-card-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  --enrolled-card-hover-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  --enrolled-button-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  --enrolled-button-hover-shadow: 0 4px 12px rgba(23, 125, 220, 0.3);
+}
+
+[data-theme="light"] {
+  --enrolled-bg-color: #f8f9fa;
+  --enrolled-card-bg: #ffffff;
+  --enrolled-border-color: #e9ecef;
+  --enrolled-heading-color: #000000;
+  --enrolled-text-color: #495057;
+  --enrolled-primary-color: #1890ff;
+  --enrolled-primary-light: #40a9ff;
+  --enrolled-primary-dark: #096dd9;
+  --enrolled-success-color: #28a745;
+  --enrolled-success-bg: #f6ffed;
+  --enrolled-error-color: #dc3545;
+  --enrolled-error-bg: #fff5f5;
+  --enrolled-card-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  --enrolled-card-hover-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  --enrolled-button-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  --enrolled-button-hover-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+}
+
+@media (max-width: 768px) {
+  .enrolled-container {
+    padding: 20px 15px;
+  }
+  
+  .enrolled-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+  }
+  
+  .enrolled-controls {
+    justify-content: center;
+  }
+  
+  .confirm-all-wrapper {
+    justify-content: center;
+  }
+  
+  .enrolled-actions {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 480px) {
+  .enrolled-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .card-enrolled-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+  
+  .enrolled-container h1 {
+    font-size: 24px;
+    text-align: center;
+  }
 }

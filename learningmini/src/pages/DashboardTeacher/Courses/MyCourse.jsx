@@ -13,9 +13,9 @@ import {
 } from "antd";
 import axios from "axios";
 import "./MyCourse.css";
-import { Link } from "react-router-dom";
-import { PlusOutlined, PlayCircleOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { PlusOutlined, PlayCircleOutlined, DeleteOutlined, EditOutlined, EyeOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
+import CourseDetail from "./DetailVideo";
 
 export default function MyCourse() {
   const { t } = useTranslation();
@@ -28,7 +28,9 @@ export default function MyCourse() {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [videosByCourse, setVideosByCourse] = useState({});
+  const [selectedDetailCourse, setSelectedDetailCourse] = useState(null);
   const [editingVideo, setEditingVideo] = useState(null);
+  
   const pageSize = 3;
 
   const fetchCourses = useCallback(async () => {
@@ -110,6 +112,9 @@ export default function MyCourse() {
     }
   };
 
+  const handleViewDetail = (course) => setSelectedDetailCourse(course);
+  const handleBack = () => setSelectedDetailCourse(null);
+
   useEffect(() => {
     fetchCourses();
   }, [fetchCourses]);
@@ -118,10 +123,20 @@ export default function MyCourse() {
     (currentPage - 1) * pageSize,
     currentPage * pageSize
   );
+  if (selectedDetailCourse) {
+    return (
+      <div className="courses-container">
+        <Button className="teacher-back-button" onClick={handleBack}>
+          &lt; {t('mycourses.actions.back')}
+        </Button>
+        <CourseDetail course={selectedDetailCourse} />
+      </div>
+    );
+  }
 
   return (
     <div className="course-container">
-      <h2>👨‍🏫 {t("teacherCourses.title")}</h2>
+      <h2>{t("teacherCourses.title")}</h2>
 
       <div style={{ textAlign: "right", marginBottom: 20 }}>
         <Button type="primary" onClick={() => setIsCourseModalOpen(true)}>
@@ -210,9 +225,13 @@ export default function MyCourse() {
                       ? t("teacherCourses.videoAdded")
                       : t("teacherCourses.addVideo")}
                   </Button>
-                  <Link className="detail-btn" to={`/course/${course.id}`}>
+                  <Button 
+                    type="primary"
+                    icon={<EyeOutlined />}
+                    onClick={() => handleViewDetail(course)}
+                  >
                     {t("teacherCourses.viewDetails")}
-                  </Link>
+                  </Button>
                 </div>
               }
             >

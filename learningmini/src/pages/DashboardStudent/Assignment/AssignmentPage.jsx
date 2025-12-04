@@ -7,14 +7,16 @@ import {
   Tag,
   Progress,
   Empty,
-  Spin
+  Spin,
+  Modal
 } from "antd";
 import { 
   RocketOutlined, 
   FileTextOutlined, 
   CheckCircleOutlined,
-  ClockCircleOutlined,
-  StarOutlined
+  StarOutlined,
+  ExclamationCircleOutlined,
+  LockOutlined
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import api from "../../../api";
@@ -22,6 +24,7 @@ import "./Assignments.css";
 
 const { Panel } = Collapse;
 const { TextArea } = Input;
+const { confirm } = Modal;
 
 export default function StudentAssignments() {
   const { t } = useTranslation();
@@ -30,7 +33,9 @@ export default function StudentAssignments() {
   const [grades, setGrades] = useState({});
   const [totalScores, setTotalScores] = useState({});
   const [questions, setQuestions] = useState({});
+  const [submittedAssignments, setSubmittedAssignments] = useState(new Set());
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState({});
   const [messageApi, contextHolder] = message.useMessage();
 
   const token = localStorage.getItem("token");
@@ -79,12 +84,18 @@ export default function StudentAssignments() {
           const gradeMap = {};
           const answerMap = {};
           let total = 0;
+          let hasSubmission = false;
           
           answersRes.data.forEach(ans => {
             gradeMap[ans.question_id] = ans.score;
             answerMap[ans.question_id] = ans.answer_text;
             if (ans.score != null) total += ans.score;
+            if (ans.submitted_at) hasSubmission = true;
           });
+
+          if (hasSubmission) {
+            setSubmittedAssignments(prev => new Set([...prev, a.id]));
+          }
 
           setGrades(prev => ({ ...prev, [a.id]: gradeMap }));
           setAnswers(prev => ({ 
@@ -108,6 +119,8 @@ export default function StudentAssignments() {
   }, [studentId, messageApi, t]);
 
   const handleChange = (assignmentId, questionId, value) => {
+    if (submittedAssignments.has(assignmentId)) return;
+    
     setAnswers(prev => ({
       ...prev,
       [assignmentId]: { 
@@ -118,23 +131,72 @@ export default function StudentAssignments() {
   };
 
   const handleSubmit = async (assignmentId) => {
-    const assignmentAnswers = answers[assignmentId];
+    const assignmentAnswers = answers[assignmentId] || {};
+    const assignmentQuestions = questions[assignmentId] || [];
     
-    if (!assignmentAnswers || Object.values(assignmentAnswers).every(val => !val)) {
-      return messageApi.warning(t('assignments.messages.answerRequired'));
+    const unansweredQuestions = assignmentQuestions.filter(question => {
+      const answer = assignmentAnswers[question.id];
+      return !answer || answer.trim() === "";
+    });
+
+    if (unansweredQuestions.length > 0) {
+      messageApi.error({
+        content: t('assignments.messages.answerAllRequired'),
+        duration: 3,
+      });
+      return;
     }
+
+    setSubmitting(prev => ({ ...prev, [assignmentId]: true }));
 
     try {
       await api.post(`/assignments/${assignmentId}/submit-answers`, {
         answers: assignmentAnswers
       });
       
-      messageApi.success(t('assignments.messages.submitSuccess'));
+      setSubmittedAssignments(prev => new Set([...prev, assignmentId]));
+      
+      messageApi.success({
+        content: t('assignments.messages.submitSuccess'),
+        duration: 3,
+      });
+      
       await loadGrades(assignmentId);
+      
+      messageApi.info({
+        content: t('assignments.messages.submitLocked'),
+        duration: 4,
+      });
+      
     } catch (err) {
-      messageApi.error(t('assignments.messages.submitError'));
-      console.error(err);
+      console.error("Lỗi khi nộp bài:", err.response || err);
+      if (err.response?.status === 409) {
+        messageApi.error(t('assignments.messages.alreadySubmitted'));
+        setSubmittedAssignments(prev => new Set([...prev, assignmentId]));
+      } else {
+        messageApi.error(err.response?.data?.message || t('assignments.messages.submitError'));
+      }
+    } finally {
+      setSubmitting(prev => ({ ...prev, [assignmentId]: false }));
     }
+  };
+
+  const showSubmitConfirm = (assignmentId) => {
+    const isSubmitting = submitting[assignmentId];
+    const isSubmitted = submittedAssignments.has(assignmentId);
+    
+    if (isSubmitting || isSubmitted) return;
+
+    confirm({
+      title: t('assignments.confirm.submitTitle'),
+      icon: <ExclamationCircleOutlined />,
+      content: t('assignments.confirm.submitContent'),
+      okText: t('common.yes'),
+      cancelText: t('common.no'),
+      onOk() {
+        handleSubmit(assignmentId);
+      },
+    });
   };
 
   const loadGrades = async (assignmentId) => {
@@ -157,12 +219,55 @@ export default function StudentAssignments() {
 
   const getAssignmentStatus = (assignmentId) => {
     const assignmentGrades = grades[assignmentId] || {};
-    const hasGrades = Object.keys(assignmentGrades).length > 0;
     const isGraded = Object.values(assignmentGrades).some(score => score != null);
+    const isSubmitted = submittedAssignments.has(assignmentId);
     
-    if (isGraded) return { status: 'graded', text: t('assignments.status.graded') };
-    if (hasGrades) return { status: 'submitted', text: t('assignments.status.submitted') };
-    return { status: 'pending', text: t('assignments.status.pending') };
+    if (isGraded) return { 
+      status: 'graded', 
+      text: t('assignments.status.graded'),
+      icon: <CheckCircleOutlined />
+    };
+    if (isSubmitted) return { 
+      status: 'submitted', 
+      text: t('assignments.status.submitted'),
+      icon: <LockOutlined />
+    };
+    return { 
+      status: 'pending', 
+      text: t('assignments.status.pending'),
+      icon: <StarOutlined />
+    };
+  };
+
+  const isAssignmentEditable = (assignmentId) => {
+    const assignmentGrades = grades[assignmentId] || {};
+    const isGraded = Object.values(assignmentGrades).some(score => score != null);
+    const isSubmitted = submittedAssignments.has(assignmentId);
+    
+    return !isSubmitted && !isGraded;
+  };
+
+  const canSubmitAssignment = (assignmentId) => {
+    if (submitting[assignmentId]) return false;
+    
+    const assignmentAnswers = answers[assignmentId] || {};
+    const assignmentQuestions = questions[assignmentId] || [];
+    
+    if (!isAssignmentEditable(assignmentId)) return false;
+    
+    const allAnswered = assignmentQuestions.length > 0 && 
+      assignmentQuestions.every(question => {
+        const answer = assignmentAnswers[question.id];
+        return answer && answer.trim() !== "";
+      });
+    
+    return allAnswered;
+  };
+
+  const getSubmitButtonText = (assignmentId) => {
+    if (submitting[assignmentId]) return t('assignments.status.submitting');
+    if (submittedAssignments.has(assignmentId)) return t('assignments.status.submitted');
+    return t('assignments.actions.submit');
   };
 
   if (loading) {
@@ -192,7 +297,16 @@ export default function StudentAssignments() {
           </div>
           <div className="stat-card">
             <div className="stat-number">
-              {assignments.filter(a => getAssignmentStatus(a.id).status === 'graded').length}
+              {assignments.filter(a => submittedAssignments.has(a.id)).length}
+            </div>
+            <div className="stat-label">{t('assignments.stats.submitted')}</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-number">
+              {assignments.filter(a => {
+                const gradesObj = grades[a.id] || {};
+                return Object.values(gradesObj).some(score => score != null);
+              }).length}
             </div>
             <div className="stat-label">{t('assignments.stats.graded')}</div>
           </div>
@@ -219,8 +333,12 @@ export default function StudentAssignments() {
               grades={grades[assignment.id] || {}}
               totalScore={totalScores[assignment.id]}
               onChange={handleChange}
-              onSubmit={handleSubmit}
+              onSubmit={showSubmitConfirm}
               status={getAssignmentStatus(assignment.id)}
+              isEditable={isAssignmentEditable(assignment.id)}
+              canSubmit={canSubmitAssignment(assignment.id)}
+              submitting={submitting[assignment.id]}
+              submitButtonText={getSubmitButtonText(assignment.id)}
             />
           ))}
         </div>
@@ -237,13 +355,20 @@ function AssignmentCard({
   totalScore, 
   onChange, 
   onSubmit,
-  status 
+  status,
+  isEditable,
+  canSubmit,
+  submitting,
+  submitButtonText
 }) {
   const { t } = useTranslation();
   
   const completionRate = questions.length > 0 
-    ? (Object.values(answers).filter(a => a.trim()).length / questions.length) * 100 
+    ? (Object.values(answers).filter(a => a && a.trim()).length / questions.length) * 100 
     : 0;
+
+  const allQuestionsAnswered = questions.length > 0 && 
+    Object.values(answers).filter(a => a && a.trim()).length === questions.length;
 
   return (
     <div className="assignment-card">
@@ -258,9 +383,8 @@ function AssignmentCard({
               status.status === 'submitted' ? 'blue' : 'orange'
             }
             className="status-tag"
+            icon={status.icon}
           >
-            {status.status === 'graded' ? <CheckCircleOutlined /> : 
-             status.status === 'submitted' ? <ClockCircleOutlined /> : <StarOutlined />}
             {status.text}
           </Tag>
         </div>
@@ -287,12 +411,17 @@ function AssignmentCard({
         <Progress 
           percent={completionRate} 
           size="small"
-          strokeColor={{
+          strokeColor={allQuestionsAnswered ? '#52c41a' : {
             '0%': '#4096ff',
             '100%': '#70b6ff',
           }}
           showInfo={false}
         />
+        {!allQuestionsAnswered && !isEditable && (
+          <div className="progress-warning">
+            {t('assignments.messages.incompleteWarning')}
+          </div>
+        )}
       </div>
 
       <Collapse 
@@ -303,8 +432,13 @@ function AssignmentCard({
           header={
             <div className="collapse-header">
               <span className="questions-count">
-                {Object.values(answers).filter(a => a.trim()).length}/{questions.length} {t('assignments.progress.answered')}
+                {Object.values(answers).filter(a => a && a.trim()).length}/{questions.length} {t('assignments.progress.answered')}
               </span>
+              {!isEditable && (
+                <Tag color="red" className="edit-disabled-tag">
+                  <LockOutlined /> {t('assignments.status.locked')}
+                </Tag>
+              )}
             </div>
           } 
           key={assignment.id}
@@ -315,26 +449,28 @@ function AssignmentCard({
             answers={answers}
             grades={grades}
             onChange={onChange}
+            isEditable={isEditable}
           />
         </Panel>
       </Collapse>
 
       <div className="assignment-actions">
         <Button 
-          type="primary" 
+          type={status.status === 'submitted' ? "default" : "primary"}
           onClick={() => onSubmit(assignment.id)}
-          className="submit-button"
-          icon={<RocketOutlined />}
-          disabled={completionRate === 0}
+          className={`submit-button ${status.status === 'submitted' ? 'submitted' : ''} ${submitting ? 'submitting' : ''}`}
+          icon={status.status === 'submitted' ? <LockOutlined /> : <RocketOutlined />}
+          disabled={!canSubmit}
+          loading={submitting}
         >
-          {t('assignments.actions.submit')}
+          {submitButtonText}
         </Button>
       </div>
     </div>
   );
 }
 
-function QuestionList({ assignmentId, questions, answers, grades, onChange }) {
+function QuestionList({ assignmentId, questions, answers, grades, onChange, isEditable }) {
   const { t } = useTranslation();
 
   if (!questions.length) {
@@ -353,14 +489,24 @@ function QuestionList({ assignmentId, questions, answers, grades, onChange }) {
       {questions.map((question, index) => {
         const userAnswer = answers[question.id] || "";
         const score = grades[question.id];
+        const isAnswered = userAnswer && userAnswer.trim() !== "";
 
         return (
           <div key={question.id} className="question-item">
             <div className="question-header">
               <span className="question-number">{question.question_text}</span>
-              <Tag color="blue" className="points-tag">
+              <Tag 
+                color={isAnswered ? "green" : "orange"} 
+                className="points-tag"
+              >
                 {question.points} {t('assignments.points')}
+                {isAnswered && " ✓"}
               </Tag>
+              {!isEditable && (
+                <Tag color="red" className="edit-disabled-indicator">
+                  <LockOutlined /> {t('assignments.status.locked')}
+                </Tag>
+              )}
             </div>
 
             <div className="question-content">
@@ -370,17 +516,21 @@ function QuestionList({ assignmentId, questions, answers, grades, onChange }) {
                 <TextArea
                   className="answer-textarea"
                   value={userAnswer}
-                  onChange={
-                    score == null
-                      ? (e) => onChange(assignmentId, question.id, e.target.value)
-                      : undefined
-                  }
-                  placeholder={score == null ? t('assignments.placeholder.enterAnswer') : ""}
+                  onChange={(e) => onChange(assignmentId, question.id, e.target.value)}
+                  placeholder={isEditable ? t('assignments.placeholder.enterAnswer') : t('assignments.placeholder.submitted')}
                   rows={4}
                   showCount
                   maxLength={1000}
-                  disabled={score != null}
+                  disabled={!isEditable}
+                  status={!isAnswered && !isEditable ? "error" : ""}
                 />
+                {score != null && (
+                  <div className="score-display">
+                    <Tag color="blue">
+                      {t('assignments.score')}: {score}/{question.points}
+                    </Tag>
+                  </div>
+                )}
               </div>
             </div>
           </div>

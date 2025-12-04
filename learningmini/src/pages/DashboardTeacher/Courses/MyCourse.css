@@ -104,3 +104,32 @@
   display: flex;
   justify-content: center;
 }
+
+.teacher-back-button {
+  color: #1677ff;
+  padding: 8px 16px 8px 8px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 90px;
+  margin-bottom: 20px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.teacher-back-button:before {
+  font-size: 16px;
+  font-weight: bold;
+  transition: transform 0.2s;
+}
+
+.teacher-back-button:hover {
+  background: rgba(22, 119, 255, 0.05);
+  color: #4096ff;
+}
+
+.teacher-back-button:hover:before {
+  transform: translateX(-2px);
+}

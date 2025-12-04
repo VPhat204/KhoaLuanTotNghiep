@@ -19,6 +19,7 @@ import {
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
+import "./CourseDetail.css";
 
 const { Title, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -87,20 +88,13 @@ export default function CourseDetail({ course }) {
   }, [fetchVideos, fetchComments, fetchStudentCount]);
 
   return (
-    <div style={{ padding: 24 }}>
-      <Card
-        style={{
-          background: "linear-gradient(135deg, #e0f7fa, #e3f2fd)",
-          borderRadius: 12,
-          overflow: "hidden",
-        }}
-        bodyStyle={{ padding: 0 }}
-      >
+    <div className="course-detail-container">
+      <Card className="course-detail-preview-card">
         <div style={{ position: "relative" }}>
           {videos.length > 0 ? (
             <video
               controls
-              style={{ width: "100%", borderRadius: "12px" }}
+              className="course-detail-video-player"
             >
               <source src={videos[0].url} type="video/mp4" />
             </video>
@@ -108,19 +102,20 @@ export default function CourseDetail({ course }) {
             <img
               src="https://cdn.dribbble.com/userupload/12056349/file/original-bf68cfef9a9e7edb23b157a4f6e71856.png"
               alt="preview"
-              style={{ width: "100%", borderRadius: "12px" }}
+              className="course-detail-preview-image"
             />
           )}
         </div>
       </Card>
 
-      <div style={{ marginTop: 24 }}>
-        <Title level={3}>{course.title}</Title>
-        <Paragraph type="secondary">
+      <div className="course-detail-content">
+        <Title level={3} className="course-detail-title">{course.title}</Title>
+        <Paragraph className="course-detail-meta" type="secondary">
           {t('courseDetail.teacher')}: <b>{course.teacher_name}</b> | {videos.length} {t('courseDetail.videos')} | {studentCount} {t('courseDetail.students')}
         </Paragraph>
 
         <Tabs
+          className="course-detail-tabs"
           defaultActiveKey="1"
           items={[
             {
@@ -128,8 +123,8 @@ export default function CourseDetail({ course }) {
               label: t('courseDetail.tabs.overview'),
               children: (
                 <>
-                  <Title level={5}>{t('courseDetail.courseDescription')}</Title>
-                  <Paragraph>{course.description || t('courseDetail.noDescription')}</Paragraph>
+                  <Title level={5} className="course-detail-section-title">{t('courseDetail.courseDescription')}</Title>
+                  <Paragraph className="course-detail-description">{course.description || t('courseDetail.noDescription')}</Paragraph>
                 </>
               ),
             },
@@ -137,19 +132,19 @@ export default function CourseDetail({ course }) {
               key: "2",
               label: t('courseDetail.tabs.content'),
               children: (
-                <>
-                  <Divider orientation="left">{t('courseDetail.lessonList')}</Divider>
+                <div className="course-detail-list-container">
+                  <Divider className="course-detail-divider" orientation="left">{t('courseDetail.lessonList')}</Divider>
                   {videos.length > 0 ? (
                     <List
+                      className="course-detail-videos-list"
                       dataSource={videos}
                       renderItem={(video) => (
                         <List.Item>
-                          <PlayCircleOutlined style={{ marginRight: 10, color: "#1890ff" }} />
-                          <span>{video.title}</span>
+                          <PlayCircleOutlined className="course-detail-video-icon" />
+                          <span className="course-detail-video-title">{video.title}</span>
                           <Tag
+                            className="course-detail-video-duration-tag"
                             icon={<ClockCircleOutlined />}
-                            color="blue"
-                            style={{ marginLeft: "auto" }}
                           >
                             {video.duration || t('courseDetail.notAvailable')}
                           </Tag>
@@ -157,48 +152,51 @@ export default function CourseDetail({ course }) {
                       )}
                     />
                   ) : (
-                    <Paragraph>{t('courseDetail.noVideos')}</Paragraph>
+                    <Paragraph className="course-detail-empty-state">{t('courseDetail.noVideos')}</Paragraph>
                   )}
-                </>
+                </div>
               ),
             },
             {
               key: "3",
               label: t('courseDetail.tabs.comments'),
               children: (
-                <div>
-                  <Title level={5}>{t('courseDetail.studentComments')}</Title>
+                <div className="course-detail-comments-section">
+                  <Title level={5} className="course-detail-section-title">{t('courseDetail.studentComments')}</Title>
 
                   <List
+                    className="course-detail-comments-list"
                     dataSource={comments}
                     locale={{ emptyText: t('courseDetail.noComments') }}
                     renderItem={(cmt) => (
                       <List.Item>
                         <List.Item.Meta
-                          avatar={<Avatar icon={<UserOutlined />} />}
+                          avatar={<Avatar className="course-detail-comment-avatar" icon={<UserOutlined />} />}
                           title={
-                            <div>
-                              <b>{cmt.user_name || t('courseDetail.user')}</b>{" "}
-                              <span style={{ color: "#999", fontSize: 12 }}>
+                            <div className="course-detail-comment-header">
+                              <span className="course-detail-comment-author">{cmt.user_name || t('courseDetail.user')}</span>
+                              <span className="course-detail-comment-time">
                                 {new Date(cmt.created_at).toLocaleString()}
                               </span>
                             </div>
                           }
-                          description={cmt.content}
+                          description={<p className="course-detail-comment-content">{cmt.content}</p>}
                         />
                       </List.Item>
                     )}
                   />
 
-                  <Divider />
+                  <Divider className="course-detail-comment-divider" />
                   <TextArea
+                    className="course-detail-comment-textarea"
                     rows={3}
                     placeholder={t('courseDetail.placeholder.writeComment')}
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
                   />
-                  <div style={{ marginTop: 8, textAlign: "right" }}>
+                  <div className="course-detail-comment-actions">
                     <Button
+                      className="course-detail-send-comment-btn"
                       type="primary"
                       icon={<SendOutlined />}
                       onClick={handleAddComment}

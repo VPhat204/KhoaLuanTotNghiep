@@ -3,6 +3,7 @@ import axios from "axios";
 import { Form, Input, Button, message } from "antd";
 import { useContext } from "react";
 import { UserContext } from "../../context/userContext";
+import { useTheme } from "../../context/themeContext"; 
 import { useTranslation } from "react-i18next";
 import "./Login.css";
 
@@ -10,6 +11,7 @@ function LoginPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { login } = useContext(UserContext);
+  const { reloadTheme } = useTheme(); 
   const [messageApi, contextHolder] = message.useMessage();
 
   const onFinish = async (values) => {
@@ -33,8 +35,10 @@ function LoginPage() {
           address: res.data.address,
           birthdate: res.data.birthdate,
           gender: res.data.gender,
+          theme: res.data.theme,
           token: res.data.token,
         });
+        reloadTheme();
 
         messageApi.success({
           content: t("loginSuccess"),

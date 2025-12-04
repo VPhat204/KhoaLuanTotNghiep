@@ -305,11 +305,11 @@ function DashboardOverview({ setSelectedKey }) {
           <Card 
             className="my-courses-card" 
             title={t('studentdashboard.myCourses') || "My Courses"} 
-            extra={<span onClick={handleViewAllCourses}>{t('studentdashboard.actions.viewMore') || "Xem thêm"}</span>}
+            extra={<span onClick={handleViewAllCourses} className="view-more-link">{t('studentdashboard.actions.viewMore') || "Xem thêm"}</span>}
           >
             {courses.slice(0, 6).map((course) => {              
               return (
-                <div key={course.id} className="course-list-item">
+                <div key={course.id} className="course-list-overview-item">
                   <div>
                     <h4>{course.title}</h4>
                     <p>{course.description || (t('studentdashboard.unknown') || 'Unknown')}</p>
@@ -336,10 +336,12 @@ function DashboardOverview({ setSelectedKey }) {
                   icon={<LeftOutlined />} 
                   onClick={goToPreviousMonth}
                   size="small"
+                  className="nav-button"
                 />
                 <Button 
                   onClick={goToCurrentMonth}
                   size="small"
+                  className="today-button"
                 >
                   {t('studentdashboard.actions.today') || "Hôm nay"}
                 </Button>
@@ -347,6 +349,7 @@ function DashboardOverview({ setSelectedKey }) {
                   icon={<RightOutlined />} 
                   onClick={goToNextMonth}
                   size="small"
+                  className="nav-button"
                 />
               </div>
             </div>

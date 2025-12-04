@@ -8,7 +8,7 @@
   "profile": "Profile",
   "logout": "Logout",
   "editName": "Change Name",
-  "footerText": "E-learning Platform ©2025 | Made with ❤️ by Team",
+  "footerText": "System E_Study Platform @2025",
   "about": "About",
   "contact": "Contact",
   "privacy": "Privacy Policy",
@@ -678,18 +678,6 @@
     "noValidScore": "No valid score entered!",
     "errorAssignmentNotFound": "Assignment not found."
   },
-  "createcourses": {
-    "create_title": "Create New Course",
-    "name": "Course Name",
-    "name_required": "Please enter the course name",
-    "name_placeholder": "Enter course name",
-
-    "description": "Description",
-    "description_required": "Please enter a description",
-    "description_placeholder": "Course description",
-
-    "btn_create": "Create Course"
-  },
   "teacherCourses": {
     "title": "Teacher - Course Management",
     "addCourseBtn": "+ Add Course",
@@ -744,6 +732,8 @@
   "chooseFile": "Choose file",
   "alreadyHaveAccount": "Already have an account? Login",
   "loginSuccess": "Login successful!",
+  "invalidEmail": "Invalid Email",
+  "passWordMinLenght": "Password Min Lenght",
   "invalidServerResponse": "Server returned invalid data.",
   "wrongEmailOrPassword": "Wrong email or password!",
   "noAccess": "You do not have access!",
@@ -776,5 +766,157 @@
     "paragraph1": "E-learning Platform is an online learning system designed to provide high-quality courses, from basic to advanced knowledge, suitable for all types of learners. With a friendly and easy-to-use interface, you can easily search for courses, track your learning progress, and interact with instructors conveniently.",
     "paragraph2": "We offer a wide variety of courses from programming, design, marketing, foreign languages to soft skills. Each course is created by reputable instructors with rich practical experience, helping learners develop skills quickly and effectively.",
     "paragraph3": "Additionally, E-learning Platform supports learners with assessment systems, course completion certificates, and a vibrant online learning community, helping you connect with like-minded individuals. Start your learning journey today!"
+  },
+  "privacypolicy": {
+    "title": "Privacy Policy",
+    "introduction": "We are committed to protecting your personal information. This privacy policy describes how we collect, use, and protect your information.",
+    "principles": {
+      "title": "Security Principles",
+      "transparency": "Transparency: We always disclose how we collect and use information",
+      "security": "Security: Applying the most advanced security measures",
+      "control": "Control: You have the right to control your personal information",
+      "compliance": "Compliance: Strict compliance with data protection regulations"
+    },
+    "sections": {
+      "mainContent": "Policy Content",
+      "details": "Details",
+      "collection": {
+        "title": "Information Collection",
+        "description": "We collect your personal information when you:",
+        "points": {
+          "register": "Register an account",
+          "enroll": "Enroll in a course",
+          "contact": "Contact us",
+          "useService": "Use our services"
+        },
+        "items": {
+          "name": "Full name",
+          "email": "Email",
+          "phone": "Phone number",
+          "studyInfo": "Study information",
+          "paymentInfo": "Payment information (if applicable)"
+        }
+      },
+      "usage": {
+        "title": "Information Usage",
+        "description": "Your personal information is used to:",
+        "points": {
+          "provideService": "Provide and improve services",
+          "processRegistration": "Process registration and payments",
+          "sendNotifications": "Send important notifications",
+          "customerSupport": "Customer support",
+          "analysis": "Analysis and research"
+        }
+      },
+      "security": {
+        "title": "Information Security",
+        "description": "We are committed to protecting your personal information through:",
+        "points": {
+          "encryption": "Data encryption",
+          "multiLayer": "Multi-layer security system",
+          "accessControl": "Strict access control",
+          "staffTraining": "Staff security training"
+        },
+        "items": {
+          "ssl": "SSL/TLS encryption",
+          "firewall": "Firewall protection",
+          "twoFactor": "Two-factor authentication",
+          "backup": "Regular data backup"
+        }
+      },
+      "sharing": {
+        "title": "Information Sharing",
+        "description": "We do not sell, exchange, or rent your personal information to third parties, unless:",
+        "points": {
+          "consent": "With your consent",
+          "legal": "As required by law",
+          "partners": "Cooperating with service provider partners"
+        }
+      }
+    },
+    "contact": {
+      "title": "Contact Information",
+      "description": "If you have any questions about the privacy policy, please contact:",
+      "email": "Email:",
+      "emailValue": "privacy@example.com",
+      "phone": "Phone:",
+      "phoneValue": "1900 1234",
+      "address": "Address:",
+      "addressValue": "123 ABC Street, XYZ District, Ho Chi Minh City"
+    },
+    "lastUpdated": "Last updated:"
+  },
+  "teacherHomeList": {
+    "title": "Teacher List",
+    "loading": "Loading teachers list...",
+    "noTeachers": "No teachers found",
+    "noCourses": "No courses yet",
+    "notAvailable": "Not available",
+    "notUpdated": "Not updated",
+    "teachingCourses": "Teaching Courses",
+    "search": {
+      "placeholder": "Search by name or email..."
+    },
+    "sort": {
+      "aToZ": "Name A-Z",
+      "zToA": "Name Z-A"
+    },
+    "actions": {
+      "viewAllCourses": "View All Courses",
+      "hideCourses": "Hide Courses",
+      "enroll": "Enroll",
+      "enrolling": "Enrolling...",
+      "enrolled": "Enrolled",
+      "cannotEnroll": "Cannot enroll",
+      "back": "Back"
+    },
+    "messages": {
+      "loadError": "Error loading teachers list",
+      "enrolledCoursesError": "Error loading enrolled courses",
+      "loginRequired": "Please login to enroll in courses",
+      "studentsOnly": "Only students can enroll in courses",
+      "alreadyEnrolled": "You have already enrolled in this course",
+      "enrollSuccess": "Successfully enrolled in course: {{courseTitle}}",
+      "noPermission": "You don't have permission to enroll in courses",
+      "enrollError": "An error occurred while enrolling in the course",
+      "loginPrompt": "Please"
+    }
+  },
+  "courseHomeDetail": {
+    "notAvailable": "N/A",
+    "noDescription": "No detailed description available"
+  },
+  "enrolledCoursesHome": {
+    "lessons": "Lessons",
+    "hours": "Hours"
+  },
+  "mycoursesHome": {
+    "enrolledDate": "Enrolled"
+  },
+  "loginHome": "Login",
+  "adds": {
+    "course":"Courses",
+    "topCourse": "Course Top",
+    "numberSubs": "subrise",
+    "sumSubs": "Total subrise",
+    "average": "Average",
+    "student/course": "student/course",
+    "invalidCourse": "Invalid data course"
+  },
+  "createcourses": {
+    "create_title": "Create New Course",
+    "name": "Course Name",
+    "name_required": "Please enter course name",
+    "name_placeholder": "Enter course name",
+    "description": "Description",
+    "description_required": "Please enter course description",
+    "description_placeholder": "Enter course description",
+    "btn_create": "Create Course",
+    "creating": "Creating...",
+    "success_message": "Course created successfully!",
+    "pending_approval_message": "Your course is pending administrator approval. You will be notified when the course is approved.",
+    "error_message": "An error occurred while creating the course. Please try again.",
+    "instruction": "After creation, the course will be submitted for administrator approval before being publicly displayed.",
+    "success_title": "Course Created Successfully!"
   }
 }

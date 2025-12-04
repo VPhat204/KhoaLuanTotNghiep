@@ -74,10 +74,10 @@ export default function Courses({ refreshTrigger }) {
 
   return (
     <div className="courses-container">
-      <h1>{t('mycourses.title')}</h1>
+      <h1 className="student-courses-title">{t('mycourses.title')}</h1>
       {selectedCourse ? (
         <div>
-          <Button onClick={handleBack} style={{ marginBottom: 16 }}>
+          <Button className="student-back-button" onClick={handleBack}>
             &lt; {t('mycourses.actions.back')}
           </Button>
           <CourseDetail course={selectedCourse} />
@@ -85,52 +85,52 @@ export default function Courses({ refreshTrigger }) {
       ) : loading ? (
         <p>{t('mycourses.loading')}</p>
       ) : courses.length === 0 ? (
-        <div className="no-courses">
+        <div className="student-no-courses">
           <p>{t('mycourses.noCourses')}</p>
         </div>
       ) : (
-        <div className="courses-grid">
+        <div className="student-courses-grid">
           {courses.map((course) => {
             const progress = progressData[course.id] || 0;
             return (
-              <div key={course.id} className="course-card">
-                <div className="course-header">
-                  <div className="course-avatar">{getInitial(course.title)}</div>
-                  <div className="course-title-section">
-                    <h3>{course.title}</h3>
-                    <span className="course-teacher">{t('mycourses.teacher')}: {course.teacher_name}</span>
+              <div key={course.id} className="student-course-card">
+                <div className="student-course-header">
+                  <div className="student-course-avatar">{getInitial(course.title)}</div>
+                  <div className="student-course-title-section">
+                    <h3 className="student-course-title">{course.title}</h3>
+                    <span className="student-course-teacher">{t('mycourses.teacher')}: {course.teacher_name}</span>
                   </div>
                 </div>
-                <p className="course-description">{course.description}</p>
-                <div className="progress-section">
-                  <div className="progress-info">
-                    <span className="progress-label">{t('mycourses.progress')}: </span>
-                    <span className="progress-value">{progress}%</span>
+                <p className="student-course-description">{course.description}</p>
+                <div className="student-progress-section">
+                  <div className="student-progress-info">
+                    <span className="student-progress-label">{t('mycourses.progress')}: </span>
+                    <span className="student-progress-value">{progress}%</span>
                   </div>
                   <Progress 
                     percent={progress} 
                     size="small"
-                    strokeColor={{ '0%': '#4096ff', '100%': '#70b6ff' }}
+                    strokeColor={{ '0%': 'var(--primary-color, #4096ff)', '100%': 'var(--primary-light, #70b6ff)' }}
                     showInfo={false}
                     style={{ width: '100%' }}
                   />
                 </div>
-                <div className="course-meta">
-                  <span className="enrolled-date">{t('mycourses.enrolledDate')}: {new Date(course.enrolled_at).toLocaleDateString()}</span>
+                <div className="student-course-meta">
+                  <span className="student-enrolled-date">{t('mycourses.enrolledDate')}: {new Date(course.enrolled_at).toLocaleDateString()}</span>
                 </div>
-                <div className="course-footer">
+                <div className="student-course-footer">
                   <Button 
                     danger 
                     onClick={() => handleUnenroll(course.id, course.title)}
                     loading={unenrolling[course.id]}
-                    className="unenroll-btn"
+                    className="student-unenroll-btn"
                   >
                     {t('mycourses.actions.unenroll')}
                   </Button>
                   <Button 
                     type="primary" 
                     onClick={() => handleViewDetail(course)}
-                    className="view-detail-btn"
+                    className="student-view-detail-btn"
                   >
                     {t('mycourses.actions.viewDetail')}
                   </Button>

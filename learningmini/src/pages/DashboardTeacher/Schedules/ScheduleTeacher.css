@@ -3,23 +3,24 @@
   margin: 0 auto;
   padding: 24px;
   font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  color: #1a1a1a;
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  color: var(--schedule-teacher-text-primary);
+  background: var(--schedule-teacher-bg-color);
   min-height: 100vh;
+  transition: all 0.3s ease;
 }
 
 .teacher-header {
-  background: white;
-  border-left: 4px solid #10b981;
+  background: var(--schedule-teacher-card-bg);
+  border-left: 4px solid var(--schedule-teacher-primary-color);
 }
 
 .teacher-schedule-header {
   margin-bottom: 32px;
-  background: white;
+  background: var(--schedule-teacher-card-bg);
   padding: 24px;
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e2e8f0;
+  box-shadow: var(--schedule-teacher-shadow);
+  border: 1px solid var(--schedule-teacher-border-color);
 }
 
 .teacher-header-top {
@@ -28,15 +29,15 @@
   align-items: flex-start;
   margin-bottom: 24px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--schedule-teacher-border-light);
 }
 
 .teacher-header-top h1 {
   margin: 0;
-  color: #1e293b;
+  color: var(--schedule-teacher-text-primary);
   font-size: 32px;
   font-weight: 700;
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: linear-gradient(135deg, var(--schedule-teacher-primary-color), var(--schedule-teacher-primary-dark));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -49,8 +50,8 @@
 
 .teacher-print-btn {
   padding: 10px 20px;
-  border: 1.5px solid #e2e8f0;
-  background: white;
+  border: 1.5px solid var(--schedule-teacher-border-color);
+  background: var(--schedule-teacher-card-bg);
   border-radius: 10px;
   cursor: pointer;
   font-size: 14px;
@@ -59,14 +60,15 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  color: var(--schedule-teacher-text-primary);
 }
 
 .teacher-print-btn:hover {
-  background: #10b981;
-  border-color: #10b981;
+  background: var(--schedule-teacher-primary-color);
+  border-color: var(--schedule-teacher-primary-color);
   color: white;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+  box-shadow: var(--schedule-teacher-shadow-hover);
 }
 
 .teacher-header-controls {
@@ -88,33 +90,34 @@
   align-items: center;
   gap: 10px;
   padding: 12px 20px;
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid var(--schedule-teacher-border-color);
   border-radius: 10px;
-  background: white;
+  background: var(--schedule-teacher-card-bg);
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 14px;
   font-weight: 600;
   min-width: 150px;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--schedule-teacher-shadow-sm);
+  color: var(--schedule-teacher-text-primary);
 }
 
 .teacher-date-display:hover {
-  border-color: #10b981;
-  background: #f8fafc;
+  border-color: var(--schedule-teacher-primary-color);
+  background: var(--schedule-teacher-hover-bg);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+  box-shadow: var(--schedule-teacher-shadow-md);
 }
 
 .teacher-calendar-icon {
   font-size: 16px;
-  color: #10b981;
+  color: var(--schedule-teacher-primary-color);
 }
 
 .teacher-date-text {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--schedule-teacher-text-primary);
 }
 
 .teacher-navigation-buttons {
@@ -124,44 +127,44 @@
 
 .teacher-nav-btn {
   padding: 10px 20px;
-  border: 1.5px solid #e2e8f0;
-  background: white;
+  border: 1.5px solid var(--schedule-teacher-border-color);
+  background: var(--schedule-teacher-card-bg);
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
   transition: all 0.3s ease;
-  color: #475569;
+  color: var(--schedule-teacher-text-secondary);
 }
 
 .teacher-nav-btn:hover {
-  background: #10b981;
-  border-color: #10b981;
+  background: var(--schedule-teacher-primary-color);
+  border-color: var(--schedule-teacher-primary-color);
   color: white;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  box-shadow: var(--schedule-teacher-shadow-md);
 }
 
-.teacher-nav-btn.current {
-  background: linear-gradient(135deg, #10b981, #059669);
+.teacher-nav-btn.teacher-nav-btn-current {
+  background: linear-gradient(135deg, var(--schedule-teacher-primary-color), var(--schedule-teacher-primary-dark));
   color: white;
-  border-color: #10b981;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  border-color: var(--schedule-teacher-primary-color);
+  box-shadow: var(--schedule-teacher-shadow-hover);
 }
 
-.teacher-nav-btn.current:hover {
-  background: linear-gradient(135deg, #059669, #047857);
+.teacher-nav-btn.teacher-nav-btn-current:hover {
+  background: linear-gradient(135deg, var(--schedule-teacher-primary-dark), var(--schedule-teacher-primary-darker));
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+  box-shadow: var(--schedule-teacher-shadow-lg);
 }
 
 .teacher-schedule-table-container {
   overflow-x: auto;
   margin-bottom: 32px;
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid var(--schedule-teacher-border-color);
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  background: white;
+  box-shadow: var(--schedule-teacher-shadow-lg);
+  background: var(--schedule-teacher-card-bg);
 }
 
 .teacher-schedule-table {
@@ -169,23 +172,23 @@
   border-collapse: separate;
   border-spacing: 0;
   min-width: 1000px;
-  background: white;
+  background: var(--schedule-teacher-card-bg);
 }
 
 .teacher-header-cell {
-  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  background: linear-gradient(135deg, var(--schedule-teacher-bg-light), var(--schedule-teacher-bg-lighter));
   padding: 20px 12px;
   text-align: center;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid var(--schedule-teacher-border-color);
   font-weight: 700;
-  color: #1e293b;
+  color: var(--schedule-teacher-text-primary);
   position: sticky;
   top: 0;
   z-index: 10;
 }
 
 .teacher-time-header {
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: linear-gradient(135deg, var(--schedule-teacher-primary-color), var(--schedule-teacher-primary-dark));
   color: white;
   font-weight: 800;
 }
@@ -193,26 +196,26 @@
 .teacher-day {
   font-size: 15px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--schedule-teacher-text-primary);
 }
 
 .teacher-date {
   font-size: 13px;
-  color: #64748b;
+  color: var(--schedule-teacher-text-secondary);
   margin-top: 4px;
   font-weight: 500;
 }
 
 .teacher-time-period {
-  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  background: linear-gradient(135deg, var(--schedule-teacher-bg-light), var(--schedule-teacher-bg-lighter));
   padding: 24px 12px;
   text-align: center;
   font-weight: 700;
-  border-right: 2px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
+  border-right: 2px solid var(--schedule-teacher-border-color);
+  border-bottom: 1px solid var(--schedule-teacher-border-color);
   width: 100px;
   font-size: 14px;
-  color: #1e293b;
+  color: var(--schedule-teacher-text-primary);
   position: sticky;
   left: 0;
   z-index: 5;
@@ -220,18 +223,18 @@
 
 .teacher-time-slot {
   height: 160px;
-  border-bottom: 1px solid #f1f5f9;
-  border-right: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--schedule-teacher-border-light);
+  border-right: 1px solid var(--schedule-teacher-border-light);
   vertical-align: top;
   padding: 8px;
   min-width: 160px;
   position: relative;
   transition: all 0.2s ease;
-  background: white;
+  background: var(--schedule-teacher-card-bg);
 }
 
 .teacher-time-slot:hover {
-  background: #f8fafc;
+  background: var(--schedule-teacher-hover-bg);
 }
 
 .teacher-time-slot:last-child {
@@ -246,7 +249,7 @@
   height: 100%;
   font-size: 11px;
   line-height: 1.3;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--schedule-teacher-shadow-md);
   border: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
   overflow: hidden;
@@ -265,7 +268,7 @@
 
 .teacher-event-item:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--schedule-teacher-shadow-lg);
 }
 
 .teacher-event-item.theory {
@@ -339,49 +342,58 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #94a3b8;
+  color: var(--schedule-teacher-text-muted);
   font-size: 11px;
   text-align: center;
   padding: 16px;
-  border: 2px dashed #cbd5e1;
+  border: 2px dashed var(--schedule-teacher-border-color);
   border-radius: 8px;
   transition: all 0.3s ease;
-  background: rgba(248, 250, 252, 0.5);
+  background: var(--schedule-teacher-bg-light);
 }
 
 .teacher-empty-slot:hover {
-  border-color: #10b981;
-  background: rgba(16, 185, 129, 0.05);
-  color: #10b981;
+  border-color: var(--schedule-teacher-primary-color);
+  background: var(--schedule-teacher-primary-light);
+  color: var(--schedule-teacher-primary-color);
+}
+
+.teacher-empty-text {
+  margin-bottom: 4px;
+}
+
+.teacher-slot-number {
+  font-size: 9px;
+  opacity: 0.7;
 }
 
 .teacher-empty-icon {
   font-size: 20px;
   font-weight: bold;
   margin-bottom: 6px;
-  color: #cbd5e1;
+  color: var(--schedule-teacher-text-muted);
   transition: all 0.3s ease;
 }
 
 .teacher-empty-slot:hover .teacher-empty-icon {
-  color: #10b981;
+  color: var(--schedule-teacher-primary-color);
   transform: scale(1.1);
 }
 
 .teacher-schedule-legend {
   margin-top: 32px;
   padding: 24px;
-  background: white;
+  background: var(--schedule-teacher-card-bg);
   border-radius: 16px;
-  border: 1.5px solid #e2e8f0;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: 1.5px solid var(--schedule-teacher-border-color);
+  box-shadow: var(--schedule-teacher-shadow);
 }
 
 .teacher-schedule-legend h3 {
   margin: 0 0 20px 0;
   font-size: 20px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--schedule-teacher-text-primary);
   text-align: center;
 }
 
@@ -397,29 +409,29 @@
   align-items: center;
   gap: 12px;
   padding: 10px 16px;
-  background: #f8fafc;
+  background: var(--schedule-teacher-bg-light);
   border-radius: 10px;
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid var(--schedule-teacher-border-color);
   transition: all 0.3s ease;
 }
 
 .teacher-legend-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--schedule-teacher-shadow);
 }
 
 .teacher-legend-color {
   width: 24px;
   height: 24px;
   border-radius: 6px;
-  border: 2px solid white;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  border: 2px solid var(--schedule-teacher-card-bg);
+  box-shadow: var(--schedule-teacher-shadow-sm);
 }
 
 .teacher-legend-label {
   font-size: 14px;
   font-weight: 600;
-  color: #475569;
+  color: var(--schedule-teacher-text-primary);
 }
 
 .teacher-date-picker-overlay {
@@ -438,19 +450,15 @@
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .teacher-date-picker {
-  background: white;
+  background: var(--schedule-teacher-card-bg);
   padding: 32px;
   border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--schedule-teacher-shadow-xl);
   min-width: 380px;
   max-width: 90vw;
   animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -469,7 +477,7 @@
 
 .teacher-date-picker h3 {
   margin: 0 0 24px 0;
-  color: #1e293b;
+  color: var(--schedule-teacher-text-primary);
   font-size: 24px;
   font-weight: 700;
   text-align: center;
@@ -478,20 +486,21 @@
 .teacher-date-input {
   width: 100%;
   padding: 16px 20px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--schedule-teacher-border-color);
   border-radius: 12px;
   font-size: 16px;
   margin-bottom: 24px;
   transition: all 0.3s ease;
-  background: #f8fafc;
+  background: var(--schedule-teacher-bg-light);
   font-weight: 500;
+  color: var(--schedule-teacher-text-primary);
 }
 
 .teacher-date-input:focus {
   outline: none;
-  border-color: #10b981;
-  background: white;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  border-color: var(--schedule-teacher-primary-color);
+  background: var(--schedule-teacher-card-bg);
+  box-shadow: 0 0 0 3px var(--schedule-teacher-primary-shadow);
 }
 
 .teacher-date-picker-actions {
@@ -512,28 +521,28 @@
 }
 
 .teacher-cancel-btn {
-  background: white;
-  border-color: #e2e8f0;
-  color: #64748b;
+  background: var(--schedule-teacher-card-bg);
+  border-color: var(--schedule-teacher-border-color);
+  color: var(--schedule-teacher-text-secondary);
 }
 
 .teacher-cancel-btn:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
-  color: #475569;
+  background: var(--schedule-teacher-hover-bg);
+  border-color: var(--schedule-teacher-border-dark);
+  color: var(--schedule-teacher-text-primary);
   transform: translateY(-1px);
 }
 
 .teacher-apply-btn {
-  background: linear-gradient(135deg, #10b981, #059669);
-  border-color: #10b981;
+  background: linear-gradient(135deg, var(--schedule-teacher-primary-color), var(--schedule-teacher-primary-dark));
+  border-color: var(--schedule-teacher-primary-color);
   color: white;
 }
 
 .teacher-apply-btn:hover {
-  background: linear-gradient(135deg, #059669, #047857);
+  background: linear-gradient(135deg, var(--schedule-teacher-primary-dark), var(--schedule-teacher-primary-darker));
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  box-shadow: var(--schedule-teacher-shadow-hover);
 }
 
 .teacher-loading-overlay {
@@ -550,12 +559,79 @@
 }
 
 .teacher-loading-spinner {
-  background: white;
+  background: var(--schedule-teacher-card-bg);
   padding: 20px 30px;
   border-radius: 10px;
   font-weight: 600;
-  color: #10b981;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  color: var(--schedule-teacher-primary-color);
+  box-shadow: var(--schedule-teacher-shadow-xl);
+}
+
+.teacher-header-info {
+  margin-bottom: 16px;
+}
+
+.teacher-courses-info {
+  color: var(--schedule-teacher-text-secondary);
+  font-size: 14px;
+  margin: 0;
+}
+
+.teacher-slots-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+}
+
+[data-theme="dark"] {
+  --schedule-teacher-bg-color: #141414;
+  --schedule-teacher-bg-light: #1e293b;
+  --schedule-teacher-bg-lighter: #334155;
+  --schedule-teacher-card-bg: #1e293b;
+  --schedule-teacher-text-primary: #f1f5f9;
+  --schedule-teacher-text-secondary: #94a3b8;
+  --schedule-teacher-text-muted: #64748b;
+  --schedule-teacher-border-color: #334155;
+  --schedule-teacher-border-light: #475569;
+  --schedule-teacher-border-dark: #1e293b;
+  --schedule-teacher-primary-color: #3b82f6;
+  --schedule-teacher-primary-dark: #2563eb;
+  --schedule-teacher-primary-darker: #1d4ed8;
+  --schedule-teacher-primary-light: rgba(59, 130, 246, 0.1);
+  --schedule-teacher-primary-shadow: rgba(59, 130, 246, 0.3);
+  --schedule-teacher-hover-bg: #334155;
+  --schedule-teacher-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --schedule-teacher-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --schedule-teacher-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
+  --schedule-teacher-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --schedule-teacher-shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.4);
+  --schedule-teacher-shadow-hover: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+[data-theme="light"] {
+  --schedule-teacher-bg-color: #f8fafc;
+  --schedule-teacher-bg-light: #f1f5f9;
+  --schedule-teacher-bg-lighter: #e2e8f0;
+  --schedule-teacher-card-bg: #ffffff;
+  --schedule-teacher-text-primary: #1e293b;
+  --schedule-teacher-text-secondary: #64748b;
+  --schedule-teacher-text-muted: #94a3b8;
+  --schedule-teacher-border-color: #e2e8f0;
+  --schedule-teacher-border-light: #f1f5f9;
+  --schedule-teacher-border-dark: #cbd5e1;
+  --schedule-teacher-primary-color: #10b981;
+  --schedule-teacher-primary-dark: #059669;
+  --schedule-teacher-primary-darker: #047857;
+  --schedule-teacher-primary-light: rgba(16, 185, 129, 0.1);
+  --schedule-teacher-primary-shadow: rgba(16, 185, 129, 0.3);
+  --schedule-teacher-hover-bg: #f8fafc;
+  --schedule-teacher-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --schedule-teacher-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --schedule-teacher-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --schedule-teacher-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --schedule-teacher-shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.3);
+  --schedule-teacher-shadow-hover: 0 6px 20px rgba(16, 185, 129, 0.3);
 }
 
 @media (max-width: 768px) {

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { PrinterOutlined, ScheduleOutlined, EditOutlined, SaveOutlined, CloseOutlined, PlusOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
+import { message } from 'antd';
 import './Schedule.css';
 
 const ScheduleWithCourses = () => {
@@ -24,6 +25,7 @@ const ScheduleWithCourses = () => {
   });
   const [showCourseModal, setShowCourseModal] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState({ period: '', dayIndex: -1, slotIndex: -1 });
+  const [messageApi, contextHolder] = message.useMessage();
 
   const getWeekDates = useCallback((date) => {
     const startDate = new Date(date);
@@ -120,12 +122,12 @@ const ScheduleWithCourses = () => {
 
   const handleSaveEdit = async (scheduleId) => {
     if (!editForm.url.trim()) {
-      alert(t('schedule.alert.enterClass'));
+      messageApi.warning(t('schedule.alert.enterClass'));
       return;
     }
 
     if (!editForm.lesson.trim()) {
-      alert(t('schedule.alert.enterLesson'));
+      messageApi.warning(t('schedule.alert.enterLesson'));
       return;
     }
 
@@ -151,11 +153,11 @@ const ScheduleWithCourses = () => {
       await fetchSchedule();
 
       setEditingCourse(null);
-      alert(t('schedule.alert.updateSuccess'));
+      messageApi.success(t('schedule.alert.updateSuccess'));
 
     } catch (err) {
       console.error('Error updating schedule:', err);
-      alert(t('schedule.alert.updateError') + (err.response?.data?.message || err.message));
+      messageApi.error(t('schedule.alert.updateError') + (err.response?.data?.message || err.message));
     } finally {
       setLoading(false);
     }
@@ -186,7 +188,7 @@ const ScheduleWithCourses = () => {
 
     } catch (err) {
       console.error('Error removing schedule:', err);
-      alert(t('schedule.alert.deleteError'));
+      messageApi.success(t('schedule.alert.deleteError'));
     } finally {
       setLoading(false);
     }
@@ -228,11 +230,11 @@ const ScheduleWithCourses = () => {
 
       setShowCourseModal(false);
       setSelectedSlot({ period: '', dayIndex: -1, slotIndex: -1 });
-      alert(t('schedule.alert.addSuccess'));
+      messageApi.success(t('schedule.alert.addSuccess'));
 
     } catch (err) {
       console.error('Error assigning course to schedule:', err);
-      alert(t('schedule.alert.error') + (err.response?.data?.message || err.message));
+      messageApi.error(t('schedule.alert.error') + (err.response?.data?.message || err.message));
     } finally {
       setLoading(false);
     }
@@ -277,18 +279,18 @@ const ScheduleWithCourses = () => {
     };
 
     return (
-      <div className="date-picker-overlay" onClick={cancelDate}>
-        <div className="date-picker" onClick={(e) => e.stopPropagation()}>
+      <div className="admin-date-picker-overlay" onClick={cancelDate}>
+        <div className="admin-date-picker" onClick={(e) => e.stopPropagation()}>
           <h3>{t('schedule.datePicker.title')}</h3>
           <input 
             type="date" 
             value={selectedDate.toISOString().split('T')[0]}
             onChange={(e) => setSelectedDate(new Date(e.target.value))}
-            className="date-input"
+            className="admin-date-input"
           />
-          <div className="date-picker-actions">
-            <button onClick={cancelDate} className="cancel-btn">{t('common.cancel')}</button>
-            <button onClick={applyDate} className="apply-btn">{t('common.apply')}</button>
+          <div className="admin-date-picker-actions">
+            <button onClick={cancelDate} className="admin-cancel-btn">{t('common.cancel')}</button>
+            <button onClick={applyDate} className="admin-apply-btn">{t('common.apply')}</button>
           </div>
         </div>
       </div>
@@ -315,7 +317,7 @@ const ScheduleWithCourses = () => {
     }
 
     return (
-      <div className="slots-container">
+      <div className="admin-slots-container">
         {daySlots.map((slot, slotIndex) => {
           if (!slot) {
             slot = { type: 'empty' };
@@ -327,12 +329,12 @@ const ScheduleWithCourses = () => {
             return (
               <div
                 key={slotIndex}
-                className="empty-slot"
+                className="admin-empty-slot"
                 onClick={() => handleAddCourseClick(period, dayIndex, slotIndex)}
               >
-                <div className="empty-icon"><PlusOutlined /></div>
+                <div className="admin-empty-icon"><PlusOutlined /></div>
                 <span>{t('schedule.addCourse')}</span>
-                <span className="slot-number">{t('schedule.slot')} {slotIndex + 1}</span>
+                <span className="admin-slot-number">{t('schedule.slot')} {slotIndex + 1}</span>
               </div>
             );
           }
@@ -340,14 +342,14 @@ const ScheduleWithCourses = () => {
           return (
             <div
               key={`schedule-${slot.schedule_id}-${slotIndex}`}
-              className={`event-item ${slot.type} ${isEditing ? 'editing' : ''}`}
+              className={`admin-event-item ${slot.type} ${isEditing ? 'editing' : ''}`}
             >
-              <div className="event-top-bar">
-                <div className="event-title">{slot.title}</div>
-                <div className="event-actions">
+              <div className="admin-event-top-bar">
+                <div className="admin-event-title">{slot.title}</div>
+                <div className="admin-event-actions">
                   {!isEditing ? (
                     <button 
-                      className="edit-btn"
+                      className="admin-edit-btn"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleEditCourse(slot, period, dayIndex, slotIndex);
@@ -359,7 +361,7 @@ const ScheduleWithCourses = () => {
                   ) : (
                     <>
                       <button 
-                        className="save-btn"
+                        className="admin-save-btn"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleSaveEdit(slot.schedule_id);
@@ -369,7 +371,7 @@ const ScheduleWithCourses = () => {
                         <SaveOutlined />
                       </button>
                       <button 
-                        className="cancel-btn"
+                        className="admin-cancel-btn"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleCancelEdit();
@@ -381,7 +383,7 @@ const ScheduleWithCourses = () => {
                     </>
                   )}
                   <button 
-                    className="remove-btn"
+                    className="admin-remove-btn"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleRemoveSchedule(slot.schedule_id, period, dayIndex, slotIndex);
@@ -394,8 +396,8 @@ const ScheduleWithCourses = () => {
               </div>
               
               {isEditing ? (
-                <div className="edit-form">
-                  <div className="form-group">
+                <div className="admin-edit-form">
+                  <div className="admin-form-group">
                     <label>{t('schedule.form.class')}:</label>
                     <input 
                       type="text" 
@@ -404,7 +406,7 @@ const ScheduleWithCourses = () => {
                       placeholder={t('schedule.form.enterClass')}
                     />
                   </div>
-                  <div className="form-group">
+                  <div className="admin-form-group">
                     <label>{t('schedule.form.lesson')}:</label>
                     <input 
                       type="text" 
@@ -413,7 +415,7 @@ const ScheduleWithCourses = () => {
                       placeholder={t('schedule.form.enterLesson')}
                     />
                   </div>
-                  <div className="form-group">
+                  <div className="admin-form-group">
                     <label>{t('schedule.form.type')}:</label>
                     <select 
                       value={editForm.type}
@@ -428,7 +430,7 @@ const ScheduleWithCourses = () => {
                   </div>
                 </div>
               ) : (
-                <div className="event-details">
+                <div className="admin-event-details">
                   <div><strong>{t('schedule.teacher')}:</strong> {slot.teacher || t('schedule.noTeacher')}</div>
                   <div><strong>{t('schedule.form.class')}:</strong> {slot.url || t('schedule.noClass')}</div>
                   <div><strong>{t('schedule.form.lesson')}:</strong> {slot.lesson || t('schedule.noLesson')}</div>
@@ -453,25 +455,25 @@ const ScheduleWithCourses = () => {
     if (!showCourseModal) return null;
 
     return (
-      <div className="modal-overlay" onClick={() => setShowCourseModal(false)}>
-        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-header">
+      <div className="admin-modal-overlay" onClick={() => setShowCourseModal(false)}>
+        <div className="admin-modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="admin-modal-header">
             <h3>{t('schedule.selectCourse')}</h3>
-            <button className="close-btn" onClick={() => setShowCourseModal(false)}>×</button>
+            <button className="admin-close-btn" onClick={() => setShowCourseModal(false)}>×</button>
           </div>
-          <div className="modal-body">
-            <div className="courses-list">
+          <div className="admin-modal-body">
+            <div className="admin-courses-list">
               {courses.map(course => (
                 <div 
                   key={course.id} 
-                  className="course-selection-item"
+                  className="admin-course-selection-item"
                   onClick={() => handleSelectCourse(course)}
                 >
-                  <div className="course-selection-header">
+                  <div className="admin-course-selection-header">
                     <h4>{course.title}</h4>
-                    <span className="course-type">{course.type}</span>
+                    <span className={`admin-course-type ${course.type}`}>{course.type}</span>
                   </div>
-                  <div className="course-selection-info">
+                  <div className="admin-course-selection-info">
                     <p><strong>{t('schedule.teacher')}:</strong> {course.teacher_name || t('schedule.teacherId', { id: course.teacher_id })}</p>
                     <p><strong>{t('schedule.form.lesson')}:</strong> {course.lesson || t('schedule.noLesson')}</p>
                     <p><strong>{t('schedule.form.class')}:</strong> {course.url || t('schedule.noClass')}</p>
@@ -480,8 +482,8 @@ const ScheduleWithCourses = () => {
               ))}
             </div>
           </div>
-          <div className="modal-footer">
-            <button className="cancel-btn" onClick={() => setShowCourseModal(false)}>{t('common.cancel')}</button>
+          <div className="admin-modal-footer">
+            <button className="admin-cancel-btn" onClick={() => setShowCourseModal(false)}>{t('common.cancel')}</button>
           </div>
         </div>
       </div>
@@ -495,33 +497,34 @@ const ScheduleWithCourses = () => {
   ];
 
   return (
-    <div className="schedule-with-courses">
+    <div className="admin-schedule-with-courses">
+      {contextHolder}
       {loading && (
-        <div className="loading-overlay">
-          <div className="loading-spinner">{t('common.processing')}</div>
+        <div className="admin-loading-overlay">
+          <div className="admin-loading-spinner">{t('common.processing')}</div>
         </div>
       )}
       
       <CourseSelectionModal />
       
-      <div className="schedule-section">
-        <div className="schedule-header">
-          <div className="header-top">
+      <div className="admin-schedule-section">
+        <div className="admin-schedule-admin-header">
+          <div className="admin-header-top">
             <h1>{t('schedule.title')}</h1>
-            <div className="header-actions">
-              <button className="print-btn" onClick={() => window.print()}>
+            <div className="admin-header-actions">
+              <button className="admin-print-btn" onClick={() => window.print()}>
                 <span><PrinterOutlined /></span>
                 {t('schedule.print')}
               </button>
             </div>
           </div>
           
-          <div className="header-controls">
-            <div className="filter-buttons">
+          <div className="admin-header-controls">
+            <div className="admin-filter-buttons">
               {filterOptions.map(filter => (
                 <button 
                   key={filter.key}
-                  className={`filter-btn ${activeFilter === filter.key ? 'active' : ''}`}
+                  className={`admin-filter-btn ${activeFilter === filter.key ? 'active' : ''}`}
                   onClick={() => setActiveFilter(filter.key)}
                 >
                   {filter.label}
@@ -529,18 +532,18 @@ const ScheduleWithCourses = () => {
               ))}
             </div>
             
-            <div className="date-controls">
-              <div className="date-display" onClick={() => setShowDatePicker(true)}>
-                <span className="calendar-icon"><ScheduleOutlined /></span>
-                <span className="date-text">
+            <div className="admin-date-controls">
+              <div className="admin-date-display" onClick={() => setShowDatePicker(true)}>
+                <span className="admin-calendar-icon"><ScheduleOutlined /></span>
+                <span className="admin-date-text">
                   {currentDate.getDate().toString().padStart(2, '0')}/{(currentDate.getMonth() + 1).toString().padStart(2, '0')}/{currentDate.getFullYear()}
                 </span>
               </div>
               
-              <div className="navigation-buttons">
-                <button className="nav-btn" onClick={goToPreviousWeek}>{t('schedule.previous')}</button>
-                <button className="nav-btn current" onClick={goToCurrentWeek}>{t('schedule.today')}</button>
-                <button className="nav-btn" onClick={goToNextWeek}>{t('schedule.next')}</button>
+              <div className="admin-navigation-buttons">
+                <button className="admin-nav-btn" onClick={goToPreviousWeek}>{t('schedule.previous')}</button>
+                <button className="admin-nav-btn current" onClick={goToCurrentWeek}>{t('schedule.today')}</button>
+                <button className="admin-nav-btn" onClick={goToNextWeek}>{t('schedule.next')}</button>
               </div>
             </div>
           </div>
@@ -548,15 +551,15 @@ const ScheduleWithCourses = () => {
           {showDatePicker && <DatePicker />}
         </div>
 
-        <div className="schedule-table-container">
-          <table className="schedule-table">
+        <div className="admin-schedule-table-container">
+          <table className="admin-schedule-table">
             <thead>
               <tr>
-                <th className="header-cell time-header">{t('schedule.period')}</th>
+                <th className="admin-header-cell admin-time-header">{t('schedule.period')}</th>
                 {weekDays.map((day, index) => (
-                  <th key={index} className="header-cell">
-                    <div className="day">{day.day}</div>
-                    <div className="date">{day.date}</div>
+                  <th key={index} className="admin-header-cell">
+                    <div className="admin-day">{day.day}</div>
+                    <div className="admin-date">{day.date}</div>
                   </th>
                 ))}
               </tr>
@@ -564,11 +567,11 @@ const ScheduleWithCourses = () => {
             <tbody>
               {Object.keys(scheduleData).map(period => (
                 <tr key={period}>
-                  <td className="time-period">{periodTranslations[period]}</td>
+                  <td className="admin-time-period">{periodTranslations[period]}</td>
                   {scheduleData[period].map((daySlots, dayIndex) => (
                     <td 
                       key={dayIndex} 
-                      className="time-slot multi-slot"
+                      className="admin-time-slot admin-multi-slot"
                     >
                       {renderCell(daySlots, period, dayIndex)}
                     </td>
@@ -579,13 +582,13 @@ const ScheduleWithCourses = () => {
           </table>
         </div>
 
-        <div className="schedule-legend">
+        <div className="admin-schedule-legend">
           <h3>{t('schedule.legend.title')}</h3>
-          <div className="legend-items">
+          <div className="admin-legend-items">
             {legendItems.map((item, index) => (
-              <div key={index} className="legend-item">
-                <div className="legend-color" style={{ backgroundColor: item.color }}></div>
-                <span className="legend-label">{item.label}</span>
+              <div key={index} className="admin-legend-item">
+                <div className="admin-legend-color" style={{ backgroundColor: item.color }}></div>
+                <span className="admin-legend-label">{item.label}</span>
               </div>
             ))}
           </div>
