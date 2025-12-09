@@ -26,7 +26,7 @@ function RegisterPage() {
         if (fileList[0]) formData.append("proof_file", fileList[0].originFileObj);
       }
 
-      await axios.post("https://khoaluantotnghiep-i5m4.onrender.com/register", formData, {
+      await axios.post("mysql://root:yyptZbSdCfSkKGpqoKbvVCdyLemKfhHb@shortline.proxy.rlwy.net:57038/railway/register", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
