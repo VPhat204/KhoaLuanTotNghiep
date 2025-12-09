@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://khoaluantotnghiep-i5m4.onrender.com",
+  baseURL: "mysql://root:yyptZbSdCfSkKGpqoKbvVCdyLemKfhHb@shortline.proxy.rlwy.net:57038/railway",
 });
 
 api.interceptors.request.use((config) => {
