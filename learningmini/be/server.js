@@ -46,17 +46,20 @@ async function connectDB() {
       user: process.env.MYSQLUSER,
       db: process.env.MYSQLDATABASE,
       port: process.env.MYSQLPORT,
-      ssl: process.env.MYSQLSSL,
     });
+
+    const caPath = path.join(__dirname, "ca.pem");
+    console.log("CA PATH:", caPath);
 
     db = await mysql.createConnection({
       host: process.env.MYSQLHOST,
       user: process.env.MYSQLUSER,
       password: process.env.MYSQLPASSWORD,
       database: process.env.MYSQLDATABASE,
-      port: process.env.MYSQLPORT,
+      port: Number(process.env.MYSQLPORT),
       ssl: {
-        ca: fs.readFileSync(path.resolve("./ca.pem"), "utf8"),
+        ca: fs.readFileSync(caPath),
+        rejectUnauthorized: true,
       },
     });
 
