@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mysql = require("mysql2/promise");
 const cors = require("cors");
@@ -6,7 +7,7 @@ const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
 const nodemailer = require("nodemailer");
-
+const fs = require("fs");
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -38,14 +39,35 @@ const transporter = nodemailer.createTransport({
 });
 
 let db;
-db = await mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT,
-  ssl: { rejectUnauthorized: false } 
-});
+async function connectDB() {
+  try {
+    console.log("ENV:", {
+      host: process.env.MYSQLHOST,
+      user: process.env.MYSQLUSER,
+      db: process.env.MYSQLDATABASE,
+      port: process.env.MYSQLPORT,
+      ssl: process.env.MYSQLSSL,
+    });
+
+    db = await mysql.createConnection({
+      host: process.env.MYSQLHOST,
+      user: process.env.MYSQLUSER,
+      password: process.env.MYSQLPASSWORD,
+      database: process.env.MYSQLDATABASE,
+      port: process.env.MYSQLPORT,
+      ssl: {
+        ca: fs.readFileSync(path.resolve("./ca.pem"), "utf8"),
+      },
+    });
+
+    console.log("MySQL connected");
+  } catch (err) {
+    console.error("Database connection error:", err);
+    throw err;
+  }
+}
+
+
 
 
 async function sendEmailNotification(to, subject, htmlContent) {
