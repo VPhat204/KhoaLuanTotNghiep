@@ -35,7 +35,7 @@ const TeacherSchedule = () => {
   const fetchTeacherCourses = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("https://khoaluantotnghiep-i5m4.onrender.com/courses/mine", {
+      const res = await axios.get("http://localhost:5000/courses/mine", {
         headers: { Authorization: `Bearer ${token}` }
       });
       setTeacherCourses(res.data);
@@ -84,7 +84,7 @@ const TeacherSchedule = () => {
     try {
       setLoading(true);
       const res = await axios.get(
-        `https://khoaluantotnghiep-i5m4.onrender.com/api/schedule/week?date=${dateString}`,
+        `http://localhost:5000/api/schedule/week?date=${dateString}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const filteredSchedule = filterScheduleByTeacherCourses(res.data);

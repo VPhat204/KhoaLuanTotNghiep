@@ -28,7 +28,7 @@ function OverviewAdmin() {
     if (!token) return;
 
     axios
-      .get("https://khoaluantotnghiep-i5m4.onrender.com/users", {
+      .get("http://localhost:5000/users", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setUsers(res.data))
@@ -43,7 +43,7 @@ function OverviewAdmin() {
     const fetchCourses = useCallback(async () => {
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch('https://khoaluantotnghiep-i5m4.onrender.com/courses', {
+      const response = await fetch('http://localhost:5000/courses', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -54,7 +54,7 @@ function OverviewAdmin() {
       const enrollmentsData = await Promise.all(
         data.map(async (course) => {
           try {
-            const enrollResponse = await fetch(`https://khoaluantotnghiep-i5m4.onrender.com/courses/${course.id}/students-count`, {
+            const enrollResponse = await fetch(`http://localhost:5000/courses/${course.id}/students-count`, {
               headers: {
                 'Authorization': `Bearer ${token}`
               }

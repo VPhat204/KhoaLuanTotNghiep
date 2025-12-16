@@ -16,6 +16,9 @@ const StudentSchedule = () => {
   const [loading, setLoading] = useState(false);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
 
+  // Sử dụng biến môi trường hoặc base URL
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
   const getWeekDates = useCallback((date) => {
     const startDate = new Date(date);
     const day = startDate.getDay();
@@ -36,18 +39,40 @@ const StudentSchedule = () => {
   const fetchEnrolledCourses = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
-      const userId = JSON.parse(localStorage.getItem("user"))?.id;
+      const userData = localStorage.getItem("user");
       
+      if (!token || !userData) {
+        console.error('No token or user data found');
+        return;
+      }
+
+      const userId = JSON.parse(userData)?.id;
+      if (!userId) {
+        console.error('User ID not found');
+        return;
+      }
+
       const res = await axios.get(
-        `https://khoaluantotnghiep-i5m4.onrender.com/users/${userId}/courses`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${API_URL}/api/users/${userId}/courses`,
+        { 
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          } 
+        }
       );
       
-      setEnrolledCourses(res.data);
+      if (res.data && Array.isArray(res.data)) {
+        setEnrolledCourses(res.data);
+      } else {
+        console.error('Invalid response format for enrolled courses');
+        setEnrolledCourses([]);
+      }
     } catch (err) {
-      console.error('Error fetching enrolled courses:', err);
+      console.error('Error fetching enrolled courses:', err.response?.data || err.message);
+      setEnrolledCourses([]);
     }
-  }, []);
+  }, [API_URL]);
 
   const fetchStudentSchedule = useCallback(async () => {
     const filterScheduleByEnrolledCourses = (scheduleData) => {
@@ -85,20 +110,47 @@ const StudentSchedule = () => {
     };
 
     const token = localStorage.getItem("token");  
+    const userData = localStorage.getItem("user");
+    
+    if (!token || !userData) {
+      console.error('No token or user data found');
+      setScheduleData({
+        Sáng: Array(7).fill().map(() => [{ type: 'empty' }, { type: 'empty' }]),
+        Chiều: Array(7).fill().map(() => [{ type: 'empty' }, { type: 'empty' }]),
+        Tối: Array(7).fill().map(() => [{ type: 'empty' }, { type: 'empty' }])
+      });
+      return;
+    }
+
     const dateString = currentDate.toISOString().split('T')[0];
     
     try {
       setLoading(true);
+      
       const res = await axios.get(
-        `https://khoaluantotnghiep-i5m4.onrender.com/api/schedule/week?date=${dateString}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${API_URL}/api/schedule/week?date=${dateString}`,
+        { 
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          } 
+        }
       );
       
-      const filteredSchedule = filterScheduleByEnrolledCourses(res.data);
-      setScheduleData(filteredSchedule);
+      if (res.data) {
+        const filteredSchedule = filterScheduleByEnrolledCourses(res.data);
+        setScheduleData(filteredSchedule);
+      } else {
+        console.error('No data received from schedule endpoint');
+        setScheduleData({
+          Sáng: Array(7).fill().map(() => [{ type: 'empty' }, { type: 'empty' }]),
+          Chiều: Array(7).fill().map(() => [{ type: 'empty' }, { type: 'empty' }]),
+          Tối: Array(7).fill().map(() => [{ type: 'empty' }, { type: 'empty' }])
+        });
+      }
       
     } catch (err) {
-      console.log('Error fetching schedule:', err);
+      console.error('Error fetching schedule:', err.response?.data || err.message);
       setScheduleData({
         Sáng: Array(7).fill().map(() => [{ type: 'empty' }, { type: 'empty' }]),
         Chiều: Array(7).fill().map(() => [{ type: 'empty' }, { type: 'empty' }]),
@@ -107,7 +159,7 @@ const StudentSchedule = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentDate, enrolledCourses]);
+  }, [currentDate, enrolledCourses, API_URL]);
 
   useEffect(() => {
     fetchEnrolledCourses();
@@ -210,11 +262,11 @@ const StudentSchedule = () => {
 
           return (
             <div
-              key={`schedule-${slot.schedule_id}-${slotIndex}`}
+              key={`schedule-${slot.schedule_id || 'no-id'}-${dayIndex}-${slotIndex}`}
               className={`event-item ${slot.type}`}
             >
               <div className="event-top-bar">
-                <div className="event-title">{slot.title}</div>
+                <div className="event-title">{slot.title || t('studentschedule.noTitle')}</div>
               </div>
               
               <div className="event-details">
@@ -308,7 +360,7 @@ const StudentSchedule = () => {
                     <td className="time-period">{t(`teacherschedule.periods.${keyMap[period]}`)}</td>
                     {scheduleData[period].map((daySlots, dayIndex) => (
                       <td 
-                        key={dayIndex} 
+                        key={`${period}-${dayIndex}`} 
                         className="time-slot multi-slot"
                       >
                         {renderCell(daySlots, period, dayIndex)}

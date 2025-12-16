@@ -51,7 +51,7 @@ const ScheduleWithCourses = () => {
     try {
       setLoading(true);
       const res = await axios.get(
-        `https://khoaluantotnghiep-i5m4.onrender.com/api/schedule/week?date=${dateString}`,
+        `http://localhost:5000/api/schedule/week?date=${dateString}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -72,7 +72,7 @@ const ScheduleWithCourses = () => {
   const fetchCourses = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("https://khoaluantotnghiep-i5m4.onrender.com/courses", {
+      const res = await axios.get("http://localhost:5000/courses", {
         headers: { Authorization: `Bearer ${token}` },
       });
       
@@ -97,7 +97,7 @@ const ScheduleWithCourses = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `https://khoaluantotnghiep-i5m4.onrender.com/api/schedules/${slot.schedule_id}`,
+        `http://localhost:5000/api/schedules/${slot.schedule_id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -136,7 +136,7 @@ const ScheduleWithCourses = () => {
       setLoading(true);
 
       await axios.put(
-        `https://khoaluantotnghiep-i5m4.onrender.com/api/schedules/${scheduleId}`,
+        `http://localhost:5000/api/schedules/${scheduleId}`,
         {
           url: editForm.url,
           lesson: editForm.lesson,
@@ -180,7 +180,7 @@ const ScheduleWithCourses = () => {
       setLoading(true);
 
       await axios.delete(
-        `https://khoaluantotnghiep-i5m4.onrender.com/api/schedules/${scheduleId}`,
+        `http://localhost:5000/api/schedules/${scheduleId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -214,7 +214,7 @@ const ScheduleWithCourses = () => {
       setLoading(true);
 
       await axios.post(
-        "https://khoaluantotnghiep-i5m4.onrender.com/api/schedule/assign",
+        "http://localhost:5000/api/schedule/assign",
         {
           course_id: course.id,
           date: dateString,

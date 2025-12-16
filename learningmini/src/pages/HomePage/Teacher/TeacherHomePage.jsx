@@ -16,12 +16,13 @@ export default function TeacherList({ onCourseEnrolled }) {
 
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user"));
+  const API_BASE_URL = "http://localhost:5000/api";
 
   useEffect(() => {
     const fetchTeachers = async () => {
       setLoading(true);
       try {
-        const res = await axios.get("https://khoaluantotnghiep-i5m4.onrender.com/teachers-courses", {
+        const res = await axios.get(`${API_BASE_URL}/users/teachers-courses`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setTeachers(res.data);
@@ -40,7 +41,7 @@ export default function TeacherList({ onCourseEnrolled }) {
       if (user && user.roles === "student") {
         try {
           const enrolledRes = await axios.get(
-            `https://khoaluantotnghiep-i5m4.onrender.com/users/${user.id}/courses`,
+            `${API_BASE_URL}/users/${user.id}/courses`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }
@@ -90,7 +91,7 @@ export default function TeacherList({ onCourseEnrolled }) {
       }
 
       await axios.post(
-        `https://khoaluantotnghiep-i5m4.onrender.com/courses/${courseId}/enroll`,
+        `${API_BASE_URL}/courses/${courseId}/enroll`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -140,7 +141,7 @@ export default function TeacherList({ onCourseEnrolled }) {
           <div className="teacher-main-info">
             <div className="teacher-avatar">
               <img 
-                src={`https://khoaluantotnghiep-i5m4.onrender.com${teacher.avatar}`} 
+                src={teacher.avatar ? `${API_BASE_URL}${teacher.avatar}` : require("../../../assets/default.jpg")} 
                 alt={teacher.name}
                 onError={(e) => {
                   e.target.onerror = null;
@@ -203,7 +204,7 @@ export default function TeacherList({ onCourseEnrolled }) {
           <div className="teacher-detail-header">
             <div className="teacher-detail-avatar">
               <img 
-                src={`https://khoaluantotnghiep-i5m4.onrender.com${selectedTeacher.avatar}`} 
+                src={selectedTeacher.avatar ? `${API_BASE_URL}${selectedTeacher.avatar}` : require("../../../assets/default.jpg")} 
                 alt={selectedTeacher.name}
                 onError={(e) => {
                   e.target.onerror = null;

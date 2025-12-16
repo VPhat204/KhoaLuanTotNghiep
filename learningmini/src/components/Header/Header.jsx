@@ -10,7 +10,7 @@ import ProfileModal from "../ProfilePage/Profile";
 import { Link, useNavigate } from "react-router-dom";
 
 const { Header } = Layout;
-const BASE_URL = "https://khoaluantotnghiep-i5m4.onrender.com";
+const BASE_URL = "http://localhost:5000";
 
 function AppHeader() {
   const { t, i18n } = useTranslation();
@@ -184,7 +184,7 @@ function AppHeader() {
             </Dropdown>
           ) : (
             <div className="app-auth-links">
-              <Link to="/login">{t("login")}</Link> | <Link to="/register">{t("register")}</Link>
+              <Link to="/login">{t("login")}</Link>
             </div>
           )}
         </div>

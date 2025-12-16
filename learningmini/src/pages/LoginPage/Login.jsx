@@ -16,7 +16,7 @@ function LoginPage() {
 
   const onFinish = async (values) => {
     try {
-      const res = await axios.post("mysql://root:yyptZbSdCfSkKGpqoKbvVCdyLemKfhHb@shortline.proxy.rlwy.net:57038/railway/login", values, {
+      const res = await axios.post("http://localhost:5000/api/auth/login", values, {
         headers: { "Content-Type": "application/json" },
       });
 

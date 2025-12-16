@@ -21,7 +21,7 @@ export const ThemeProvider = ({ children }) => {
     
     if (token && user?.id) {
       try {
-        await fetch(`https://khoaluantotnghiep-i5m4.onrender.com/users/${user.id}/theme`, {
+        await fetch(`http://localhost:5000/users/${user.id}/theme`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -43,7 +43,7 @@ export const ThemeProvider = ({ children }) => {
     
     if (token && user?.id) {
       try {
-        const response = await fetch(`https://khoaluantotnghiep-i5m4.onrender.com/users/${user.id}/theme`, {
+        const response = await fetch(`http://localhost:5000/users/${user.id}/theme`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

@@ -35,7 +35,7 @@ function UserManagement() {
 
   const fetchUsers = useCallback(async () => {
     try {
-      const res = await axios.get("https://khoaluantotnghiep-i5m4.onrender.com/users", {
+      const res = await axios.get("http://localhost:5000/users", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(res.data);
@@ -58,7 +58,7 @@ function UserManagement() {
         if (values.proofInfo !== undefined) formData.append("proof_info", values.proofInfo);
         file.forEach(f => formData.append("proof_file", f));
 
-        await axios.put(`https://khoaluantotnghiep-i5m4.onrender.com/users/${editingUser.id}`, formData, {
+        await axios.put(`http://localhost:5000/users/${editingUser.id}`, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
@@ -75,13 +75,13 @@ function UserManagement() {
           formData.append("proof_info", values.proofInfo || "");
           file.forEach(f => formData.append("proof_file", f));
 
-          await axios.post("https://khoaluantotnghiep-i5m4.onrender.com/register", formData, {
+          await axios.post("http://localhost:5000/register", formData, {
             headers: { "Content-Type": "multipart/form-data" },
           });
           messageApi.success(t('userManagements.messages.teacherRegisterSuccess'));
         } else {
           await axios.post(
-            "https://khoaluantotnghiep-i5m4.onrender.com/users",
+            "http://localhost:5000/users",
             {
               name: values.name,
               email: values.email,
@@ -105,7 +105,7 @@ function UserManagement() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`https://khoaluantotnghiep-i5m4.onrender.com/users/${id}`, {
+      await axios.delete(`http://localhost:5000/users/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       messageApi.success(t('userManagements.messages.deleteSuccess'));
@@ -118,7 +118,7 @@ function UserManagement() {
   const handleApprove = async (id, approved) => {
     try {
       const res = await axios.put(
-        `https://khoaluantotnghiep-i5m4.onrender.com/users/${id}/approve-teacher`,
+        `http://localhost:5000/users/${id}/approve-teacher`,
         { approve: !approved },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -132,7 +132,7 @@ function UserManagement() {
   const handleLock = async (id, locked) => {
     try {
       const res = await axios.put(
-        `https://khoaluantotnghiep-i5m4.onrender.com/users/${id}/lock`,
+        `http://localhost:5000/users/${id}/lock`,
         { lock: !Number(locked) },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -146,7 +146,7 @@ function UserManagement() {
   const handleResetPassword = async (values) => {
     try {
       await axios.put(
-        `https://khoaluantotnghiep-i5m4.onrender.com/users/${resetUserId}/reset-password`,
+        `http://localhost:5000/users/${resetUserId}/reset-password`,
         { newPassword: values.newPassword },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -384,7 +384,7 @@ function UserManagement() {
                       ? editingUser.proof_file.map((f, idx) => (
                           <li key={idx}>
                             <a
-                              href={`https://khoaluantotnghiep-i5m4.onrender.com/uploads/${f}`}
+                              href={`http://localhost:5000/uploads/${f}`}
                               target="_blank"
                               rel="noreferrer"
                             >
@@ -395,7 +395,7 @@ function UserManagement() {
                       : (
                           <li>
                             <a
-                              href={`https://khoaluantotnghiep-i5m4.onrender.com/uploads/${editingUser.proof_file}`}
+                              href={`http://localhost:5000/uploads/${editingUser.proof_file}`}
                               target="_blank"
                               rel="noreferrer"
                             >
@@ -451,21 +451,21 @@ function UserManagement() {
               <div className="verification-file-section">
                 {/\.(jpg|jpeg|png|gif)$/i.test(viewUser.proof_file) && (
                   <img
-                    src={`https://khoaluantotnghiep-i5m4.onrender.com/uploads/${viewUser.proof_file}`}
+                    src={`http://localhost:5000/uploads/${viewUser.proof_file}`}
                     alt="proof"
                     className="verification-image"
                   />
                 )}
                 {viewUser.proof_file.toLowerCase().endsWith(".pdf") && (
                   <iframe
-                    src={`https://khoaluantotnghiep-i5m4.onrender.com/uploads/${viewUser.proof_file}`}
+                    src={`http://localhost:5000/uploads/${viewUser.proof_file}`}
                     title="proof-pdf"
                     className="verification-iframe"
                   />
                 )}
                 <p>
                   <a 
-                    href={`https://khoaluantotnghiep-i5m4.onrender.com/uploads/${viewUser.proof_file}`} 
+                    href={`http://localhost:5000/uploads/${viewUser.proof_file}`} 
                     target="_blank" 
                     rel="noreferrer"
                     className="download-link"

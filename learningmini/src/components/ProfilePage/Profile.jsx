@@ -16,7 +16,7 @@ function ProfileModal({ visible, onClose, user, updateUser }) {
   const [proofFileList, setProofFileList] = useState([]);
   const [editing, setEditing] = useState(false);
   const token = localStorage.getItem("token");
-  const BASE_URL = "https://khoaluantotnghiep-i5m4.onrender.com";
+  const BASE_URL = "http://localhost:5000";
 
   useEffect(() => {
     if (visible && user) {

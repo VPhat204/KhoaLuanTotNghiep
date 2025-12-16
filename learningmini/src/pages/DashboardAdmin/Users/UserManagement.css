@@ -80,6 +80,7 @@
   opacity: 0.5;
 }
 
+/* Button Styles */
 .user-management-actions .ant-btn-link {
   color: var(--primary-color);
   padding: 4px 8px;
@@ -99,12 +100,14 @@
   background: var(--error-bg);
 }
 
+/* Tag Styles */
 .user-management-tag {
   border: none;
   border-radius: 6px;
   font-weight: 500;
 }
 
+/* Modal Styles */
 .user-management-modal .ant-modal-content {
   background: var(--modal-bg);
   border-radius: 12px;
@@ -146,6 +149,7 @@
   padding: 16px 24px;
 }
 
+/* Form Styles */
 .user-management-form .ant-form-item-label > label {
   color: var(--text-primary);
   font-weight: 500;
@@ -197,6 +201,7 @@
   border-color: var(--primary-color);
 }
 
+/* Verification Info Modal Styles */
 .verification-modal-content {
   color: var(--text-primary);
 }
@@ -268,6 +273,7 @@
   box-shadow: var(--button-shadow);
 }
 
+/* Status Buttons */
 .status-button {
   border-radius: 6px;
   font-weight: 500;
@@ -279,6 +285,7 @@
   box-shadow: var(--button-shadow);
 }
 
+/* Upload file list styles */
 .upload-file-list {
   margin-top: 8px;
   padding: 0;
@@ -303,6 +310,7 @@
   text-decoration: underline;
 }
 
+/* Dark mode variables */
 [data-theme="dark"] {
   --card-bg: #1a1a1a;
   --card-border: #333;
@@ -333,6 +341,7 @@
   --button-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
+/* Light mode variables */
 [data-theme="light"] {
   --card-bg: #ffffff;
   --card-border: #e8e8e8;
@@ -363,6 +372,7 @@
   --button-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* Responsive Design */
 @media (max-width: 1200px) {
   .user-management-container {
     padding: 20px;
@@ -411,6 +421,7 @@
   }
 }
 
+/* Smooth transitions */
 .user-management-container * {
   transition: background-color 0.3s ease, 
               color 0.3s ease, 
